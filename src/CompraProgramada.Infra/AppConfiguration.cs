@@ -15,7 +15,7 @@ namespace CompraProgramada.Infra;
 
 public static class AppConfiguration
 {
-    public static void ConfigurarServicos(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.ConfigurarMediatR();
         services.ConfigurarFluentValidation();
@@ -23,14 +23,22 @@ public static class AppConfiguration
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
     }
+    public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.ConfigurarBancoDeDados(configuration);
+        services.AdicionaServicosERepositorios();
+        services.ConfigurarRegrasDaAplicacao(configuration);
+    }
 
     private static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration["Service:DataBase:ConnectionString"];
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+        var connectionString = configuration.GetSection("Service:DataBase:ConnectionString").Get<string>();
+        services.AddDbContextPool<AppDbContext>(options =>
+            options.UseMySql(connectionString,
+            ServerVersion.AutoDetect(connectionString),
                 opt =>
                 {
+                    opt.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
                     opt.EnableRetryOnFailure(
                         maxRetryCount: 3,
                         maxRetryDelay: TimeSpan.FromSeconds(30),

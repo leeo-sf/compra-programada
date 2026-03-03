@@ -38,20 +38,36 @@ public class MotorCompraService : IMotorCompraService
         var deveExecutarCompraHoje = await _historicoExecucaoService.ExecutarCompraHojeAsync(cancellationToken);
 
         if (!deveExecutarCompraHoje)
+        {
+            _logger.LogInformation("MotorCompra não será executado hoje. Encerrando processo.");
             return;
+        }
 
         var clientesAtivos = await _clienteService.ObtemClientesAtivoAsync(cancellationToken);
 
-        if (!clientesAtivos.IsSuccess)
+        if (!clientesAtivos.IsSuccess || !clientesAtivos.Value!.Any())
             throw new ApplicationException("Erro ao obter clientes ativos");
+
+        _logger.LogInformation("Obtido {QuantidadeClientes} clientes ativos para processamento.", clientesAtivos.Value!.Count);
 
         var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
 
+        if (!cestaVigente.IsSuccess || cestaVigente.Value is null)
+            throw new ApplicationException("Erro ao obter cesta vigente recomendada");
+
+        _logger.LogInformation("Obtido cesta vigente CestaId {CestaId} para processamento.", cestaVigente.Value!.Id);
+
         var totalConsolidadoCompra = clientesAtivos.Value!.Sum(cliente => cliente.ValorMensal / 3);
+
+        _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", totalConsolidadoCompra);
 
         var valoresPorAtivoConsolidado = ValorPorAtivoConsolidado(cestaVigente.Value!, totalConsolidadoCompra);
 
+        _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado);
+
         var cotacoesFechamento = await ObterCotacoesFechamentoB3ComBaseEmCestaAsync(cancellationToken);
+
+        _logger.LogInformation("Cotações de fachamento da B3 com base na data pregão {DataPregao}. Cotações: {CotacoesFechamento}", cotacoesFechamento.DataPregao, cotacoesFechamento.Itens);
 
         var quantidadeAhComprarPorAtivo = VerificarResiduosAsync(cotacoesFechamento.Itens, valoresPorAtivoConsolidado, cancellationToken);
     }
