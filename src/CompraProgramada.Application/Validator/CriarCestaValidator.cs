@@ -1,0 +1,16 @@
+﻿using CompraProgramada.Application.Request;
+using FluentValidation;
+
+namespace CompraProgramada.Application.Validator;
+
+internal sealed class CriarCestaValidator : AbstractValidator<CriarAlterarCestaRequest>
+{
+    public CriarCestaValidator()
+    {
+        RuleFor(x => x.Nome)
+            .NotEmpty()
+            .WithMessage("O nome da cesta é obrigatório.")
+            .MaximumLength(100)
+            .WithMessage("O nome da cesta deve conter no máximo 100 caracteres.");
+    }
+}

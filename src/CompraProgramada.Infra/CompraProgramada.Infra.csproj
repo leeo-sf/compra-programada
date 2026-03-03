@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CompraProgramada.Application\CompraProgramada.Application.csproj" />
+    <ProjectReference Include="..\CompraProgramada.Data\CompraProgramada.Data.csproj" />
+    <ProjectReference Include="..\CompraProgramada.Domain\CompraProgramada.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
