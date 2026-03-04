@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace CompraProgramada.Application.Response;
 
-public class CestaResponse
+public class CestaRecomendadaResponse
 {
     public required int CestaId { get; set; }
     public required string Nome { get; set; }

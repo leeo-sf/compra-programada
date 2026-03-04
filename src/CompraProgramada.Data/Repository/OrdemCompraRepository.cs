@@ -9,8 +9,10 @@ public class OrdemCompraRepository : IOrdemCompraRepository
 
     public OrdemCompraRepository(AppDbContext context) => _context = context;
 
-    public Task SalvarOrdemDeCompra(OrdemCompra ordemCompra, CancellationToken cancellationToken)
+    public async Task<List<OrdemCompra>> SalvarOrdensDeCompra(List<OrdemCompra> ordemCompra, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        _context.OrdemCompra.AddRange(ordemCompra);
+        await _context.SaveChangesAsync();
+        return ordemCompra;
     }
 }

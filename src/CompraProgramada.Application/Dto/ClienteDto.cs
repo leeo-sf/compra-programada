@@ -10,6 +10,6 @@ public class ClienteDto
     public required decimal ValorMensal { get; set; }
     public required bool Ativo { get; set; }
     public required DateTime DataAdesao { get; set; }
-    public required List<AtivoDto> Ativos { get; set; }
+    public required ContaGraficaDto ContaGrafica { get; set; }
     public decimal ValorAporte => ValorMensal / 3;
 }

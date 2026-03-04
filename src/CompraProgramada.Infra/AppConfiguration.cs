@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Application;
-using CompraProgramada.Application.Config;
+﻿using CompraProgramada.Application.Config;
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Data;
@@ -47,26 +46,31 @@ public static class AppConfiguration
     }
 
     private static void ConfigurarMediatR(this IServiceCollection services)
-        => services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Result).Assembly));
+        => services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AppConfig).Assembly));
 
     private static void AdicionaServicosERepositorios(this IServiceCollection services)
     {
-        services.AddScoped<IClienteRepository, ClienteRepository>();
-        services.AddScoped<IContaMasterRepository, ContaMasterRepository>();
-        services.AddScoped<IContaGraficaRepository, ContaGraficaRepository>();
-        services.AddScoped<ICotacaoRepository, CotacaoRepository>();
-        services.AddScoped<ICustodiaMasterRepository, CustodiaMasterRepository>();
         services.AddScoped<ICestaRecomendadaRepository, CestaRecomendadaRepository>();
+        services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<IContaGraficaRepository, ContaGraficaRepository>();
+        services.AddScoped<IContaMasterRepository, ContaMasterRepository>();
+        services.AddScoped<ICotacaoRepository, CotacaoRepository>();
+        services.AddScoped<ICustodiaFilhoteRepository, CustodiaFilhoteRepository>();
+        services.AddScoped<ICustodiaMasterRepository, CustodiaMasterRepository>();
+        services.AddScoped<IDistribuicaoRepository, DistribuicaoRepository>();
         services.AddScoped<IHistoricoExecucaoMotorRepository, HistoricoExecucaoMotorRepository>();
+        services.AddScoped<IOrdemCompraRepository, OrdemCompraRepository>();
 
+        services.AddScoped<ICestaRecomendadaService, CestaRecomendadaService>();
         services.AddScoped<IClienteService, ClienteService>();
         services.AddScoped<IContaGraficaService, ContaGraficaService>();
         services.AddScoped<ICotacaoService, CotacaoService>();
         services.AddScoped<ICustodiaFilhoteService, CustodiaFilhoteService>();
         services.AddScoped<ICustodiaMasterService, CustodiaMasterService>();
-        services.AddScoped<ICestaRecomendadaService, CestaRecomendadaService>();
+        services.AddScoped<IDistribuicaoService, DistribuicaoService>();
         services.AddScoped<IHistoricoExecucaoMotorService, HistoricoExecucaoMotorService>();
         services.AddScoped<IMotorCompraService, MotorCompraService>();
+        services.AddScoped<IOrdemCompraService, OrdemCompraService>();
 
         services.AddSingleton<ICotahistParserService, CotahistParserService>();
         services.AddSingleton<ICalendarioMotorCompraService, CalendarioMotorCompraService>();
@@ -75,7 +79,7 @@ public static class AppConfiguration
     private static void ConfigurarFluentValidation(this IServiceCollection services)
     {
         services.AddFluentValidationAutoValidation();
-        services.AddValidatorsFromAssembly(typeof(Result).Assembly, includeInternalTypes: true);
+        services.AddValidatorsFromAssembly(typeof(AppConfig).Assembly, includeInternalTypes: true);
     }
 
     private static void ConfigurarRegrasDaAplicacao(this IServiceCollection services, IConfiguration configuration)

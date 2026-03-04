@@ -1,13 +1,14 @@
 ﻿using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Request;
-using CompraProgramada.Domain.Entity;
+using OperationResult;
 
 namespace CompraProgramada.Application.Interface;
 
 public interface ICestaRecomendadaService
 {
-    Task<Result<CestaRecomendada?>> ObterCestaAtivaAsync(CancellationToken cancellationToken);
-    Task<Result<IEnumerable<CestaRecomendada>>> HistoricoCestasAsync(CancellationToken cancellationToken);
+    Task<Result<CestaRecomandadaDto?>> ObterCestaAtivaAsync(CancellationToken cancellationToken);
+    Task<Result<IEnumerable<CestaRecomandadaDto>>> HistoricoCestasAsync(CancellationToken cancellationToken);
     Task<Result<CriarAlterarCestaDto>> CriarCestaAsync(CriarAlterarCestaRequest request, CancellationToken cancellationToken);
-    Result<(List<string> ativosRemovidos, List<string> ativosAdicionados)> ObterMudancasDeAtivos(List<ComposicaoCesta> composicaoAnterior, List<ComposicaoCesta> composicaoAtual);
+    Result<(List<string> ativosRemovidos, List<string> ativosAdicionados)> ObterMudancasDeAtivos(List<ComposicaoCestaRecomendadaDto> composicaoAnterior, List<ComposicaoCestaRecomendadaDto> composicaoAtual);
+    Result<List<ValorAtivoConsolidadoDto>> ValorPorAtivoConsolidado(CestaRecomandadaDto cesta, decimal totalConsolidado);
 }

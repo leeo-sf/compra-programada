@@ -3,6 +3,7 @@ using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using OperationResult;
 
 namespace CompraProgramada.Application.Handler;
 
@@ -28,22 +29,28 @@ public class ClienteHandle
         if (!result.IsSuccess)
         {
             _logger.LogError("Falha ao processar adesão: {Exception}", result.Exception);
-            return Result<AdesaoResponse>.Fail(result.Exception);
+            return result.Exception;
         }
 
         var cliente = result.Value!;
         var contaGraficaCliente = cliente.ContaGrafica!;
 
-        return Result<AdesaoResponse>.Ok(new AdesaoResponse
+        return new AdesaoResponse
         {
-            ClienteId = cliente.Id,
+            ClienteId = cliente.ClienteId,
             Nome = cliente.Nome,
             Cpf = cliente.Cpf,
             Email = cliente.Email,
             ValorMensal = cliente.ValorMensal,
             Ativo = cliente.Ativo,
             DataAdesao = cliente.DataAdesao,
-            ContaGrafica = new (contaGraficaCliente.Id, contaGraficaCliente.NumeroConta, contaGraficaCliente.Tipo, contaGraficaCliente.DataCriacao)
-        });
+            ContaGrafica = new ContaGraficaResponse
+            {
+                Id = contaGraficaCliente.Id,
+                Tipo = contaGraficaCliente.Tipo,
+                NumeroConta = contaGraficaCliente.NumeroConta,
+                DataCriacao = contaGraficaCliente.DataCriacao,
+            }
+        };
     }
 }

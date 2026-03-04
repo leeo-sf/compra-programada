@@ -4,5 +4,5 @@ namespace CompraProgramada.Domain.Interface;
 
 public interface IOrdemCompraRepository
 {
-    Task SalvarOrdemDeCompra(OrdemCompra ordemCompra, CancellationToken cancellationToken);
+    Task<List<OrdemCompra>> SalvarOrdensDeCompra(List<OrdemCompra> ordemCompra, CancellationToken cancellationToken);
 }

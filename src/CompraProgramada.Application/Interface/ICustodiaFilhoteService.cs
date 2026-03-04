@@ -1,8 +1,9 @@
-﻿using CompraProgramada.Domain.Entity;
+﻿using CompraProgramada.Application.Dto;
+using OperationResult;
 
 namespace CompraProgramada.Application.Interface;
 
 public interface ICustodiaFilhoteService
 {
-    Task<CustodiaFilhote> AtualizarCustodiaFilhoteAsync(ContaGrafica conta, CancellationToken cancellationToken);
+    Task<Result<List<CustodiaFilhoteDto>>> AtualizarCustodiaFilhoteContasAsync(List<ContaGraficaDto> contas, CancellationToken cancellationToken);
 }

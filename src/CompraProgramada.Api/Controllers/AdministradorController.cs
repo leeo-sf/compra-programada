@@ -14,10 +14,10 @@ public class AdministradorController(IMediator mediator) : BaseController(mediat
         => await SendCommand(request, 201);
 
     [HttpGet("cesta/atual")]
-    public async Task<ActionResult<CestaResponse>> CestaAtualAsync()
+    public async Task<ActionResult<CestaRecomendadaResponse>> CestaAtualAsync()
         => await SendCommand(new CestaAtualRequest());
 
     [HttpGet("cesta/historico")]
-    public async Task<ActionResult<List<CestaResponse>>> HistoricoAsync()
+    public async Task<ActionResult<List<CestaRecomendadaResponse>>> HistoricoAsync()
         => await SendCommand(new CestaHistoricoRequest());
 }

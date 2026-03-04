@@ -14,6 +14,5 @@ internal class CustodiaMasterEntityTypeConfig : IEntityTypeConfiguration<Custodi
         builder.Property(x => x.ContaMasterId).IsRequired().HasColumnName("conta_master_id").HasComment("identificador conta");
         builder.Property(x => x.Ticker).HasColumnName("ticker").HasComment("ativo");
         builder.Property(x => x.QuantidadeResiduo).HasColumnName("quantidade_residuo").HasDefaultValue(0).HasComment("quantidade de ativos que sobraram");
-        builder.Property(x => x.ConsideradoNovaCompra).HasColumnName("considerado_nova_compra").HasDefaultValue(false).HasComment("status se já foi considerado na nova compra");
     }
 }

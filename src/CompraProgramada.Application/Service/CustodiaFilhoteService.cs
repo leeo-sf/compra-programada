@@ -1,19 +1,45 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Dto;
+using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using OperationResult;
 
 namespace CompraProgramada.Application.Service;
 
 public class CustodiaFilhoteService : ICustodiaFilhoteService
 {
-    private readonly ICustodiaMasterRepository _custodiaRepository;
+    private readonly ICustodiaFilhoteRepository _custodiaFilhoteRepository;
 
-    public CustodiaFilhoteService(ICustodiaMasterRepository custodiaRepository) => _custodiaRepository = custodiaRepository;
+    public CustodiaFilhoteService(ICustodiaFilhoteRepository custodiaFilhoteRepository)
+        => _custodiaFilhoteRepository = custodiaFilhoteRepository;
 
-    public async Task<CustodiaFilhote> AtualizarCustodiaFilhoteAsync(ContaGrafica conta, CancellationToken cancellationToken)
+    public async Task<Result<List<CustodiaFilhoteDto>>> AtualizarCustodiaFilhoteContasAsync(List<ContaGraficaDto> contas, CancellationToken cancellationToken)
     {
-        var custodia = new CustodiaFilhote(0, conta.Id, default, default);
-        //var custodiaSalva = await _custodiaRepository.CreateAsync(custodia, cancellationToken);
-        return custodia;
+        if (!contas.Any())
+            return new ApplicationException("Nenhuma conta gráfica informada para atualização.");
+
+        var contasCustodias = contas.Select(c => new ContaGrafica
+        (
+            c.Id,
+            c.NumeroConta,
+            c.DataCriacao,
+            c.ClienteId
+        )
+        {
+            CustodiaFilhotes = c.CustodiaFilhote!
+                .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.Quantidade)).ToList()
+        }).ToList();
+
+        var custodias = contasCustodias.SelectMany(c => c.CustodiaFilhotes).ToList();
+
+        var custodiasSalvas = await _custodiaFilhoteRepository.AtualizarCustodiasAsync(custodias, cancellationToken);
+
+        return custodiasSalvas.Select(c => new CustodiaFilhoteDto
+        {
+            Id = c.Id,
+            ContaGraficaId = c.ContaGraficaId,
+            Ticker = c.Ticker!,
+            Quantidade = c.Quantidade,
+        }).ToList();
     }
 }
