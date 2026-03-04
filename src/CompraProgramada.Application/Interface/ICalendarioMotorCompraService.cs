@@ -1,6 +1,6 @@
 ﻿namespace CompraProgramada.Application.Interface;
 
-public interface ICalendarioCompraService
+public interface ICalendarioMotorCompraService
 {
     bool DeveExecutarCompraHoje();
     DateTime ObterProximaDataCompra();

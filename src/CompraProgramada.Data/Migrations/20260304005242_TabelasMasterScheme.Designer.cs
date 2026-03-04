@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompraProgramada.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260303112239_MotorCompraScheme")]
-    partial class MotorCompraScheme
+    [Migration("20260304005242_TabelasMasterScheme")]
+    partial class TabelasMasterScheme
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -222,6 +222,37 @@ namespace CompraProgramada.Data.Migrations
                     b.ToTable("conta_grafica", (string)null);
                 });
 
+            modelBuilder.Entity("CompraProgramada.Domain.Entity.ContaMaster", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasComment("identificador");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_criacao");
+
+                    b.Property<string>("NumeroConta")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("numero_conta")
+                        .HasComment("número conta");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("tipo")
+                        .HasComment("tipo conta");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("conta_master", (string)null);
+                });
+
             modelBuilder.Entity("CompraProgramada.Domain.Entity.Cotacao", b =>
                 {
                     b.Property<int>("Id")
@@ -271,10 +302,51 @@ namespace CompraProgramada.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContaGraficaId")
-                        .IsUnique();
+                    b.HasIndex("ContaGraficaId");
 
                     b.ToTable("custodia_filhote", (string)null);
+                });
+
+            modelBuilder.Entity("CompraProgramada.Domain.Entity.CustodiaMaster", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasComment("identificador");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("ConsideradoNovaCompra")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("considerado_nova_compra")
+                        .HasComment("status se já foi considerado na nova compra");
+
+                    b.Property<int>("ContaMasterId")
+                        .HasColumnType("int")
+                        .HasColumnName("conta_master_id")
+                        .HasComment("identificador conta");
+
+                    b.Property<int>("QuantidadeResiduo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("quantidade_residuo")
+                        .HasComment("quantidade de ativos que sobraram");
+
+                    b.Property<string>("Ticker")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ticker")
+                        .HasComment("ativo");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContaMasterId");
+
+                    b.ToTable("custodia_master", (string)null);
                 });
 
             modelBuilder.Entity("CompraProgramada.Domain.Entity.HistoricoExecucaoMotor", b =>
@@ -345,12 +417,23 @@ namespace CompraProgramada.Data.Migrations
             modelBuilder.Entity("CompraProgramada.Domain.Entity.CustodiaFilhote", b =>
                 {
                     b.HasOne("CompraProgramada.Domain.Entity.ContaGrafica", "ContaGrafica")
-                        .WithOne("CustodiaFilhote")
-                        .HasForeignKey("CompraProgramada.Domain.Entity.CustodiaFilhote", "ContaGraficaId")
+                        .WithMany("CustodiaFilhotes")
+                        .HasForeignKey("ContaGraficaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ContaGrafica");
+                });
+
+            modelBuilder.Entity("CompraProgramada.Domain.Entity.CustodiaMaster", b =>
+                {
+                    b.HasOne("CompraProgramada.Domain.Entity.ContaMaster", "ContaMaster")
+                        .WithMany("CustodiaMasters")
+                        .HasForeignKey("ContaMasterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContaMaster");
                 });
 
             modelBuilder.Entity("CompraProgramada.Domain.Entity.CestaRecomendada", b =>
@@ -365,8 +448,12 @@ namespace CompraProgramada.Data.Migrations
 
             modelBuilder.Entity("CompraProgramada.Domain.Entity.ContaGrafica", b =>
                 {
-                    b.Navigation("CustodiaFilhote")
-                        .IsRequired();
+                    b.Navigation("CustodiaFilhotes");
+                });
+
+            modelBuilder.Entity("CompraProgramada.Domain.Entity.ContaMaster", b =>
+                {
+                    b.Navigation("CustodiaMasters");
                 });
 
             modelBuilder.Entity("CompraProgramada.Domain.Entity.Cotacao", b =>

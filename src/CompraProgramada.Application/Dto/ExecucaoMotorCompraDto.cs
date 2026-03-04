@@ -1,6 +1,6 @@
 ﻿namespace CompraProgramada.Application.Dto;
 
-public class CompraExecucaoDto
+public class ExecucaoMotorCompraDto
 {
     public DateTime DataReferencia { get; set; }
     public DateTime DataExecucao { get; set; }

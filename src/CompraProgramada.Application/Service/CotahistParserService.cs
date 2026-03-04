@@ -3,7 +3,7 @@ using CompraProgramada.Application.Interface;
 
 namespace CompraProgramada.Application.Service;
 
-public class CotahistParser : ICotahistParser
+public class CotahistParserService : ICotahistParserService
 {
     public IEnumerable<CotacaoB3Dto> ParseArquivo(string caminhoArquivo)
     {

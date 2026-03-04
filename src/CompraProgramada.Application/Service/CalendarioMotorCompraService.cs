@@ -3,12 +3,12 @@ using CompraProgramada.Application.Interface;
 
 namespace CompraProgramada.Application.Service;
 
-public class CalendarioCompraService : ICalendarioCompraService
+public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 {
     private readonly AppConfig _config;
     private readonly DateTime _dataAtual = DateTime.Now;
 
-    public CalendarioCompraService(AppConfig config) => _config = config;
+    public CalendarioMotorCompraService(AppConfig config) => _config = config;
 
     public bool DeveExecutarCompraHoje()
     {

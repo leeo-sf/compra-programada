@@ -13,6 +13,8 @@ public class ClienteRepository : IClienteRepository
     public async Task<List<Cliente>> ObterClientesAtivosAsync(CancellationToken cancellationToken)
         => await _context.Cliente
             .AsNoTracking()
+            .Include(x => x.ContaGrafica)
+            .Include(x => x.ContaGrafica!.CustodiaFilhotes)
             .Where(c => c.Ativo)
             .ToListAsync(cancellationToken);
 
@@ -30,4 +32,9 @@ public class ClienteRepository : IClienteRepository
         => await _context.Cliente
             .AsNoTracking()
             .CountAsync(c => c.Ativo);
+
+    public async Task<Cliente?> ObterClienteAsync(int id, CancellationToken cancellationToken)
+        => await _context.Cliente
+            .Include(x => x.ContaGrafica)
+            .FirstOrDefaultAsync(x => x.Id == id);
 }

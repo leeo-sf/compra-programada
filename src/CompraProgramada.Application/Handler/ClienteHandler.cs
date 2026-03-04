@@ -23,7 +23,7 @@ public class ClienteHandle
     {
         _logger.LogInformation("Iniciando processo de adesão para o cliente {Nome} com CPF {Cpf}.", request.Nome, request.Cpf);
 
-        var result = await _clienteService.CadastrarClienteAsync(request, cancellationToken);
+        var result = await _clienteService.AdesaoAsync(request, cancellationToken);
 
         if (!result.IsSuccess)
         {

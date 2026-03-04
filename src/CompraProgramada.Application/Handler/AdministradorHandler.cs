@@ -2,8 +2,8 @@
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
+using CompraProgramada.Domain.Entity;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace CompraProgramada.Application.Handler;
@@ -15,11 +15,15 @@ public class AdministradorHandler
 {
     private readonly ILogger<AdministradorHandler> _logger;
     private readonly ICestaRecomendadaService _cestaService;
+    private readonly IClienteService _clienteService;
+    private const string PRIMEIRA_CESTA_CADASTRADA_MENSAGEM = "Primeira cesta cadastrada com sucesso.";
 
     public AdministradorHandler(ILogger<AdministradorHandler> logger,
+        IClienteService clienteService,
         ICestaRecomendadaService cestaService)
     {
         _logger = logger;
+        _clienteService = clienteService;
         _cestaService = cestaService;
     }
 
@@ -35,7 +39,19 @@ public class AdministradorHandler
             return Result<CriarAlterarCestaResponse>.Fail(result.Exception);
         }
 
-        return Result<CriarAlterarCestaResponse>.Ok(result.Value!);
+        if (!result.Value!.CestaAtualizada)
+            return Result<CriarAlterarCestaResponse>.Ok(MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, default, default, default, PRIMEIRA_CESTA_CADASTRADA_MENSAGEM));
+
+        var usuariosAtivos = await _clienteService.QuantidadeAtivosAsync(cancellationToken);
+
+        if (!usuariosAtivos.IsSuccess)
+            return Result<CriarAlterarCestaResponse>.Fail(new ApplicationException("Falha ao obter quantidade de clientes ativos."));
+
+        var (ativosRemovidos, ativosAdicionados) = _cestaService.ObterMudancasDeAtivos(result.Value.CestaAnterior!.ComposicaoCesta, result.Value.CestaAtual.ComposicaoCesta).Value;
+
+        var mensagemOperacao = $"Cesta atualizada. Rebalanceamento disparado para {usuariosAtivos.Value} clientes ativos.";
+        return Result<CriarAlterarCestaResponse>.Ok(
+            MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, result.Value.CestaAnterior, ativosRemovidos, ativosAdicionados, mensagemOperacao));
     }
 
     public async Task<Result<CestaResponse>> Handle(CestaAtualRequest request, CancellationToken cancellationToken)
@@ -73,4 +89,19 @@ public class AdministradorHandler
             Itens = c.ComposicaoCesta.Select(cc => new ComposicaoCestaDto(cc.Ticker, cc.Percentual)).ToList()
         }).ToList());
     }
+
+    private CriarAlterarCestaResponse MontarResponseCriarAlterarCesta(CestaRecomendada cesta, bool atualizouCesta, CestaRecomendada? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados, string mensagemOperacao)
+        => new CriarAlterarCestaResponse
+        {
+            CestaId = cesta.Id,
+            Nome = cesta.Nome,
+            Ativa = cesta.Ativa,
+            DataCriacao = cesta.DataCriacao,
+            Itens = cesta.ComposicaoCesta.Select(cc => new ComposicaoCestaDto(cc.Ticker, cc.Percentual)).ToList(),
+            CestaAnteriorDesativada = cestaAnterior is null ? default : new CestaDesativadaDto { CestaId = cestaAnterior!.Id, Nome = cestaAnterior.Nome, DataDesativacao = cestaAnterior.DataDesativacao },
+            AtivosRemovidos = ativosRemovidos is not null ? ativosRemovidos : default,
+            AtivosAdicionados = ativosAdicionados is not null ? ativosAdicionados : default,
+            RebalanceamentoDisparado = !atualizouCesta ? false : true,
+            Mensagem = mensagemOperacao
+        };
 }

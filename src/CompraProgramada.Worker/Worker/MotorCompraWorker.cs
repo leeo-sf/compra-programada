@@ -8,12 +8,12 @@ public class MotorCompraWorker : BackgroundService
     private readonly ILogger<MotorCompraWorker> _logger;
     private readonly AppConfig _appConfig;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ICotahistParser _cotahistParser;
+    private readonly ICotahistParserService _cotahistParser;
 
     public MotorCompraWorker(ILogger<MotorCompraWorker> logger,
         AppConfig appConfig,
         IServiceScopeFactory serviceScopeFactory,
-        ICotahistParser cotahistParser)
+        ICotahistParserService cotahistParser)
     {
         _logger = logger;
         _appConfig = appConfig;

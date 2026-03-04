@@ -12,6 +12,14 @@ namespace CompraProgramada.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_custodia_filhote_conta_grafica_conta_grafica_id",
+                table: "custodia_filhote");
+
+            migrationBuilder.DropIndex(
+                name: "IX_custodia_filhote_conta_grafica_id",
+                table: "custodia_filhote");
+
             migrationBuilder.AddColumn<decimal>(
                 name: "valor_anterior",
                 table: "cliente",
@@ -115,6 +123,19 @@ namespace CompraProgramada.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_custodia_filhote_conta_grafica_id",
+                table: "custodia_filhote",
+                column: "conta_grafica_id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_custodia_filhote_conta_grafica_conta_grafica_id",
+                table: "custodia_filhote",
+                column: "conta_grafica_id",
+                principalTable: "conta_grafica",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_composicao_cesta_cesta_id",
                 table: "composicao_cesta",
                 column: "cesta_id");
@@ -143,9 +164,19 @@ namespace CompraProgramada.Data.Migrations
             migrationBuilder.DropTable(
                 name: "cotacao");
 
+            migrationBuilder.DropIndex(
+                name: "IX_custodia_filhote_conta_grafica_id",
+                table: "custodia_filhote");
+
             migrationBuilder.DropColumn(
                 name: "valor_anterior",
                 table: "cliente");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_custodia_filhote_conta_grafica_id",
+                table: "custodia_filhote",
+                column: "conta_grafica_id",
+                unique: true);
         }
     }
 }

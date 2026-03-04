@@ -2,8 +2,8 @@
 
 namespace CompraProgramada.Application.Interface;
 
-public interface IContaService
+public interface IContaGraficaService
 {
+    Task<Result> AlterarCustodiasAsync(List<ContaGrafica> contas, CancellationToken cancellationToken);
     Task<Result<ContaGrafica>> GerarContaGraficaAsync(Cliente cliente, CancellationToken cancellationToken);
-    Task<Result<ContaMaster>> GerarContaMasterAsync(Cliente cliente, CancellationToken cancellationToken);
 }

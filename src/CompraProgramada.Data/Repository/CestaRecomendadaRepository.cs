@@ -12,7 +12,7 @@ public class CestaRecomendadaRepository : ICestaRecomendadaRepository
 
     public async Task<CestaRecomendada> CriarAsync(CestaRecomendada cesta, CancellationToken cancellationToken)
     {
-        _context.Cesta.Add(cesta);
+        _context.CestaRecomendada.Add(cesta);
         await _context.SaveChangesAsync(cancellationToken);
         return cesta;
     }
@@ -25,12 +25,12 @@ public class CestaRecomendadaRepository : ICestaRecomendadaRepository
     }
 
     public async Task<CestaRecomendada?> ObterCestaAtivaAsync(CancellationToken cancellationToken)
-        => await _context.Cesta
+        => await _context.CestaRecomendada
             .Include(c => c.ComposicaoCesta)
             .FirstOrDefaultAsync(c => c.Ativa, cancellationToken);
 
     public async Task<List<CestaRecomendada>> ObterTodasCestasAsync(CancellationToken cancellationToken)
-        => await _context.Cesta
+        => await _context.CestaRecomendada
             .Include(c => c.ComposicaoCesta)
             .AsNoTracking()
             .ToListAsync();

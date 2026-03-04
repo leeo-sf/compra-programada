@@ -52,19 +52,24 @@ public static class AppConfiguration
     private static void AdicionaServicosERepositorios(this IServiceCollection services)
     {
         services.AddScoped<IClienteRepository, ClienteRepository>();
-        services.AddScoped<IContaRepository, ContaRepository>();
-        services.AddScoped<ICustodiaRepository, CustodiaRepository>();
+        services.AddScoped<IContaMasterRepository, ContaMasterRepository>();
+        services.AddScoped<IContaGraficaRepository, ContaGraficaRepository>();
+        services.AddScoped<ICotacaoRepository, CotacaoRepository>();
+        services.AddScoped<ICustodiaMasterRepository, CustodiaMasterRepository>();
         services.AddScoped<ICestaRecomendadaRepository, CestaRecomendadaRepository>();
         services.AddScoped<IHistoricoExecucaoMotorRepository, HistoricoExecucaoMotorRepository>();
 
         services.AddScoped<IClienteService, ClienteService>();
-        services.AddScoped<IContaService, ContaService>();
-        services.AddScoped<ICustodiaService, CustodiaService>();
+        services.AddScoped<IContaGraficaService, ContaGraficaService>();
+        services.AddScoped<ICotacaoService, CotacaoService>();
+        services.AddScoped<ICustodiaFilhoteService, CustodiaFilhoteService>();
+        services.AddScoped<ICustodiaMasterService, CustodiaMasterService>();
         services.AddScoped<ICestaRecomendadaService, CestaRecomendadaService>();
         services.AddScoped<IHistoricoExecucaoMotorService, HistoricoExecucaoMotorService>();
+        services.AddScoped<IMotorCompraService, MotorCompraService>();
 
-        services.AddSingleton<ICotahistParser, CotahistParser>();
-        services.AddSingleton<ICalendarioCompraService, CalendarioCompraService>();
+        services.AddSingleton<ICotahistParserService, CotahistParserService>();
+        services.AddSingleton<ICalendarioMotorCompraService, CalendarioMotorCompraService>();
     }
 
     private static void ConfigurarFluentValidation(this IServiceCollection services)
