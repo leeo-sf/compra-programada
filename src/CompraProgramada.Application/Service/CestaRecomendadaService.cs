@@ -45,7 +45,7 @@ public class CestaRecomendadaService : ICestaRecomendadaService
         var cesta = await _cestaRepository.ObterCestaAtivaAsync(cancellationToken);
 
         if (cesta is null)
-            return new ApplicationException("Cesta Top Five não cadastrada.");
+            return new ApplicationException("Nenhuma Cesta Top Five ativa no momento.");
 
         return GerarCestaDto(cesta);
     }

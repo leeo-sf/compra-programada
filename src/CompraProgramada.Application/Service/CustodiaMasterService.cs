@@ -51,7 +51,7 @@ public class CustodiaMasterService : ICustodiaMasterService
     public async Task<Result> AjustarResiduosAsync(List<AtivoDto> residuos, CancellationToken cancellationToken)
     {
         if (!residuos.Any())
-            return new ApplicationException("Você precisa definir os resíduos.");
+            return Result.Success();
 
         var contaMaster = await _contaRepository.ObterContaMasterAsync(cancellationToken);
 

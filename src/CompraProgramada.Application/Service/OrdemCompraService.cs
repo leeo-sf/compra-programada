@@ -14,7 +14,7 @@ public class OrdemCompraService : IOrdemCompraService
 
     public async Task<Result<List<OrdemCompraDto>>> EmitirOrdensDeCompraAsync(List<OrdemCompraDto> ordensCompraDto, CancellationToken cancellationToken)
     {
-        if (ordensCompraDto.Any())
+        if (!ordensCompraDto.Any())
             return new ApplicationException("Pelo menos uma ordem de compra deve ser informada para registro");
 
         var ordensCompra = ordensCompraDto

@@ -17,6 +17,7 @@ public class DistribuicaoService : IDistribuicaoService
     private readonly ICotahistParserService _cotahistParser;
     private readonly ICotacaoService _cotacaoService;
     private readonly ICestaRecomendadaService _cestaService;
+    private readonly IFileService _fileService;
 
     public DistribuicaoService(ILogger<DistribuicaoService> logger,
         IDistribuicaoRepository distribuicaoRepository,
@@ -25,7 +26,8 @@ public class DistribuicaoService : IDistribuicaoService
         IOrdemCompraService ordemCompraService,
         ICotahistParserService cotahistParser,
         ICotacaoService cotacaoService,
-        ICestaRecomendadaService cestaService)
+        ICestaRecomendadaService cestaService,
+        IFileService fileService)
     {
         _logger = logger;
         _distribuicaoRepository = distribuicaoRepository;
@@ -35,6 +37,7 @@ public class DistribuicaoService : IDistribuicaoService
         _cotahistParser = cotahistParser;
         _cotacaoService = cotacaoService;
         _cestaService = cestaService;
+        _fileService = fileService;
     }
 
     public async Task<Result<List<DistribuicaoDto>>> RealizarDistribuicaoAtivoPorCliente(List<ClienteDto> clientesAtivos, decimal totalConsolidado, CancellationToken cancellationToken)
@@ -96,7 +99,7 @@ public class DistribuicaoService : IDistribuicaoService
                 Ticker = combinacaoFechamento.Ticker,
                 QuantidadeTotal = quantidadeDeCompraAtivo,
                 PrecoExecucao = combinacaoFechamento.PrecoFechamento,
-                QuantidadeLotePadrao = ((quantidadeDeCompraAtivo / 100) * 100) / 100,
+                QuantidadeLotePadrao = quantidadeDeCompraAtivo / 100 * 100 / 100,
             });
         }
 
@@ -132,12 +135,20 @@ public class DistribuicaoService : IDistribuicaoService
             foreach (var ativo in ativosConsolidado)
             {
                 var contaCliente = cliente.ContaGrafica!;
-                var custodiaCliente = contaCliente.CustodiaFilhote?.FirstOrDefault(
+                var custodiaAtualCliente = contaCliente.CustodiaFilhote?.FirstOrDefault(
                     x => x.Ticker == ativo.Ticker && x.ContaGraficaId == contaCliente.Id);
 
                 var quantidadeNovasAcoes = (int)Math.Truncate(ativo.Quantidade * (cliente.ValorAporte / totalConsolidado));
 
                 var custodiaAhSerAtualizada = contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id);
+
+                var custodiaClienteAtualizada = new CustodiaFilhoteDto
+                {
+                    Id = custodiaAtualCliente!.Id,
+                    ContaGraficaId = custodiaAtualCliente.ContaGraficaId,
+                    Ticker = custodiaAtualCliente.Ticker!,
+                    Quantidade = custodiaAtualCliente.Quantidade + quantidadeNovasAcoes
+                };
 
                 if (custodiaAhSerAtualizada is null)
                     contasClientesAtualizadas.Add(new ContaGraficaDto
@@ -147,26 +158,22 @@ public class DistribuicaoService : IDistribuicaoService
                         ClienteId = contaCliente.ClienteId,
                         Tipo = contaCliente.Tipo,
                         DataCriacao = contaCliente.DataCriacao,
-                        CustodiaFilhote = new List<CustodiaFilhoteDto> { }
+                        CustodiaFilhote = new List<CustodiaFilhoteDto>() { custodiaClienteAtualizada }
                     });
                 else
-                    contasClientesAtualizadas.Find(x => x.Id == contaCliente.Id)?.CustodiaFilhote?.Add(new CustodiaFilhoteDto
-                    {
-                        Id = custodiaCliente!.Id,
-                        ContaGraficaId = custodiaCliente.ContaGraficaId,
-                        Ticker = custodiaCliente.Ticker!,
-                        Quantidade = custodiaCliente.Quantidade + quantidadeNovasAcoes
-                    });
+                    contasClientesAtualizadas.Find(x => x.Id == contaCliente.Id)?.CustodiaFilhote?.Add(custodiaClienteAtualizada);
 
                 distribuicao.Add(new DistribuicaoDto
                 {
                     Id = 0,
+                    Cpf = cliente.Cpf,
                     OrdemCompraId = 0,
-                    ContaGraficaId = custodiaCliente!.ContaGraficaId,
+                    ContaGraficaId = custodiaAtualCliente.ContaGraficaId,
                     Ticker = ativo.Ticker,
                     QuantidadeAlocada = quantidadeNovasAcoes,
                     ValorOperacao = quantidadeNovasAcoes * ativo.PrecoFechamento,
-                    ContaGrafica = contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id)!
+                    ContaGrafica = contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id)!,
+                    Data = DateTime.Now
                 });
             }
         }
@@ -189,27 +196,23 @@ public class DistribuicaoService : IDistribuicaoService
 
     public async Task<CotacaoDto> ObterCotacoesFechamentoB3ComBaseEmCestaAsync(CancellationToken cancellationToken)
     {
-        string pastaCotacoes = Path.Combine(AppContext.BaseDirectory, "cotacoes");
+        var caminhoArquivoUltimoPregao = _fileService.ObterCaminhoCompletoArquivoCotacoes();
 
-        if (!Directory.Exists(pastaCotacoes))
-            throw new DirectoryNotFoundException($"A pasta {pastaCotacoes} não foi encontrada.");
-
-        var arquivoUltimoPregao = Directory.GetFiles(pastaCotacoes, "COTAHIST_D*")
-            .Select(caminho => new FileInfo(caminho))
-            .OrderByDescending(f => f.Name)
-            .FirstOrDefault();
-
-        if (!File.Exists(arquivoUltimoPregao!.FullName))
-            throw new FileNotFoundException($"Nenhum arquivo com a data pregão mais recente foi encontrado.");
-
-        var cotacoesB3 = _cotahistParser.ParseArquivo(arquivoUltimoPregao.FullName);
+        var cotacoesB3 = _cotahistParser.ParseArquivo(caminhoArquivoUltimoPregao);
 
         var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
-        var cestaVigenteTickers = new HashSet<string>(cestaVigente.Value!.Itens.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
+
+        if (!cestaVigente.IsSuccess)
+            throw new ApplicationException(cestaVigente.Exception.Message);
+
+        var cestaVigenteTickers = new HashSet<string>(cestaVigente.Value.Itens.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
 
         var cotacoesCesta = cotacoesB3.Where(cotacao => cestaVigenteTickers.Contains(cotacao.Ticker));
 
-        var result = new CotacaoDto { DataPregao = cotacoesCesta.First().DataPregao, Itens = cotacoesCesta.Select(x => new ComposicaoCotacaoDto(x.Ticker, x.PrecoFechamento)).ToList() };
+        if (!cotacoesCesta.Any())
+            throw new ApplicationException("Não foi possível obter a cesta recomendada nas cotações da B3.");
+
+        var result = new CotacaoDto { DataPregao = cotacoesCesta.FirstOrDefault()!.DataPregao, Itens = cotacoesCesta.Select(x => new ComposicaoCotacaoDto(x.Ticker, x.PrecoFechamento)).ToList() };
 
         _logger.LogInformation("Cotações de fachamento B3 da cesta Top Five com base na data pregão {DataPregao}. Cotações: {CotacoesFechamento}", result.DataPregao, result.Itens);
 

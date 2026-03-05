@@ -4,6 +4,7 @@ using CompraProgramada.Application.Service;
 using CompraProgramada.Data;
 using CompraProgramada.Data.Repository;
 using CompraProgramada.Domain.Interface;
+using Confluent.Kafka;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +22,14 @@ public static class AppConfiguration
         services.ConfigurarBancoDeDados(configuration);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
+        //services.ConfigurarKafka(configuration);
     }
     public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration)
     {
         services.ConfigurarBancoDeDados(configuration);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
+        //services.ConfigurarKafka(configuration);
     }
 
     private static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration)
@@ -74,6 +77,8 @@ public static class AppConfiguration
 
         services.AddSingleton<ICotahistParserService, CotahistParserService>();
         services.AddSingleton<ICalendarioMotorCompraService, CalendarioMotorCompraService>();
+        services.AddSingleton<IFileService, FileService>();
+        services.AddSingleton<IImpostoRendaService, ImpostoRendaService>();
     }
 
     private static void ConfigurarFluentValidation(this IServiceCollection services)
@@ -84,4 +89,18 @@ public static class AppConfiguration
 
     private static void ConfigurarRegrasDaAplicacao(this IServiceCollection services, IConfiguration configuration)
         => services.AddSingleton(opt => configuration.GetSection("ApplicationConfig").Get<AppConfig>()!);
+
+    private static void ConfigurarKafka(this IServiceCollection services, IConfiguration configuration)
+    {
+        var producerConfig = new ProducerConfig
+        {
+            BootstrapServers = configuration.GetSection("Service:Kafka:Server").Get<string>(),
+            Acks = Acks.All,
+            MessageSendMaxRetries = configuration.GetSection("Service:Kafka:SendMaxRetries").Get<int>()
+        };
+
+        services.AddSingleton(producerConfig);
+        services.AddSingleton(opt => configuration.GetSection("Service:Kafka").Get<KafkaConfig>()!);
+        services.AddSingleton<IKafkaProducer, KafkaProducer>();
+    }
 }

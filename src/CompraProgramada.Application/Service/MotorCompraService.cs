@@ -10,31 +10,33 @@ public class MotorCompraService : IMotorCompraService
     private readonly IHistoricoExecucaoMotorService _historicoExecucaoService;
     private readonly IClienteService _clienteService;
     private readonly ICalendarioMotorCompraService _calendarioMotorCompraService;
-    IDistribuicaoService _distribuicaoService;
+    private readonly IDistribuicaoService _distribuicaoService;
+    private readonly IImpostoRendaService _impostoRendaService;
 
     public MotorCompraService(ILogger<MotorCompraService> logger,
         IHistoricoExecucaoMotorService historicoExecucaoService,
         IClienteService clienteService,
         ICalendarioMotorCompraService calendarioMotorCompraService,
-        IDistribuicaoService distribuicaoService)
+        IDistribuicaoService distribuicaoService,
+        IImpostoRendaService impostoRendaService)
     {
         _logger = logger;
         _historicoExecucaoService = historicoExecucaoService;
         _clienteService = clienteService;
         _calendarioMotorCompraService = calendarioMotorCompraService;
         _distribuicaoService = distribuicaoService;
+        _impostoRendaService = impostoRendaService;
     }
 
     public async Task ExecutarCompraAsync(CancellationToken cancellationToken)
     {
         var deveExecutarCompraHoje = await _historicoExecucaoService.ExecutarCompraHojeAsync(cancellationToken);
-
-        /*if (!deveExecutarCompraHoje)
+        if (!deveExecutarCompraHoje)
         {
             var dataProximaExecucao = _calendarioMotorCompraService.ObterProximaDataCompra();
             _logger.LogInformation("MotorCompra não será executado hoje. Próxima data de compra prevista para {DataProximaExecucao}. Encerrando processo.", dataProximaExecucao);
             return;
-        }*/
+        }
 
         var clientesAtivos = await _clienteService.ObtemClientesAtivoAsync(cancellationToken);
         if (!clientesAtivos.IsSuccess || !clientesAtivos.Value!.Any())
@@ -52,9 +54,12 @@ public class MotorCompraService : IMotorCompraService
 
         var distribuicoesGrupoClientes = await _distribuicaoService.RealizarDistribuicaoAtivoPorCliente(clientesAtivos.Value, valorTotalConsolidado, cancellationToken);
 
+        if (!distribuicoesGrupoClientes.IsSuccess)
+            throw new ApplicationException(distribuicoesGrupoClientes.Exception.Message);
+
         _logger.LogInformation("Distribuição de grupo realizada e residuos definidos.");
 
-        // 4. Calcula IR Dedo-Duro e envia pro Kafka
+        await _impostoRendaService.CalcularIRDedoDuro(distribuicoesGrupoClientes.Value, cancellationToken);
 
         var dataExecucao = DateTime.Now;
         var dataReferencia = _calendarioMotorCompraService.ObterDataReferenciaExecucao(dataExecucao);
