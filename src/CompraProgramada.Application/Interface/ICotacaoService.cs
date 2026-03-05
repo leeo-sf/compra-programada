@@ -1,5 +1,5 @@
 ﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Domain.Entity;
+using OperationResult;
 
 namespace CompraProgramada.Application.Interface;
 

@@ -14,6 +14,5 @@ internal class CustodiaFilhoteEntityTypeConfig : IEntityTypeConfiguration<Custod
         builder.Property(x => x.ContaGraficaId).IsRequired().HasColumnName("conta_grafica_id").HasComment("identificador conta");
         builder.Property(x => x.Ticker).HasColumnName("ticker").HasComment("ativo");
         builder.Property(x => x.Quantidade).HasColumnName("quantidade").HasDefaultValue(0).HasComment("quantidade comprado");
-        builder.HasOne(x => x.ContaGrafica).WithOne(x => x.CustodiaFilhote).HasForeignKey<CustodiaFilhote>(x => x.ContaGraficaId);
     }
 }

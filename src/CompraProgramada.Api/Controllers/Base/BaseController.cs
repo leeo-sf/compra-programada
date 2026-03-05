@@ -1,7 +1,7 @@
-﻿using CompraProgramada.Application;
-using CompraProgramada.Application.Exceptions;
+﻿using CompraProgramada.Application.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OperationResult;
 
 namespace CompraProgramada.Api.Controllers.Base;
 

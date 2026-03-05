@@ -10,5 +10,6 @@ public record Cliente(int Id, string Nome, string Cpf, string Email, decimal Val
     public decimal ValorMensal { get; init; } = ValorMensal;
     public bool Ativo { get; init; } = Ativo;
     public DateTime DataAdesao{ get; init; } = DataAdesao;
+    public decimal ValorAporte => ValorMensal / 3;
     public ContaGrafica? ContaGrafica { get; init; } = default!;
 }

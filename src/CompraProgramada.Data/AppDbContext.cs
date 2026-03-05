@@ -7,11 +7,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Cliente> Cliente { get; set; } = default!;
     public DbSet<ContaGrafica> ContaGrafica { get; set; } = default!;
-    public DbSet<CestaRecomendada> Cesta { get; set; } = default!;
+    public DbSet<ContaMaster> ContaMaster { get; set; } = default!;
+    public DbSet<CestaRecomendada> CestaRecomendada { get; set; } = default!;
     public DbSet<ComposicaoCesta> ComposicaoCesta { get; set; } = default!;
-    public DbSet<HistoricoExecucaoMotor> HistoricoCompra { get; set; } = default!;
+    public DbSet<HistoricoExecucaoMotor> HistoricoExecucaoMotor { get; set; } = default!;
     public DbSet<Cotacao> Cotacao { get; set; } = default!;
     public DbSet<ComposicaoCotacao> ComposicaoCotacao { get; set; } = default!;
+    public DbSet<CustodiaMaster> CustodiaMaster { get; set; } = default!;
+    public DbSet<CustodiaFilhote> CustodiaFilhote { get; set; } = default!;
+    public DbSet<OrdemCompra> OrdemCompra { get; set; } = default!;
+    public DbSet<Distribuicao> Distribuicao { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

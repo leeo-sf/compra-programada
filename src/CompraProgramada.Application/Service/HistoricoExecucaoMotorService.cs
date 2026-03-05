@@ -7,10 +7,10 @@ namespace CompraProgramada.Application.Service;
 public class HistoricoExecucaoMotorService : IHistoricoExecucaoMotorService
 {
     private readonly IHistoricoExecucaoMotorRepository _historicoExecucaoRepository;
-    private readonly ICalendarioCompraService _calendarioCompraService;
+    private readonly ICalendarioMotorCompraService _calendarioCompraService;
 
     public HistoricoExecucaoMotorService(IHistoricoExecucaoMotorRepository historicoExecucaoRepository,
-        ICalendarioCompraService calendarioCompraService)
+        ICalendarioMotorCompraService calendarioCompraService)
     {
         _historicoExecucaoRepository = historicoExecucaoRepository;
         _calendarioCompraService = calendarioCompraService;
@@ -33,7 +33,7 @@ public class HistoricoExecucaoMotorService : IHistoricoExecucaoMotorService
         return false;
     }
 
-    public async Task SalvarExecucaoAsync(CompraExecucaoDto execucaoCompra, CancellationToken cancellationToken)
+    public async Task SalvarExecucaoAsync(ExecucaoMotorCompraDto execucaoCompra, CancellationToken cancellationToken)
         => await _historicoExecucaoRepository.CriarHistoricoExecucaoAsync(
             new (0, execucaoCompra.DataReferencia, execucaoCompra.DataExecucao, execucaoCompra.Executado),
             cancellationToken);

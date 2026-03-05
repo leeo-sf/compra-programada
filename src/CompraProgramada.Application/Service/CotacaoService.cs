@@ -2,6 +2,7 @@
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using OperationResult;
 
 namespace CompraProgramada.Application.Service;
 
@@ -16,7 +17,7 @@ public class CotacaoService : ICotacaoService
         var cotacao = await _cotacaoRepository.ObterCotacaoAsync(dataPregao, cancellationToken);
 
         if (cotacao is null)
-            return Result<CotacaoDto>.Fail(new ApplicationException($"Não existe cotação para a data informada {dataPregao:dd/mm/yyyy}"));
+            return new ApplicationException($"Não existe cotação para a data informada {dataPregao:dd/mm/yyyy}");
 
         var result = new CotacaoDto
         {
@@ -24,7 +25,7 @@ public class CotacaoService : ICotacaoService
             Itens = cotacao.ComposicaoCotacao.Select(i => new ComposicaoCotacaoDto(i.Ticker, i.PrecoFechamento)).ToList()
         };
 
-        return Result<CotacaoDto>.Ok(result);
+        return result;
     }
 
     public async Task<Result<CotacaoDto>> SalvarCotacaoAsync(CotacaoDto cotacao, CancellationToken cancellationToken)
@@ -38,6 +39,6 @@ public class CotacaoService : ICotacaoService
             Itens = cotacaoSalva.ComposicaoCotacao.Select(i => new ComposicaoCotacaoDto(i.Ticker, i.PrecoFechamento)).ToList()
         };
 
-        return Result<CotacaoDto>.Ok(result);
+        return result;
     }
 }

@@ -7,5 +7,6 @@ public record ContaGrafica(int Id, string NumeroConta, DateTime DataCriacao, int
 {
     public string Tipo { get; } = "FILHOTE";
     public Cliente Cliente { get; init; } = default!;
-    public CustodiaFilhote CustodiaFilhote { get; init; } = default!;
+    public List<Distribuicao> Distribuicoes { get; init; } = new List<Distribuicao>();
+    public List<CustodiaFilhote> CustodiaFilhotes { get; init; } = new List<CustodiaFilhote>();
 }

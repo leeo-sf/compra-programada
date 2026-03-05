@@ -11,5 +11,5 @@ public class AdesaoResponse
     public required decimal ValorMensal { get; set; }
     public required bool Ativo { get; set; }
     public required DateTime DataAdesao { get; set; }
-    public required ContaGraficaDto ContaGrafica { get; set; }
+    public required ContaGraficaResponse ContaGrafica { get; set; }
 }

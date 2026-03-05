@@ -4,6 +4,7 @@ namespace CompraProgramada.Domain.Interface;
 
 public interface IClienteRepository
 {
+    Task<Cliente?> ObterClienteAsync(int id, CancellationToken cancellationToken);
     Task<List<Cliente>> ObterClientesAtivosAsync(CancellationToken cancellationToken);
     Task<int> QuantidadeAtivosAsync(CancellationToken cancellationToken);
     Task<bool> ExisteAsync(string cpf, CancellationToken cancellationToken);
