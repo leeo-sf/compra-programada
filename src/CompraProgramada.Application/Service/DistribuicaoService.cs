@@ -14,10 +14,8 @@ public class DistribuicaoService : IDistribuicaoService
     private readonly ICustodiaMasterService _custodiaMasterService;
     private readonly ICustodiaFilhoteService _custodiaFilhoteService;
     private readonly IOrdemCompraService _ordemCompraService;
-    private readonly ICotahistParserService _cotahistParser;
     private readonly ICotacaoService _cotacaoService;
     private readonly ICestaRecomendadaService _cestaService;
-    private readonly IFileService _fileService;
 
     public DistribuicaoService(ILogger<DistribuicaoService> logger,
         IDistribuicaoRepository distribuicaoRepository,
@@ -26,18 +24,15 @@ public class DistribuicaoService : IDistribuicaoService
         IOrdemCompraService ordemCompraService,
         ICotahistParserService cotahistParser,
         ICotacaoService cotacaoService,
-        ICestaRecomendadaService cestaService,
-        IFileService fileService)
+        ICestaRecomendadaService cestaService)
     {
         _logger = logger;
         _distribuicaoRepository = distribuicaoRepository;
         _custodiaMasterService = custodiaMasterService;
         _custodiaFilhoteService = custodiaFilhoteService;
         _ordemCompraService = ordemCompraService;
-        _cotahistParser = cotahistParser;
         _cotacaoService = cotacaoService;
         _cestaService = cestaService;
-        _fileService = fileService;
     }
 
     public async Task<Result<List<DistribuicaoDto>>> RealizarDistribuicaoAtivoPorCliente(List<ClienteDto> clientesAtivos, decimal totalConsolidado, CancellationToken cancellationToken)
@@ -50,7 +45,9 @@ public class DistribuicaoService : IDistribuicaoService
 
         var residuos = await ObtemResiduosAsync(cancellationToken);
 
-        var cotacoesFechamento = await ObterCotacoesFechamentoB3ComBaseEmCestaAsync(cancellationToken);
+        var cotacoesFechamento = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
+        if (!cotacoesFechamento.IsSuccess)
+            throw cotacoesFechamento.Exception;
 
         var valoresPorAtivoConsolidado = _cestaService.ValorPorAtivoConsolidado(cestaVigente.Value!, totalConsolidado);
         if (!valoresPorAtivoConsolidado.IsSuccess || valoresPorAtivoConsolidado.Value is null)
@@ -58,7 +55,7 @@ public class DistribuicaoService : IDistribuicaoService
 
         _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado.Value);
 
-        var combinacoesFechamentoECompra = cotacoesFechamento.Itens.Join(
+        var combinacoesFechamentoECompra = cotacoesFechamento.Value.Itens.Join(
             valoresPorAtivoConsolidado.Value!,
             cotacaoFechamento => cotacaoFechamento.Ticker,
             valorPorAtivoConsolidado => valorPorAtivoConsolidado.Ticker,
@@ -192,35 +189,6 @@ public class DistribuicaoService : IDistribuicaoService
             return null;
 
         return residuos.Value;
-    }
-
-    public async Task<CotacaoDto> ObterCotacoesFechamentoB3ComBaseEmCestaAsync(CancellationToken cancellationToken)
-    {
-        var caminhoArquivoUltimoPregao = _fileService.ObterCaminhoCompletoArquivoCotacoes();
-
-        var cotacoesB3 = _cotahistParser.ParseArquivo(caminhoArquivoUltimoPregao);
-
-        var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
-
-        if (!cestaVigente.IsSuccess)
-            throw new ApplicationException(cestaVigente.Exception.Message);
-
-        var cestaVigenteTickers = new HashSet<string>(cestaVigente.Value.Itens.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
-
-        var cotacoesCesta = cotacoesB3.Where(cotacao => cestaVigenteTickers.Contains(cotacao.Ticker));
-
-        if (!cotacoesCesta.Any())
-            throw new ApplicationException("Não foi possível obter a cesta recomendada nas cotações da B3.");
-
-        var result = new CotacaoDto { DataPregao = cotacoesCesta.FirstOrDefault()!.DataPregao, Itens = cotacoesCesta.Select(x => new ComposicaoCotacaoDto(x.Ticker, x.PrecoFechamento)).ToList() };
-
-        _logger.LogInformation("Cotações de fachamento B3 da cesta Top Five com base na data pregão {DataPregao}. Cotações: {CotacoesFechamento}", result.DataPregao, result.Itens);
-
-        await _cotacaoService.SalvarCotacaoAsync(
-            result,
-            cancellationToken);
-
-        return result;
     }
 
     public async Task SalvarRegistroDistribuicoes(List<DistribuicaoDto> ditribuicoes, List<OrdemCompraDto> ordensCompraAtivos, CancellationToken cancellationToken)
