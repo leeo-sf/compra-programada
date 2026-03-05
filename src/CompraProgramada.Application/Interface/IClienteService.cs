@@ -11,4 +11,5 @@ public interface IClienteService
     Task<Result<ClienteDto>> AdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken);
     Result<decimal> TotalConsolidade(List<ClienteDto> clientesAtivos);
     Task<Result<ClienteDto>> SairDoProdutoAsync(int clienteId, CancellationToken cancellationToken);
+    Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken);
 }

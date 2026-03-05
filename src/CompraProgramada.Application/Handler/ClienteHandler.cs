@@ -9,7 +9,8 @@ namespace CompraProgramada.Application.Handler;
 
 public class ClienteHandle
     : IRequestHandler<AdesaoRequest, Result<AdesaoResponse>>,
-        IRequestHandler<SaidaProdutoRequest, Result<SaidaProdutoResponse>>
+        IRequestHandler<SaidaProdutoRequest, Result<SaidaProdutoResponse>>,
+        IRequestHandler<AtualizarValorMensalRequest, Result<AtualizarValorMensalResponse>>
 {
     private readonly ILogger<ClienteHandle> _logger;
     private readonly IClienteService _clienteService;
@@ -67,5 +68,29 @@ public class ClienteHandle
             };
 
         return result.Exception;
+    }
+
+    public async Task<Result<AtualizarValorMensalResponse>> Handle(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Solicitação do ClienteId: {ClienteId} para alteração do valor mensal, novo valor mensal: {NovoValorMensal}", request.ClienteId, request.NovoValorMensal);
+
+        var atualizaValorMensalResult = await _clienteService.AtualizarValorMensalAsync(request, cancellationToken);
+
+        if (!atualizaValorMensalResult.IsSuccess)
+        {
+            _logger.LogError("Ocorreu um erro na alteração do valor mensal. {Error}", atualizaValorMensalResult.Exception);
+            return atualizaValorMensalResult.Exception;
+        }
+
+        var cliente = atualizaValorMensalResult.Value;
+
+        _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", cliente.ClienteId, cliente.ValorMensal);
+
+        return new AtualizarValorMensalResponse
+        {
+            ClienteId = cliente.ClienteId,
+            ValorMensalAnterior = cliente.ValorAnterior,
+            ValorMensalNovo = cliente.ValorMensal
+        };
     }
 }

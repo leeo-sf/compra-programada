@@ -17,6 +17,7 @@ public class ClienteService : IClienteService
     private const string VALOR_MENSAL_MINIMO_CODIGO = "VALOR_MENSAL_INVALIDO";
     private const string CPF_CADASTRADO_CODIGO = "CLIENTE_CPF_DUPLICADO";
     private const string CLIENTE_NAO_ENCONTRADO_CODIGO = "CLIENTE_NAO_ENCONTRADO";
+    private const string CLIENTE_INATIVO_CODIGO = "CLIENTE_INATIVO";
     private const decimal VALOR_MINIMO_ADESAO = 100;
 
     public ClienteService(IClienteRepository clienteRepository,
@@ -93,6 +94,26 @@ public class ClienteService : IClienteService
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, dadosAtualizadosCliente, cancellationToken);
 
         return GerarClienteDto(cliente);
+    }
+
+    public async Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
+    {
+        if (request.NovoValorMensal < VALOR_MINIMO_ADESAO)
+            return new ErroMapeadoException("O valor mensal minimo e de R$ 100,00.", "VALOR_MENSAL_INVALIDO");
+
+        var cliente = await _clienteRepository.ObterClienteAsync(request.ClienteId, cancellationToken);
+
+        if (cliente is null)
+            return new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
+
+        if (!cliente.Ativo)
+            return new ErroMapeadoException("Cliente com status inativo", CLIENTE_INATIVO_CODIGO);
+
+        var dadosAtualizadosCliente = cliente with { ValorMensal = request.NovoValorMensal };
+
+        var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, dadosAtualizadosCliente, cancellationToken);
+
+        return GerarClienteDto(clienteAtualizado);
     }
 
     public ClienteDto GerarClienteDto(Cliente cliente)

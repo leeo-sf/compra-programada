@@ -14,6 +14,10 @@ public class ClienteController(IMediator mediator) : BaseController(mediator)
         => await SendCommand(request, 201);
 
     [HttpPost("{clienteId}/saida")]
-    public async Task<ActionResult<SaidaProdutoResponse>> AlterarValorMensalAsync(int clienteId)
+    public async Task<ActionResult<SaidaProdutoResponse>> SaidaProdutoAsync(int clienteId)
         => await SendCommand(new SaidaProdutoRequest(clienteId));
+
+    [HttpPut("{clienteId}/valor-mensal")]
+    public async Task<ActionResult<AtualizarValorMensalResponse>> AlterarValorMensalAsync(int clienteId, AtualizarValorMensalRequest request)
+        => await SendCommand(request with { ClienteId = clienteId });
 }
