@@ -89,6 +89,9 @@ public class ClienteService : IClienteService
         if (cliente is null)
             return new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
 
+        if (!cliente.Ativo)
+            return new ErroMapeadoException("Cliente já está com status inativo", CLIENTE_INATIVO_CODIGO);
+
         var dadosAtualizadosCliente = cliente with { Ativo = false };
 
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, dadosAtualizadosCliente, cancellationToken);
@@ -99,7 +102,7 @@ public class ClienteService : IClienteService
     public async Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
     {
         if (request.NovoValorMensal < VALOR_MINIMO_ADESAO)
-            return new ErroMapeadoException("O valor mensal minimo e de R$ 100,00.", "VALOR_MENSAL_INVALIDO");
+            return new ErroMapeadoException("O valor mensal minimo e de R$ 100,00.", VALOR_MENSAL_MINIMO_CODIGO);
 
         var cliente = await _clienteRepository.ObterClienteAsync(request.ClienteId, cancellationToken);
 

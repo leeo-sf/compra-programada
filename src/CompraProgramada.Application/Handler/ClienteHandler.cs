@@ -37,6 +37,8 @@ public class ClienteHandle
         var cliente = result.Value!;
         var contaGraficaCliente = cliente.ContaGrafica!;
 
+        _logger.LogInformation("Adesão realizada com sucesso para o cliente {Nome} com CPF {Cpf}.", request.Nome, request.Cpf);
+        
         return new AdesaoResponse
         {
             ClienteId = cliente.ClienteId,
@@ -58,16 +60,23 @@ public class ClienteHandle
 
     public async Task<Result<SaidaProdutoResponse>> Handle(SaidaProdutoRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Iniciando processo de saida do produto para o cliente {ClienteId}.", request.ClienteId);
+
         var result = await _clienteService.SairDoProdutoAsync(request.ClienteId, cancellationToken);
 
-        if (result.IsSuccess)
-            return new SaidaProdutoResponse
-            {
-                ClienteId = result.Value.ClienteId,
-                Nome = result.Value.Nome
-            };
+        if (!result.IsSuccess)
+        {
+            _logger.LogError("Ocorreu um erro na alteração do valor mensal. {Error}", result.Exception);
+            return result.Exception;
+        }
 
-        return result.Exception;
+        _logger.LogInformation("Solicitação de saída do produto realizada com sucesso.");
+
+        return new SaidaProdutoResponse
+        {
+            ClienteId = result.Value.ClienteId,
+            Nome = result.Value.Nome
+        };
     }
 
     public async Task<Result<AtualizarValorMensalResponse>> Handle(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
