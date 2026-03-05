@@ -34,7 +34,7 @@ public class MotorCompraWorker : BackgroundService
 
                 using var scope = _serviceScopeFactory.CreateScope();
 
-                var motorCompraService = scope.ServiceProvider.GetRequiredService<IMotorCompraService>();
+                var motorCompraService = scope.ServiceProvider.GetRequiredService<ICompraService>();
 
                 await motorCompraService.ExecutarCompraAsync(stoppingToken);
             }

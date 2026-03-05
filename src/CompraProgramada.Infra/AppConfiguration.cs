@@ -72,7 +72,7 @@ public static class AppConfiguration
         services.AddScoped<ICustodiaMasterService, CustodiaMasterService>();
         services.AddScoped<IDistribuicaoService, DistribuicaoService>();
         services.AddScoped<IHistoricoExecucaoMotorService, HistoricoExecucaoMotorService>();
-        services.AddScoped<IMotorCompraService, MotorCompraService>();
+        services.AddScoped<ICompraService, CompraService>();
         services.AddScoped<IOrdemCompraService, OrdemCompraService>();
 
         services.AddSingleton<ICotahistParserService, CotahistParserService>();

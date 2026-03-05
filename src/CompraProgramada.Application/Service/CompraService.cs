@@ -4,16 +4,16 @@ using Microsoft.Extensions.Logging;
 
 namespace CompraProgramada.Application.Service;
 
-public class MotorCompraService : IMotorCompraService
+public class CompraService : ICompraService
 {
-    private readonly ILogger<MotorCompraService> _logger;
+    private readonly ILogger<CompraService> _logger;
     private readonly IHistoricoExecucaoMotorService _historicoExecucaoService;
     private readonly IClienteService _clienteService;
     private readonly ICalendarioMotorCompraService _calendarioMotorCompraService;
     private readonly IDistribuicaoService _distribuicaoService;
     private readonly IImpostoRendaService _impostoRendaService;
 
-    public MotorCompraService(ILogger<MotorCompraService> logger,
+    public CompraService(ILogger<CompraService> logger,
         IHistoricoExecucaoMotorService historicoExecucaoService,
         IClienteService clienteService,
         ICalendarioMotorCompraService calendarioMotorCompraService,
@@ -44,11 +44,11 @@ public class MotorCompraService : IMotorCompraService
 
         _logger.LogInformation("{QuantidadeClientes} clientes ativos para processamento.", clientesAtivos.Value!.Count);
 
-        var totalConsolidadoResult = _clienteService.TotalConsolidade(clientesAtivos.Value);
-        if (!totalConsolidadoResult.IsSuccess)
+        var valorTotalConsolidadoResult = _clienteService.TotalConsolidade(clientesAtivos.Value);
+        if (!valorTotalConsolidadoResult.IsSuccess)
             throw new ApplicationException("Erro ao calcular total consolidado.");
 
-        var valorTotalConsolidado = totalConsolidadoResult.Value;
+        var valorTotalConsolidado = valorTotalConsolidadoResult.Value;
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 
