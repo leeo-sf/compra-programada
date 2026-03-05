@@ -13,6 +13,10 @@ public class ClienteController(IMediator mediator) : BaseController(mediator)
     public async Task<ActionResult<AdesaoResponse>> AdesaoAsync(AdesaoRequest request)
         => await SendCommand(request, 201);
 
+    [HttpGet("{clienteId}/carteira")]
+    public async Task<ActionResult<CarteiraCustodiaResponse>> CustodiaCarteiraAsync(int clienteId)
+        => await SendCommand(new CarteiraCustodiaRequest(clienteId));
+
     [HttpPost("{clienteId}/saida")]
     public async Task<ActionResult<SaidaProdutoResponse>> SaidaProdutoAsync(int clienteId)
         => await SendCommand(new SaidaProdutoRequest(clienteId));
