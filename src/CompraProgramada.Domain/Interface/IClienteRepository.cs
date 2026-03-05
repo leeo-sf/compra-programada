@@ -9,4 +9,5 @@ public interface IClienteRepository
     Task<int> QuantidadeAtivosAsync(CancellationToken cancellationToken);
     Task<bool> ExisteAsync(string cpf, CancellationToken cancellationToken);
     Task<Cliente> CriarAsync(Cliente cliente, CancellationToken cancellationToken);
+    Task<Cliente> AtualizarClienteAsync(Cliente dadosAntigos, Cliente novosDados, CancellationToken cancellationToken);
 }

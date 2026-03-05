@@ -37,4 +37,11 @@ public class ClienteRepository : IClienteRepository
         => await _context.Cliente
             .Include(x => x.ContaGrafica)
             .FirstOrDefaultAsync(x => x.Id == id);
+
+    public async Task<Cliente> AtualizarClienteAsync(Cliente dadosAntigos, Cliente novosDados, CancellationToken cancellationToken)
+    {
+        _context.Entry(dadosAntigos).CurrentValues.SetValues(novosDados);
+        await _context.SaveChangesAsync(cancellationToken);
+        return novosDados;
+    }
 }

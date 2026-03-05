@@ -8,7 +8,8 @@ using OperationResult;
 namespace CompraProgramada.Application.Handler;
 
 public class ClienteHandle
-    : IRequestHandler<AdesaoRequest, Result<AdesaoResponse>>
+    : IRequestHandler<AdesaoRequest, Result<AdesaoResponse>>,
+        IRequestHandler<SaidaProdutoRequest, Result<SaidaProdutoResponse>>
 {
     private readonly ILogger<ClienteHandle> _logger;
     private readonly IClienteService _clienteService;
@@ -52,5 +53,19 @@ public class ClienteHandle
                 DataCriacao = contaGraficaCliente.DataCriacao,
             }
         };
+    }
+
+    public async Task<Result<SaidaProdutoResponse>> Handle(SaidaProdutoRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _clienteService.SairDoProdutoAsync(request.ClienteId, cancellationToken);
+
+        if (result.IsSuccess)
+            return new SaidaProdutoResponse
+            {
+                ClienteId = result.Value.ClienteId,
+                Nome = result.Value.Nome
+            };
+
+        return result.Exception;
     }
 }
