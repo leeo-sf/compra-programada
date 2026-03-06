@@ -48,21 +48,69 @@ public class CustodiaMasterService : ICustodiaMasterService
         return Result.Success();
     }
 
-    public async Task<Result> AjustarResiduosAsync(List<AtivoDto> residuos, CancellationToken cancellationToken)
+    public async Task<Result> AtualizarResiduosAsync(List<GrupoAtivoCompraDto> grupoAtivos, CancellationToken cancellationToken)
     {
-        if (!residuos.Any())
-            return Result.Success();
+        if (!grupoAtivos.Any())
+            return new ApplicationException("Um grupo para compra deve ser informado.");
 
-        var contaMaster = await _contaRepository.ObterContaMasterAsync(cancellationToken);
+        var custodias = await _custodiaRepository.ObterResiduosAsync(cancellationToken);
 
-        if (contaMaster is null)
+        if (custodias is null)
             return new ApplicationException("Conta master não encontrada!");
 
-        var custodiasAtualizadas = contaMaster.CustodiaMasters
-            .Select(cm => cm with { QuantidadeResiduo = Math.Max(0, residuos.First(x => x.Ticker == cm.Ticker).Quantidade) }).ToList();
+        var custodiasAhSerAtualizada = custodias
+            .Select(cm =>
+            {
+                var ativo = grupoAtivos.FirstOrDefault(ativo => ativo.Ticker == cm.Ticker)!;
+                return cm with { QuantidadeResiduo = ativo.Quantidade };
+            }).ToList();
 
-        await _custodiaRepository.AtualizarResiduosAysnc(custodiasAtualizadas, cancellationToken);
+        await _custodiaRepository.AtualizarResiduosAysnc(custodiasAhSerAtualizada, cancellationToken);
 
         return Result.Success();
+    }
+
+    public async Task<Result> CapturarResiduosDeCustodiaDistribuida(List<GrupoAtivoCompraDto> grupoAhDistribuir, List<DistribuicaoDto> distribuicaoRealizada, CancellationToken cancellationToken)
+    {
+        if (!grupoAhDistribuir.Any() || !distribuicaoRealizada.Any())
+            return new ApplicationException("Para a captura de resíduos ser realizada precisa ser informado os grupos de distribuição");
+
+        var custodiasParaAtualizar = new List<GrupoAtivoCompraDto>();
+
+        foreach (var grupo in grupoAhDistribuir)
+        {
+            var quantidadeDistribuida = distribuicaoRealizada.Where(x => x.Ticker == grupo.Ticker).Sum(x => x.QuantidadeAlocada);
+
+            var residuo = Math.Abs(quantidadeDistribuida - grupo.Quantidade);
+
+            custodiasParaAtualizar.Add(new GrupoAtivoCompraDto
+            {
+                Ticker = grupo.Ticker,
+                Quantidade = residuo,
+                PrecoFechamento = grupo.PrecoFechamento
+            });
+        }
+
+        var result = await AtualizarResiduosAsync(custodiasParaAtualizar, cancellationToken);
+        if (!result.IsSuccess)
+            return result.Exception;
+
+        return Result.Success();
+    }
+    public int SubtrairResiduosParaCompra(CustodiaMasterDto custodia, int quantidadeCompraAtivo)
+    {
+        var residuoAtual = custodia?.QuantidadeResiduos ?? 0;
+
+        if (residuoAtual == 0)
+            return 0;
+
+        var quantidadeResiduos = Math.Abs(residuoAtual - quantidadeCompraAtivo);
+        var novaQuantidadeCompraAtivos = quantidadeCompraAtivo - residuoAtual;
+
+        var necessidadeLiquida = quantidadeCompraAtivo - residuoAtual;
+        if (necessidadeLiquida < 0)
+            novaQuantidadeCompraAtivos = residuoAtual - quantidadeCompraAtivo;
+
+        return novaQuantidadeCompraAtivos;
     }
 }

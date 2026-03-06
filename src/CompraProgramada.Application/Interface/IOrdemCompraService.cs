@@ -5,5 +5,5 @@ namespace CompraProgramada.Application.Interface;
 
 public interface IOrdemCompraService
 {
-    Task<Result<List<OrdemCompraDto>>> EmitirOrdensDeCompraAsync(List<OrdemCompraDto> ordensCompra, CancellationToken cancellationToken);
+    Task<Result<List<OrdemCompraDto>>> RegistrarOrdensDeCompraAsync(List<OrdemCompraDto> ordensCompra, CancellationToken cancellationToken);
 }
