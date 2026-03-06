@@ -40,14 +40,13 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
 
         var custodiasSalvas = await _custodiaFilhoteRepository.AtualizarCustodiasAsync(custodias, cancellationToken);
 
-        return custodiasSalvas.Select(c => new CustodiaFilhoteDto
-        {
-            Id = c.Id,
-            ContaGraficaId = c.ContaGraficaId,
-            Ticker = c.Ticker!,
-            PrecoMedio = c.PrecoMedio,
-            Quantidade = c.Quantidade,
-        }).ToList();
+        return custodiasSalvas.Select(c => new CustodiaFilhoteDto(
+            c.Id,
+            c.ContaGraficaId,
+            c.Ticker!,
+            c.PrecoMedio,
+            c.Quantidade
+        )).ToList();
     }
 
     public async Task<Result<CarteiraDto>> ObterRentabilidadeDaCertira(List<CustodiaFilhoteDto> custodias, CancellationToken cancellationToken)

@@ -132,7 +132,7 @@ public class ClienteService : IClienteService
         var custodiasDto = cliente.ContaGrafica!.CustodiaFilhotes
             .Select(x => new CustodiaFilhoteDto(x.Id, x.ContaGraficaId, x.Ticker!, x.PrecoMedio, x.Quantidade)).ToList();
 
-        var carteiraResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(custodiasDto);
+        var carteiraResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(custodiasDto, cancellationToken);
         if (!carteiraResult.IsSuccess)
             return new ApplicationException("Falha ao obter detalhes da carteira.");
 
@@ -159,14 +159,13 @@ public class ClienteService : IClienteService
                 DataCriacao = cliente.ContaGrafica.DataCriacao,
                 ClienteId = cliente.ContaGrafica.Id,
                 Tipo = cliente.ContaGrafica.Tipo,
-                CustodiaFilhote = cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto
-                {
-                    Id = cf.Id,
-                    ContaGraficaId = cf.ContaGraficaId,
-                    Ticker = cf.Ticker ?? string.Empty,
-                    PrecoMedio = cf.PrecoMedio,
-                    Quantidade = cf.Quantidade
-                }).ToList()
+                CustodiaFilhote = cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
+                    cf.Id,
+                    cf.ContaGraficaId,
+                    cf.Ticker ?? string.Empty,
+                    cf.PrecoMedio,
+                    cf.Quantidade
+                )).ToList()
             }
         };
 }

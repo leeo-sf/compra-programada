@@ -37,14 +37,13 @@ public class ContaGraficaService : IContaGraficaService
             DataCriacao = contaSalva.DataCriacao,
             ClienteId = contaSalva.ClienteId,
             Tipo = contaSalva.Tipo,
-            CustodiaFilhote = contaSalva.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto
-            {
-                Id = cf.Id,
-                ContaGraficaId = cf.ContaGraficaId,
-                Ticker = cf.Ticker ?? string.Empty,
-                PrecoMedio = cf.PrecoMedio,
-                Quantidade = cf.Quantidade
-            }).ToList()
+            CustodiaFilhote = contaSalva.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
+                cf.Id,
+                cf.ContaGraficaId,
+                cf.Ticker ?? string.Empty,
+                cf.PrecoMedio,
+                cf.Quantidade
+            )).ToList()
         };
     }
 

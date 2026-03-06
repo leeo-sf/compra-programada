@@ -125,14 +125,13 @@ public class DistribuicaoService : IDistribuicaoService
 
                 var custodiaAhSerAtualizada = contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id);
 
-                var custodiaClienteAtualizada = new CustodiaFilhoteDto
-                {
-                    Id = custodiaAtualCliente!.Id,
-                    ContaGraficaId = custodiaAtualCliente.ContaGraficaId,
-                    Ticker = custodiaAtualCliente.Ticker!,
-                    PrecoMedio = precoMedio.Value,
-                    Quantidade = custodiaAtualCliente.Quantidade + quantidadeNovasAcoes
-                };
+                var custodiaClienteAtualizada = new CustodiaFilhoteDto(
+                    custodiaAtualCliente!.Id,
+                    custodiaAtualCliente.ContaGraficaId,
+                    custodiaAtualCliente.Ticker!,
+                    precoMedio.Value,
+                    custodiaAtualCliente.Quantidade + quantidadeNovasAcoes
+                );
 
                 if (custodiaAhSerAtualizada is null)
                     contasClientesAtualizadas.Add(new ContaGraficaDto
