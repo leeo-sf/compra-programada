@@ -79,6 +79,7 @@ public static class AppConfiguration
         services.AddSingleton<ICalendarioMotorCompraService, CalendarioMotorCompraService>();
         services.AddSingleton<IFileService, FileService>();
         services.AddSingleton<IImpostoRendaService, ImpostoRendaService>();
+        services.AddSingleton<IPrecoMedioService, PrecoMedioService>();
     }
 
     private static void ConfigurarFluentValidation(this IServiceCollection services)

@@ -24,7 +24,7 @@ public class ContaMasterRepository : IContaMasterRepository
 
     public async Task<ContaMaster> AtualizarResiduosAysnc(ContaMaster conta, CancellationToken cancellationToken)
     {
-        _context.ContaMaster.Entry(conta).CurrentValues.SetValues(conta);
+        _context.ContaMaster.Update(conta);
         await _context.SaveChangesAsync(cancellationToken);
         return conta;
     }
