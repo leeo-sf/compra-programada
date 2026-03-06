@@ -41,7 +41,7 @@ public class CustodiaMasterService : ICustodiaMasterService
         if (contaMaster is null)
             return new ApplicationException("Conta master não encontrada!");
 
-        var custodias = residuos.Select(x => new CustodiaMaster(0, contaMaster.Id, x.Ticker, x.Quantidade)).ToList();
+        var custodias = residuos.Select(x => new CustodiaMaster { Id = 0, ContaMasterId = contaMaster.Id, Ticker = x.Ticker, QuantidadeResiduo = x.Quantidade }).ToList();
 
         await _contaRepository.AtualizarResiduosAysnc(contaMaster with { CustodiaMasters = custodias }, cancellationToken);
 
@@ -58,14 +58,16 @@ public class CustodiaMasterService : ICustodiaMasterService
         if (custodias is null)
             return new ApplicationException("Conta master não encontrada!");
 
-        var custodiasAhSerAtualizada = custodias
-            .Select(cm =>
-            {
-                var ativo = grupoAtivos.FirstOrDefault(ativo => ativo.Ticker == cm.Ticker)!;
-                return cm with { QuantidadeResiduo = ativo.Quantidade };
-            }).ToList();
+        foreach (var custodia in custodias)
+        {
+            var ativo = grupoAtivos.FirstOrDefault(a => a.Ticker == custodia.Ticker);
+            if (ativo is null)
+                continue;
 
-        await _custodiaRepository.AtualizarResiduosAysnc(custodiasAhSerAtualizada, cancellationToken);
+            custodia.QuantidadeResiduo = ativo.Quantidade;
+        }
+
+        await _custodiaRepository.AtualizarResiduosAysnc(custodias, cancellationToken);
 
         return Result.Success();
     }
@@ -83,12 +85,7 @@ public class CustodiaMasterService : ICustodiaMasterService
 
             var residuo = Math.Abs(quantidadeDistribuida - grupo.Quantidade);
 
-            custodiasParaAtualizar.Add(new GrupoAtivoCompraDto
-            {
-                Ticker = grupo.Ticker,
-                Quantidade = residuo,
-                PrecoFechamento = grupo.PrecoFechamento
-            });
+            custodiasParaAtualizar.Add(new GrupoAtivoCompraDto(grupo.Ticker, residuo, grupo.PrecoFechamento));
         }
 
         var result = await AtualizarResiduosAsync(custodiasParaAtualizar, cancellationToken);
@@ -102,7 +99,7 @@ public class CustodiaMasterService : ICustodiaMasterService
         var residuoAtual = custodia?.QuantidadeResiduos ?? 0;
 
         if (residuoAtual == 0)
-            return 0;
+            return quantidadeCompraAtivo;
 
         var quantidadeResiduos = Math.Abs(residuoAtual - quantidadeCompraAtivo);
         var novaQuantidadeCompraAtivos = quantidadeCompraAtivo - residuoAtual;

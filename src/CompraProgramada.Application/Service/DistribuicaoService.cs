@@ -71,32 +71,29 @@ public class DistribuicaoService : IDistribuicaoService
         if (!residuosNaoDistribuidos.IsSuccess)
             throw residuosNaoDistribuidos.Exception;
 
-        var grupoAtivosAhComprar = new List<GrupoAtivoCompraDto>();
+        var grupoAtivosAhDistribuir = new List<GrupoAtivoCompraDto>();
         var residuosAtualizados = new List<GrupoAtivoCompraDto>();
         var ordensCompra = new List<OrdemCompraDto>();
 
         foreach (var fechamento in combinacoesFechamentoECompra)
         {
-            var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
-            var quantidadeDeCompraAtivo = (int)Math.Truncate(fechamento.ValorAhComprarPorAtivo / fechamento.PrecoFechamento);
+            var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker)!;
+            var residuosAtuais = custodia.QuantidadeResiduos;
+            var qtdNecessariaParaDistribuicao = (int)Math.Truncate(fechamento.ValorAhComprarPorAtivo / fechamento.PrecoFechamento);
 
-            var novaQuantidadeDeCompraAtivo = _custodiaMasterService.SubtrairResiduosParaCompra(custodia!, quantidadeDeCompraAtivo);
+            var quantidadeDeCompraAtivo = _custodiaMasterService.SubtrairResiduosParaCompra(custodia!, qtdNecessariaParaDistribuicao);
+            var qtdSobraResiduos = residuosAtuais - Math.Abs(quantidadeDeCompraAtivo - qtdNecessariaParaDistribuicao);
 
-            var grupo = new GrupoAtivoCompraDto
-            {
-                Ticker = fechamento.Ticker,
-                Quantidade = novaQuantidadeDeCompraAtivo,
-                PrecoFechamento = fechamento.PrecoFechamento
-            };
+            var grupo = new GrupoAtivoCompraDto(fechamento.Ticker, qtdSobraResiduos, fechamento.PrecoFechamento);
 
-            grupoAtivosAhComprar.Add(grupo with { Quantidade = quantidadeDeCompraAtivo });
+            grupoAtivosAhDistribuir.Add(grupo with { Quantidade = qtdNecessariaParaDistribuicao });
             residuosAtualizados.Add(grupo);
 
             ordensCompra.Add(new OrdemCompraDto
             {
                 Id = 0,
                 PrecoExecucao = fechamento.PrecoFechamento,
-                QuantidadeCompra = Math.Abs(novaQuantidadeDeCompraAtivo - quantidadeDeCompraAtivo),
+                QuantidadeCompra = quantidadeDeCompraAtivo,
                 Ticker = fechamento.Ticker
             });
         }
@@ -105,7 +102,7 @@ public class DistribuicaoService : IDistribuicaoService
         if (!residuosAtualizadosResult.IsSuccess)
             throw residuosAtualizadosResult.Exception;
 
-        return (grupoAtivosAhComprar, ordensCompra);
+        return (grupoAtivosAhDistribuir, ordensCompra);
     }
 
     public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasPorAtivo(List<ClienteDto> clientes, List<GrupoAtivoCompraDto> grupoAtivoCompra, decimal totalConsolidado, CancellationToken cancellationToken)
