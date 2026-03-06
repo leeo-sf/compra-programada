@@ -27,7 +27,7 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
         )
         {
             CustodiaFilhotes = c.CustodiaFilhote!
-                .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.Quantidade)).ToList()
+                .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList()
         }).ToList();
 
         var custodias = contasCustodias.SelectMany(c => c.CustodiaFilhotes).ToList();
@@ -39,6 +39,7 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
             Id = c.Id,
             ContaGraficaId = c.ContaGraficaId,
             Ticker = c.Ticker!,
+            PrecoMedio = c.PrecoMedio,
             Quantidade = c.Quantidade,
         }).ToList();
     }

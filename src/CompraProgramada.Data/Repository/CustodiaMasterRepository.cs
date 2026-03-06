@@ -1,6 +1,7 @@
 ﻿using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CompraProgramada.Data.Repository;
 
@@ -20,12 +21,11 @@ public class CustodiaMasterRepository : ICustodiaMasterRepository
     public async Task<List<CustodiaMaster>?> ObterResiduosAsync(CancellationToken cancellationToken)
         => await _context.CustodiaMaster
             .Include(x => x.ContaMaster)
-            .Where(cm => cm.QuantidadeResiduo > 0)
             .ToListAsync();
 
-    public async Task AtualizarResiduosAysnc(List<CustodiaMaster> conta, CancellationToken cancellationToken)
+    public async Task AtualizarResiduosAysnc(List<CustodiaMaster> custodias, CancellationToken cancellationToken)
     {
-        _context.Entry(conta).CurrentValues.SetValues(conta);
+        _context.CustodiaMaster.UpdateRange(custodias);
         await _context.SaveChangesAsync(cancellationToken);
     }
 }

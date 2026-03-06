@@ -12,14 +12,12 @@ public class OrdemCompraService : IOrdemCompraService
 
     public OrdemCompraService(IOrdemCompraRepository ordemCompraRepository) => _ordemCompraRepository = ordemCompraRepository;
 
-    public async Task<Result<List<OrdemCompraDto>>> EmitirOrdensDeCompraAsync(List<OrdemCompraDto> ordensCompraDto, CancellationToken cancellationToken)
+    public async Task<Result<List<OrdemCompraDto>>> RegistrarOrdensDeCompraAsync(List<OrdemCompraDto> ordensCompraDto, CancellationToken cancellationToken)
     {
         if (!ordensCompraDto.Any())
             return new ApplicationException("Pelo menos uma ordem de compra deve ser informada para registro");
 
-        var ordensCompra = ordensCompraDto
-            .Where(oc => oc.QuantidadeTotal > 1)
-            .Select(oc => new OrdemCompra(0, oc.Ticker, oc.QuantidadeLotePadrao, oc.QuantidadeTotal, oc.PrecoExecucao, DateTime.Now)).ToList();
+        var ordensCompra = EmitirOrdensDeCompra(ordensCompraDto);
 
         var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensDeCompra(ordensCompra, cancellationToken);
 
@@ -27,11 +25,13 @@ public class OrdemCompraService : IOrdemCompraService
         {
             Id = oc.Id,
             Ticker = oc.Ticker,
-            QuantidadeTotal = oc.Quantidade,
-            PrecoExecucao = oc.PrecoExecucao,
-            QuantidadeLotePadrao = oc.QuantidadeLotePadrao
+            QuantidadeCompra = oc.Quantidade,
+            PrecoExecucao = oc.PrecoExecucao
         }).ToList();
 
         return retorno;
     }
+
+    public List<OrdemCompra> EmitirOrdensDeCompra(List<OrdemCompraDto> ordensCompraDto)
+        => ordensCompraDto.Select(ordem => new OrdemCompra(0, ordem.Ticker, ordem.QuantidadeCompra / 100, ordem.QuantidadeCompra, ordem.PrecoExecucao, DateTime.Now)).ToList();
 }

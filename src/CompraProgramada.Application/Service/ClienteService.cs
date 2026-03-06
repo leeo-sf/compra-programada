@@ -103,6 +103,7 @@ public class ClienteService : IClienteService
                     Id = cf.Id,
                     ContaGraficaId = cf.ContaGraficaId,
                     Ticker = cf.Ticker ?? string.Empty,
+                    PrecoMedio = cf.PrecoMedio,
                     Quantidade = cf.Quantidade
                 }).ToList()
             }
