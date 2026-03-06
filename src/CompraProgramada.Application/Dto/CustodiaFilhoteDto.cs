@@ -1,10 +1,8 @@
 ﻿namespace CompraProgramada.Application.Dto;
 
-public class CustodiaFilhoteDto
-{
-    public required int Id { get; set; }
-    public required int ContaGraficaId { get; set; }
-    public required string Ticker { get; set; }
-    public required decimal PrecoMedio { get; set; }
-    public required int Quantidade { get; set; }
-}
+public record CustodiaFilhoteDto(
+    int Id,
+    int ContaGraficaId,
+    string Ticker,
+    decimal PrecoMedio,
+    int Quantidade);

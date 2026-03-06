@@ -2,6 +2,7 @@
 using CompraProgramada.Application.Exceptions;
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Request;
+using CompraProgramada.Application.Response;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using OperationResult;
@@ -14,6 +15,7 @@ public class ClienteService : IClienteService
     private readonly IClienteRepository _clienteRepository;
     private readonly IContaGraficaService _contaService;
     private readonly ICestaRecomendadaService _cestaRecomendadaService;
+    private readonly ICustodiaFilhoteService _custodiaFilhoteService;
     private const string VALOR_MENSAL_MINIMO_CODIGO = "VALOR_MENSAL_INVALIDO";
     private const string CPF_CADASTRADO_CODIGO = "CLIENTE_CPF_DUPLICADO";
     private const string CLIENTE_NAO_ENCONTRADO_CODIGO = "CLIENTE_NAO_ENCONTRADO";
@@ -22,11 +24,13 @@ public class ClienteService : IClienteService
 
     public ClienteService(IClienteRepository clienteRepository,
         IContaGraficaService contaService,
-        ICestaRecomendadaService cestaRecomendadaService)
+        ICestaRecomendadaService cestaRecomendadaService,
+        ICustodiaFilhoteService custodiaFilhoteService)
     {
         _clienteRepository = clienteRepository;
         _contaService = contaService;
         _cestaRecomendadaService = cestaRecomendadaService;
+        _custodiaFilhoteService = custodiaFilhoteService;
     }
 
     public async Task<Result<List<ClienteDto>>> ObtemClientesAtivoAsync(CancellationToken cancellationToken)
@@ -117,6 +121,24 @@ public class ClienteService : IClienteService
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, dadosAtualizadosCliente, cancellationToken);
 
         return GerarClienteDto(clienteAtualizado);
+    }
+
+    public async Task<Result<CarteiraCustodiaResponse>> ConsultarCarteiraAsync(int clienteId, CancellationToken cancellationToken)
+    {
+        var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
+        if (cliente is null)
+            return new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
+
+        var custodiasDto = cliente.ContaGrafica!.CustodiaFilhotes
+            .Select(x => new CustodiaFilhoteDto(x.Id, x.ContaGraficaId, x.Ticker!, x.PrecoMedio, x.Quantidade)).ToList();
+
+        var carteiraResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(custodiasDto);
+        if (!carteiraResult.IsSuccess)
+            return new ApplicationException("Falha ao obter detalhes da carteira.");
+
+        var carteiraValue = carteiraResult.Value;
+
+        return new CarteiraCustodiaResponse(cliente.Id, cliente.Nome, cliente.ContaGrafica.NumeroConta, carteiraValue.Resumo, carteiraValue.Ativos);
     }
 
     public ClienteDto GerarClienteDto(Cliente cliente)

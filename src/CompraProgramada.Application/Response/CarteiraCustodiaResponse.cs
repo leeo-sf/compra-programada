@@ -2,12 +2,12 @@
 
 namespace CompraProgramada.Application.Response;
 
-public class CarteiraCustodiaResponse(ClienteDto cliente, ResumoCarteiraDto resumo)
+public record CarteiraCustodiaResponse(
+    int ClienteId,
+    string Nome,
+    string ContaGrafica,
+    ResumoCarteiraDto resumo,
+    List<DetalheAtivoCarteiraDto> Ativos)
 {
-    public int ClienteId { get; } = cliente.ClienteId;
-    public string Nome { get; } = cliente.Nome;
-    public string ContaGrafica = cliente.ContaGrafica.NumeroConta;
-    public DateTime DataConsulta { get; } = DateTime.Now;
-    public ResumoCarteiraDto Resumo { get; } = resumo;
-    public List<DetalheAtivosCarteiraDto> Ativos { get; }
+    public DateTime DataConsulta => DateTime.Now;
 }

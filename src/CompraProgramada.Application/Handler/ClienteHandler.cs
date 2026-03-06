@@ -10,7 +10,8 @@ namespace CompraProgramada.Application.Handler;
 public class ClienteHandle
     : IRequestHandler<AdesaoRequest, Result<AdesaoResponse>>,
         IRequestHandler<SaidaProdutoRequest, Result<SaidaProdutoResponse>>,
-        IRequestHandler<AtualizarValorMensalRequest, Result<AtualizarValorMensalResponse>>
+        IRequestHandler<AtualizarValorMensalRequest, Result<AtualizarValorMensalResponse>>,
+        IRequestHandler<CarteiraCustodiaRequest, Result<CarteiraCustodiaResponse>>
 {
     private readonly ILogger<ClienteHandle> _logger;
     private readonly IClienteService _clienteService;
@@ -101,5 +102,20 @@ public class ClienteHandle
             ValorMensalAnterior = cliente.ValorAnterior,
             ValorMensalNovo = cliente.ValorMensal
         };
+    }
+
+    public async Task<Result<CarteiraCustodiaResponse>> Handle(CarteiraCustodiaRequest request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Cliente solicitando consulta da carteira: {ClienteId}", request);
+
+        var carteiraResult = await _clienteService.ConsultarCarteiraAsync(request.ClienteId, cancellationToken);
+
+        if (!carteiraResult.IsSuccess)
+        {
+            _logger.LogError("Ocorreu um erro na consulta da carteira. {Error}", carteiraResult.Exception);
+            return carteiraResult.Exception;
+        }
+
+        return carteiraResult.Value;
     }
 }
