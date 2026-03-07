@@ -18,6 +18,18 @@ public static class AppConfiguration
 {
     public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFront",
+                policy =>
+                {
+                    var url = configuration.GetSection("Cors:AppUrl").Get<string>() ?? "";
+                    policy.WithOrigins(url)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+        });
+
         services.AddControllers()
             .AddJsonOptions(options =>
             {
