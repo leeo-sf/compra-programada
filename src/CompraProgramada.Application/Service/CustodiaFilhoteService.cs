@@ -34,13 +34,11 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
         {
             CustodiaFilhotes = c.CustodiaFilhotes!
                 .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList(),
-            HistoricoComprar = c.HistoricoCompra!
-                .Select(hc => new HistoricoCompra(hc.Id, hc.Data, hc.Valor, hc.ContaGraficaId)).ToList(),
+            HistoricoCompra = c.HistoricoCompra!
+                .Select(hc => HistoricoCompra.RegistrarHistorico(c.Id, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte)).ToList(),
         }).ToList();
 
         var custodias = contasCustodias.SelectMany(c => c.CustodiaFilhotes).ToList();
-
-        var historicoCompra = contasCustodias.SelectMany(c => c.HistoricoComprar).ToList();
 
         var custodiasSalvas = await _custodiaFilhoteRepository.AtualizarCustodiasAsync(custodias, cancellationToken);
 
@@ -60,7 +58,7 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
             return new ErroMapeadoException("Falha ao obter cotações do ativo na B3", "COTACOES_FECHAMENTO");
 
         decimal valorTotalInvestido = 0;
-        decimal valorAtualCarteira = 0;
+        decimal valorTotalAtualCarteira = 0;
         decimal plTotal = 0;
 
         foreach (var custodia in custodias)
@@ -73,33 +71,63 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
 
             plTotal += plAtivo;
             valorTotalInvestido += valorInvestido;
-            valorAtualCarteira += valorAtual;
+            valorTotalAtualCarteira += valorAtual;
         }
 
-        var rentabilidadePercentual = ((valorAtualCarteira / valorTotalInvestido) - 1) * 100;
+        var rentabilidadePercentual = ((valorTotalAtualCarteira / valorTotalInvestido) - 1) * 100;
 
+        var resumo = new ResumoCarteiraDto(valorTotalInvestido, valorTotalAtualCarteira, plTotal, Math.Round(rentabilidadePercentual, 2));
+
+        var detalhesResult = ObterDetalhesDaCerteira(custodias, cotacoesFechamentoCesta.Value, valorTotalAtualCarteira);
+
+        return new CarteiraDto(resumo, detalhesResult);
+    }
+
+    public Task<Result<List<CarteiraDto>>> ObterDetalhesEvolucaoDaCertira(ContaGrafica custodias, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    private List<DetalheAtivoCarteiraDto> ObterDetalhesDaCerteira(List<CustodiaFilhoteDto> custodias, CotacaoDto cotacoesFechamentoCesta, decimal valorTotalCarteira)
+    {
         var detalhesAtivos = custodias
             .Select(custodia =>
-        {
-            var fechamentoAtivo = cotacoesFechamentoCesta.Value.Itens.FirstOrDefault(x => x.Ticker == custodia.Ticker)!;
-            var valorInvestido = custodia.Quantidade * custodia.PrecoMedio;
-            var valorAtual = custodia.Quantidade * fechamentoAtivo.PrecoFechamento;
-            var pl = (fechamentoAtivo.PrecoFechamento - custodia.PrecoMedio) * custodia.Quantidade;
-            var plPercentual = valorAtual < 1 ? 0 : ((valorAtual / valorInvestido) - 1) * 100;
-            var composicaoCarteira = valorAtual < 1 ? 0 : (valorAtual / valorAtualCarteira) * 100;
+            {
+                var fechamentoAtivo = cotacoesFechamentoCesta.Itens.FirstOrDefault(x => x.Ticker == custodia.Ticker)!;
 
-            return new DetalheAtivoCarteiraDto(
-                custodia.Ticker,
-                custodia.Quantidade,
-                custodia.PrecoMedio,
-                fechamentoAtivo.PrecoFechamento,
-                valorAtual,
-                pl,
-                Math.Round(plPercentual, 2),
-                Math.Round(composicaoCarteira, 2));
-        }).ToList();
+                var valorInvestido = custodia.Quantidade * custodia.PrecoMedio;
+                var valorAtual = custodia.Quantidade * fechamentoAtivo.PrecoFechamento;
+                var pl = (fechamentoAtivo.PrecoFechamento - custodia.PrecoMedio) * custodia.Quantidade;
+                var plPercentual = valorAtual < 1 ? 0 : ((valorAtual / valorInvestido) - 1) * 100;
+                var composicaoCarteira = valorAtual < 1 ? 0 : (valorAtual / valorTotalCarteira) * 100;
 
-        return new CarteiraDto(
-            new ResumoCarteiraDto(valorTotalInvestido, valorAtualCarteira, plTotal, Math.Round(rentabilidadePercentual, 2)), detalhesAtivos);
+                return new DetalheAtivoCarteiraDto(
+                    custodia.Ticker,
+                    custodia.Quantidade,
+                    custodia.PrecoMedio,
+                    fechamentoAtivo.PrecoFechamento,
+                    valorAtual,
+                    pl,
+                    Math.Round(plPercentual, 2),
+                    Math.Round(composicaoCarteira, 2));
+            }).ToList();
+
+        return detalhesAtivos;
+    }
+
+    public Task<Result<List<DetalheAtivoCarteiraDto>>> ObterDetalhesEvolucaoDaCertira(ContaGraficaDto conta, CancellationToken cancellationToken)
+    {
+        var historicoAportes = new List<HistoricoAporteDto>();
+        var comprasOrdenadaPorData = conta.HistoricoCompra!
+            .OrderBy(x => x.Data!.Value).ToList()
+            .Select(g => new HistoricoAporteDto(
+                0,
+                g.Data!.Value,
+                ""
+            )).ToList();
+
+        
+
+        throw new NotImplementedException();
     }
 }

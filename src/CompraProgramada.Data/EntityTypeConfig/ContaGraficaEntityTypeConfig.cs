@@ -15,7 +15,6 @@ internal class ContaGraficaEntityTypeConfig : IEntityTypeConfiguration<ContaGraf
         builder.Property(x => x.DataCriacao).HasColumnName("data_criacao");
         builder.Property(x => x.Tipo).HasColumnName("tipo").HasComment("tipo conta");
         builder.HasMany(x => x.CustodiaFilhotes).WithOne(x => x.ContaGrafica).HasForeignKey(x => x.ContaGraficaId);
-        builder.HasMany(x => x.HistoricoComprar).WithOne(x => x.ContaGrafica).HasForeignKey(x => x.ContaGraficaId);
-        builder.HasMany(x => x.EvolucaoCarteira).WithOne(x => x.ContaGrafica).HasForeignKey(x => x.ContaGraficaId);
+        builder.HasMany(x => x.HistoricoCompra).WithOne(x => x.ContaGrafica).HasForeignKey(x => x.ContaGraficaId);
     }
 }

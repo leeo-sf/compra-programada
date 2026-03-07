@@ -38,9 +38,7 @@ public class ClienteRepository : IClienteRepository
             .Include(x => x.ContaGrafica)
                 .ThenInclude(conta => conta.CustodiaFilhotes)
             .Include(x => x.ContaGrafica)
-                .ThenInclude(conta => conta.HistoricoComprar)
-            .Include(x => x.ContaGrafica)
-                .ThenInclude(conta => conta.EvolucaoCarteira)
+                .ThenInclude(conta => conta.HistoricoCompra)
             .FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<Cliente> AtualizarClienteAsync(Cliente dadosAntigos, Cliente novosDados, CancellationToken cancellationToken)

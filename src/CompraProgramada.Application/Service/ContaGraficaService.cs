@@ -37,11 +37,7 @@ public class ContaGraficaService : IContaGraficaService
             contaSalva.DataCriacao,
             contaSalva.ClienteId,
             contaSalva.Tipo,
-            contaSalva.HistoricoComprar.Select(hc => new HistoricoCompraDto(
-                hc.Id,
-                hc.Valor,
-                hc.Data,
-                hc.ContaGraficaId)).ToList(),
+            null,
             contaSalva.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
                 cf.Id,
                 cf.ContaGraficaId,
@@ -57,7 +53,7 @@ public class ContaGraficaService : IContaGraficaService
         if (!compras.Any())
             return new ApplicationException("Nenhuma compra informada para registro.");
 
-        var comprarAhRegistrar = compras.Select(hc => new HistoricoCompra(hc.Id, hc.Data, hc.Valor, hc.ContaGraficaId)).ToList();
+        var comprarAhRegistrar = compras.Select(hc => HistoricoCompra.RegistrarHistorico(hc.ContaGraficaId, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte)).ToList();
 
         await _contaGraficaRepository.RegistrarHistoricoCompraAysnc(comprarAhRegistrar, cancellationToken);
 
