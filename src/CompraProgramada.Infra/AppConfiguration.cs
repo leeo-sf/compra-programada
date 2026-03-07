@@ -4,6 +4,7 @@ using CompraProgramada.Application.Service;
 using CompraProgramada.Data;
 using CompraProgramada.Data.Repository;
 using CompraProgramada.Domain.Interface;
+using CompraProgramada.Infra.Converter;
 using Confluent.Kafka;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -17,6 +18,12 @@ public static class AppConfiguration
 {
     public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+            });
+
         services.ConfigurarMediatR();
         services.ConfigurarFluentValidation();
         services.ConfigurarBancoDeDados(configuration);

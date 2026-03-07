@@ -36,6 +36,11 @@ public class ClienteRepository : IClienteRepository
     public async Task<Cliente?> ObterClienteAsync(int id, CancellationToken cancellationToken)
         => await _context.Cliente
             .Include(x => x.ContaGrafica)
+                .ThenInclude(conta => conta.CustodiaFilhotes)
+            .Include(x => x.ContaGrafica)
+                .ThenInclude(conta => conta.HistoricoComprar)
+            .Include(x => x.ContaGrafica)
+                .ThenInclude(conta => conta.EvolucaoCarteira)
             .FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<Cliente> AtualizarClienteAsync(Cliente dadosAntigos, Cliente novosDados, CancellationToken cancellationToken)

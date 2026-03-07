@@ -62,39 +62,31 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
         decimal valorTotalInvestido = 0;
         decimal valorAtualCarteira = 0;
         decimal plTotal = 0;
-        decimal saldoTotalCarteira = 0;
 
         foreach (var custodia in custodias)
         {
             var fechamentoAtivo = cotacoesFechamentoCesta.Value.Itens.FirstOrDefault(x => x.Ticker == custodia.Ticker)!;
 
             var valorInvestido = custodia.Quantidade * custodia.PrecoMedio;
-            var saldoCarteira = custodia.Quantidade * fechamentoAtivo.PrecoFechamento;
+            var valorAtual = custodia.Quantidade * fechamentoAtivo.PrecoFechamento;
             var plAtivo = (fechamentoAtivo.PrecoFechamento - custodia.PrecoMedio) * custodia.Quantidade;
 
             plTotal += plAtivo;
-            saldoTotalCarteira += saldoCarteira;
             valorTotalInvestido += valorInvestido;
-            valorAtualCarteira += custodia.Quantidade + fechamentoAtivo.PrecoFechamento;
+            valorAtualCarteira += valorAtual;
         }
 
-        var rentabilidadePercentual = custodias.Sum(custodia =>
+        var rentabilidadePercentual = ((valorAtualCarteira / valorTotalInvestido) - 1) * 100;
+
+        var detalhesAtivos = custodias
+            .Select(custodia =>
         {
             var fechamentoAtivo = cotacoesFechamentoCesta.Value.Itens.FirstOrDefault(x => x.Ticker == custodia.Ticker)!;
-
             var valorInvestido = custodia.Quantidade * custodia.PrecoMedio;
             var valorAtual = custodia.Quantidade * fechamentoAtivo.PrecoFechamento;
-
-            return (valorAtual / valorInvestido - 1) * 100;
-        });
-
-        var detalhesAtivos = custodias.Select(custodia =>
-        {
-            var fechamentoAtivo = cotacoesFechamentoCesta.Value.Itens.FirstOrDefault(x => x.Ticker == custodia.Ticker)!;
-            var valorAtual = custodia.Quantidade * fechamentoAtivo.PrecoFechamento;
             var pl = (fechamentoAtivo.PrecoFechamento - custodia.PrecoMedio) * custodia.Quantidade;
-            var plPercentual = (custodia.PrecoMedio / fechamentoAtivo.PrecoFechamento - 1) * 100;
-            var composicaoCarteira = valorAtual / valorTotalInvestido * 100;
+            var plPercentual = valorAtual < 1 ? 0 : ((valorAtual / valorInvestido) - 1) * 100;
+            var composicaoCarteira = valorAtual < 1 ? 0 : (valorAtual / valorAtualCarteira) * 100;
 
             return new DetalheAtivoCarteiraDto(
                 custodia.Ticker,
@@ -103,11 +95,11 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
                 fechamentoAtivo.PrecoFechamento,
                 valorAtual,
                 pl,
-                plPercentual,
-                composicaoCarteira);
+                Math.Round(plPercentual, 2),
+                Math.Round(composicaoCarteira, 2));
         }).ToList();
 
         return new CarteiraDto(
-            new ResumoCarteiraDto(valorTotalInvestido, valorAtualCarteira, plTotal, rentabilidadePercentual), detalhesAtivos);
+            new ResumoCarteiraDto(valorTotalInvestido, valorAtualCarteira, plTotal, Math.Round(rentabilidadePercentual, 2)), detalhesAtivos);
     }
 }

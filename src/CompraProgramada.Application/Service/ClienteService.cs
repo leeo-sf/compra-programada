@@ -133,7 +133,7 @@ public class ClienteService : IClienteService
 
         var carteiraValue = carteiraResult.Value;
 
-        return new CarteiraCustodiaResponse(cliente.Id, cliente.Nome, cliente.ContaGrafica.NumeroConta, carteiraValue.Resumo, carteiraValue.Ativos);
+        return new CarteiraCustodiaResponse(cliente.Id, cliente.Nome, cliente.ContaGrafica.NumeroConta, DateTime.Now, carteiraValue.Resumo, carteiraValue.Ativos);
     }
 
     public ClienteDto GerarClienteDto(Cliente cliente)

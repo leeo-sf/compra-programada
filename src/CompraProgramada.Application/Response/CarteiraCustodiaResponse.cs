@@ -6,8 +6,6 @@ public record CarteiraCustodiaResponse(
     int ClienteId,
     string Nome,
     string ContaGrafica,
+    DateTime DataConsulta,
     ResumoCarteiraDto resumo,
-    List<DetalheAtivoCarteiraDto> Ativos)
-{
-    public DateTime DataConsulta => DateTime.Now;
-}
+    List<DetalheAtivoCarteiraDto> Ativos);
