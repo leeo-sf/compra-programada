@@ -3,7 +3,7 @@
 public record ContaGraficaDto(
     int Id,
     string NumeroConta,
-    DateTime? DataCriacao,
+    DateTime DataCriacao,
     int ClienteId,
     string Tipo,
     List<HistoricoCompraDto>? HistoricoCompra,

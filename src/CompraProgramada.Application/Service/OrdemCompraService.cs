@@ -17,21 +17,20 @@ public class OrdemCompraService : IOrdemCompraService
         if (!ordensCompraDto.Any())
             return new ApplicationException("Pelo menos uma ordem de compra deve ser informada para registro");
 
-        var ordensCompra = EmitirOrdensDeCompra(ordensCompraDto);
+        var ordensCompra = ordensCompraDto
+            .Select(oc => OrdemCompra.GerarOrdemCompra(oc.Ticker, oc.QuantidadeTotal, oc.PrecoUnitario, oc.ValorTotal,
+                oc.Detalhes.Select(d => OrdemCompraDetalhe.GerarDetalhes(d.Tipo, d.Ticker, d.Quantidade, 0)).ToList())).ToList();
 
         var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensDeCompra(ordensCompra, cancellationToken);
 
-        var retorno = ordensCompraEmitidas.Select(oc => new OrdemCompraDto
-        {
-            Id = oc.Id,
-            Ticker = oc.Ticker,
-            QuantidadeCompra = oc.Quantidade,
-            PrecoExecucao = oc.PrecoExecucao
-        }).ToList();
+        var result = ordensCompraEmitidas
+            .Select(oc => new OrdemCompraDto(
+                oc.Id,
+                oc.Ticker,
+                oc.QuantidadeTotal,
+                oc.Detalhes.Select(d => new DetalheOrdemCompraDto(d.Tipo, d.Ticker, d.Quantidade)).ToList(),
+                oc.PrecoUnitario)).ToList();
 
-        return retorno;
+        return result;
     }
-
-    public List<OrdemCompra> EmitirOrdensDeCompra(List<OrdemCompraDto> ordensCompraDto)
-        => ordensCompraDto.Select(ordem => new OrdemCompra(0, ordem.Ticker, ordem.QuantidadeCompra / 100, ordem.QuantidadeCompra, ordem.PrecoExecucao, DateTime.Now)).ToList();
 }

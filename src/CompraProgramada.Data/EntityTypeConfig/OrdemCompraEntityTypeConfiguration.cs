@@ -12,9 +12,10 @@ internal class OrdemCompraEntityTypeConfiguration : IEntityTypeConfiguration<Ord
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd().HasColumnName("id").HasComment("identificador");
         builder.Property(x => x.Ticker).IsRequired().HasColumnName("ticker").HasComment("ativo comprado");
-        builder.Property(x => x.QuantidadeLotePadrao).IsRequired().HasDefaultValue(0).HasColumnName("quantidade_lote_padrao").HasComment("quantos multiplos de 100 foram comprados");
-        builder.Property(x => x.Quantidade).IsRequired().HasColumnName("quantidade").HasComment("quantidade total de ativos comprados");
-        builder.Property(x => x.PrecoExecucao).IsRequired().HasColumnName("preco_execucao").HasComment("preço da compra executada");
+        builder.Property(x => x.QuantidadeTotal).IsRequired().HasDefaultValue(0).HasColumnName("quantidade_total").HasComment("quantos total de ativos");
+        builder.Property(x => x.PrecoUnitario).IsRequired().HasColumnName("preco_unitatio").HasComment("preço de fechamento de cada ativo");
+        builder.Property(x => x.ValorTotal).IsRequired().HasColumnName("valor_total").HasComment("valor total da ordem de compra");
         builder.Property(x => x.Data).HasColumnName("data").IsRequired().HasComment("data da compra");
+        builder.HasMany(x => x.Detalhes).WithOne(x => x.OrdemCompra).HasForeignKey(x => x.OrdemCompraId);
     }
 }
