@@ -6,9 +6,12 @@ namespace CompraProgramada.Application.Service;
 public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 {
     private readonly AppConfig _config;
-    private readonly DateTime _dataAtual = DateTime.Now;
+    private DateTime _dataAtual;
 
-    public CalendarioMotorCompraService(AppConfig config) => _config = config;
+    public CalendarioMotorCompraService(AppConfig config) => (_config, _dataAtual) = (config, DateTime.Now);
+    public CalendarioMotorCompraService(AppConfig config, DateTime dataAtual) => (_config, _dataAtual) = (config, dataAtual);
+
+    public void SetDataAtual(DateTime dataAtual) => _dataAtual = dataAtual;
 
     public bool DeveExecutarCompraHoje()
     {

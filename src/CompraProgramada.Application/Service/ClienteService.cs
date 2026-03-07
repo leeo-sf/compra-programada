@@ -68,7 +68,14 @@ public class ClienteService : IClienteService
 
         var contaSalva = await _contaService.GerarContaGraficaAsync(cliente.Id, cancellationToken);
 
-        return GerarClienteDto(cliente);
+        if (contaSalva.IsSuccess)
+        {
+            var contaDto = contaSalva.Value!;
+            var contaDomain = new ContaGrafica(contaDto.Id, contaDto.NumeroConta, contaDto.DataCriacao, clienteSalvo.Id);
+            clienteSalvo = clienteSalvo with { ContaGrafica = contaDomain };
+        }
+
+        return GerarClienteDto(clienteSalvo);
     }
 
     public async Task<Result<int>> QuantidadeAtivosAsync(CancellationToken cancellationToken)
@@ -95,7 +102,7 @@ public class ClienteService : IClienteService
 
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, dadosAtualizadosCliente, cancellationToken);
 
-        return GerarClienteDto(cliente);
+        return GerarClienteDto(clienteAtualizado);
     }
 
     public async Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
@@ -147,24 +154,35 @@ public class ClienteService : IClienteService
             ValorMensal = cliente.ValorMensal,
             Ativo = cliente.Ativo,
             DataAdesao = cliente.DataAdesao,
-            ContaGrafica = new ContaGraficaDto(
-                cliente.ContaGrafica!.Id,
-                cliente.ContaGrafica.NumeroConta,
-                cliente.ContaGrafica.DataCriacao,
-                cliente.Id,
-                cliente.ContaGrafica.Tipo,
-                cliente.ContaGrafica.HistoricoComprar.Select(hc => new HistoricoCompraDto(
-                    hc.Id,
-                    hc.Valor,
-                    hc.Data,
-                    hc.ContaGraficaId)).ToList(),
-                cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
-                    cf.Id,
-                    cf.ContaGraficaId,
-                    cf.Ticker ?? string.Empty,
-                    cf.PrecoMedio,
-                    cf.Quantidade
-                )).ToList()
+            ContaGrafica = (
+                cliente.ContaGrafica is not null
+                ? new ContaGraficaDto(
+                    cliente.ContaGrafica.Id,
+                    cliente.ContaGrafica.NumeroConta,
+                    cliente.ContaGrafica.DataCriacao,
+                    cliente.Id,
+                    cliente.ContaGrafica.Tipo,
+                    cliente.ContaGrafica.HistoricoComprar.Select(hc => new HistoricoCompraDto(
+                        hc.Id,
+                        hc.Valor,
+                        hc.Data,
+                        hc.ContaGraficaId)).ToList(),
+                    cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
+                        cf.Id,
+                        cf.ContaGraficaId,
+                        cf.Ticker ?? string.Empty,
+                        cf.PrecoMedio,
+                        cf.Quantidade
+                    )).ToList()
+                )
+                : new ContaGraficaDto(
+                    0,
+                    string.Empty,
+                    DateTime.UtcNow,
+                    cliente.Id,
+                    string.Empty,
+                    new List<HistoricoCompraDto>(),
+                    new List<CustodiaFilhoteDto>())
             )
         };
 }
