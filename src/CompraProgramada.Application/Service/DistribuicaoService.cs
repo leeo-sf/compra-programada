@@ -13,29 +13,29 @@ public class DistribuicaoService : IDistribuicaoService
     private readonly IDistribuicaoRepository _distribuicaoRepository;
     private readonly ICustodiaMasterService _custodiaMasterService;
     private readonly ICustodiaFilhoteService _custodiaFilhoteService;
-    private readonly IOrdemCompraService _ordemCompraService;
     private readonly ICotacaoService _cotacaoService;
     private readonly ICestaRecomendadaService _cestaService;
     private readonly IPrecoMedioService _precoMedioService;
+    private readonly IContaGraficaService _contaGraficaService;
 
     public DistribuicaoService(ILogger<DistribuicaoService> logger,
         IDistribuicaoRepository distribuicaoRepository,
         ICustodiaMasterService custodiaMasterService,
         ICustodiaFilhoteService custodiaFilhoteService,
-        IOrdemCompraService ordemCompraService,
         ICotahistParserService cotahistParser,
         ICotacaoService cotacaoService,
         ICestaRecomendadaService cestaService,
-        IPrecoMedioService precoMedioService)
+        IPrecoMedioService precoMedioService,
+        IContaGraficaService contaGraficaService)
     {
         _logger = logger;
         _distribuicaoRepository = distribuicaoRepository;
         _custodiaMasterService = custodiaMasterService;
         _custodiaFilhoteService = custodiaFilhoteService;
-        _ordemCompraService = ordemCompraService;
         _cotacaoService = cotacaoService;
         _cestaService = cestaService;
         _precoMedioService = precoMedioService;
+        _contaGraficaService = contaGraficaService;
     }
 
     public async Task<(List<GrupoAtivoCompraDto>, List<OrdemCompraDto>)> RealizaDistribuicaoGrupoAtivo(List<ClienteDto> clientesAtivos, decimal totalConsolidado, CancellationToken cancellationToken)
@@ -111,12 +111,12 @@ public class DistribuicaoService : IDistribuicaoService
         var distribuicao = new List<DistribuicaoDto>();
         var contasClientesAtualizadas = new List<ContaGraficaDto>();
 
-        foreach (var cliente in clientes)
+        foreach (var cliente in clientes.OrderByDescending(x => x.ClienteId))
         {
             foreach (var ativo in grupoAtivoCompra)
             {
                 var contaCliente = cliente.ContaGrafica!;
-                var custodiaAtualCliente = contaCliente.CustodiaFilhote?.FirstOrDefault(
+                var custodiaAtualCliente = contaCliente.CustodiaFilhotes?.FirstOrDefault(
                     x => x.Ticker == ativo.Ticker && x.ContaGraficaId == contaCliente.Id);
 
                 var quantidadeNovasAcoes = (int)Math.Truncate(ativo.Quantidade * (cliente.ValorAporte / totalConsolidado));
@@ -133,18 +133,27 @@ public class DistribuicaoService : IDistribuicaoService
                     custodiaAtualCliente.Quantidade + quantidadeNovasAcoes
                 );
 
+                var historicoCompra = new HistoricoCompraDto(
+                    0,
+                    cliente.ValorAporte,
+                    DateOnly.FromDateTime(DateTime.Now),
+                    contaCliente.Id);
+
                 if (custodiaAhSerAtualizada is null)
-                    contasClientesAtualizadas.Add(new ContaGraficaDto
-                    {
-                        Id = contaCliente.Id,
-                        NumeroConta = contaCliente.NumeroConta,
-                        ClienteId = contaCliente.ClienteId,
-                        Tipo = contaCliente.Tipo,
-                        DataCriacao = contaCliente.DataCriacao,
-                        CustodiaFilhote = new List<CustodiaFilhoteDto>() { custodiaClienteAtualizada }
-                    });
+                    contasClientesAtualizadas.Add(new ContaGraficaDto(
+                        contaCliente.Id,
+                        contaCliente.NumeroConta,
+                        DateTime.Now,
+                        contaCliente.ClienteId,
+                        contaCliente.Tipo,
+                        new List<HistoricoCompraDto>() { historicoCompra },
+                        new List<CustodiaFilhoteDto>() { custodiaClienteAtualizada }
+                    ));
                 else
-                    contasClientesAtualizadas.Find(x => x.Id == contaCliente.Id)?.CustodiaFilhote?.Add(custodiaClienteAtualizada);
+                {
+                    contasClientesAtualizadas.Find(x => x.Id == contaCliente.Id)?.CustodiaFilhotes?.Add(custodiaClienteAtualizada);
+                    contasClientesAtualizadas.Find(x => x.Id == contaCliente.Id)?.HistoricoCompra?.Add(historicoCompra);
+                }
 
                 distribuicao.Add(new DistribuicaoDto
                 {
@@ -162,7 +171,11 @@ public class DistribuicaoService : IDistribuicaoService
         }
 
         await _custodiaFilhoteService.AtualizarCustodiaFilhoteContasAsync(contasClientesAtualizadas, cancellationToken);
-        _logger.LogInformation("Salvando custodias filhotes na base de dados.");
+        _logger.LogInformation("Atualizando custodias das contas ativas na base de dados.");
+
+        var historicosCompra = contasClientesAtualizadas.SelectMany(x => x.HistoricoCompra!).ToList();
+        await _contaGraficaService.RegistrarComprasAsync(historicosCompra, cancellationToken);
+        _logger.LogInformation("Registrado o histórico de compras dos clientes na base.");
 
         return distribuicao;
     }

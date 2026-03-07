@@ -2,6 +2,7 @@
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using Confluent.Kafka;
 using OperationResult;
 
 namespace CompraProgramada.Application.Service;
@@ -18,48 +19,47 @@ public class ContaGraficaService : IContaGraficaService
         _contaGraficaRepository = contaGraficaRepository;
     }
 
-    public async Task<Result<ContaGraficaDto>> GerarContaGraficaAsync(ContaGraficaDto contaGraficaDto, CancellationToken cancellationToken)
+    public async Task<Result<ContaGraficaDto>> GerarContaGraficaAsync(int clienteId, CancellationToken cancellationToken)
     {
         var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
 
         var custodiaConta = cestaVigente.Value!.Itens
             .Select(x => new CustodiaFilhote(0, 0, x.Ticker)).ToList();
 
-        var numeroConta = GerarNumeroConta(contaGraficaDto.ClienteId, ehContaGrafica: true);
-        var novaConta = new ContaGrafica(0, numeroConta, DateTime.Now, contaGraficaDto.ClienteId) { CustodiaFilhotes = custodiaConta };
+        var numeroConta = GerarNumeroConta(clienteId, ehContaGrafica: true);
+        var novaConta = new ContaGrafica(0, numeroConta, DateTime.Now, clienteId) { CustodiaFilhotes = custodiaConta };
 
         var contaSalva = await _contaGraficaRepository.CriarAsync(novaConta, cancellationToken);
 
-        return new ContaGraficaDto
-        {
-            Id = contaSalva.Id,
-            NumeroConta = contaSalva.NumeroConta,
-            DataCriacao = contaSalva.DataCriacao,
-            ClienteId = contaSalva.ClienteId,
-            Tipo = contaSalva.Tipo,
-            CustodiaFilhote = contaSalva.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
+        return new ContaGraficaDto(
+            contaSalva.Id,
+            contaSalva.NumeroConta,
+            contaSalva.DataCriacao,
+            contaSalva.ClienteId,
+            contaSalva.Tipo,
+            contaSalva.HistoricoComprar.Select(hc => new HistoricoCompraDto(
+                hc.Id,
+                hc.Valor,
+                hc.Data,
+                hc.ContaGraficaId)).ToList(),
+            contaSalva.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
                 cf.Id,
                 cf.ContaGraficaId,
                 cf.Ticker ?? string.Empty,
                 cf.PrecoMedio,
                 cf.Quantidade
             )).ToList()
-        };
+        );
     }
 
-    public async Task<Result> AlterarCustodiasAsync(List<ContaGraficaDto> contasDto, CancellationToken cancellationToken)
+    public async Task<Result> RegistrarComprasAsync(List<HistoricoCompraDto> compras, CancellationToken cancellationToken)
     {
-        if (!contasDto.Any())
-            return new ApplicationException("Nenhuma conta foi informada.");
+        if (!compras.Any())
+            return new ApplicationException("Nenhuma compra informada para registro.");
 
-        var contas = contasDto
-            .Select(c => new ContaGrafica(c.Id, c.NumeroConta, c.DataCriacao, c.ClienteId)
-            {
-                CustodiaFilhotes = c.CustodiaFilhote?
-                    .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.Quantidade)).ToList() ?? []
-            }).ToList();
+        var comprarAhRegistrar = compras.Select(hc => new HistoricoCompra(hc.Id, hc.Data, hc.Valor, hc.ContaGraficaId)).ToList();
 
-        await _contaGraficaRepository.AtualizarCustodiasAysnc(contas, cancellationToken);
+        await _contaGraficaRepository.RegistrarHistoricoCompraAysnc(comprarAhRegistrar, cancellationToken);
 
         return Result.Success();
     }

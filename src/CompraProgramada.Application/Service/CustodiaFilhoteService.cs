@@ -32,11 +32,15 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
             c.ClienteId
         )
         {
-            CustodiaFilhotes = c.CustodiaFilhote!
-                .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList()
+            CustodiaFilhotes = c.CustodiaFilhotes!
+                .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList(),
+            HistoricoComprar = c.HistoricoCompra!
+                .Select(hc => new HistoricoCompra(hc.Id, hc.Data, hc.Valor, hc.ContaGraficaId)).ToList(),
         }).ToList();
 
         var custodias = contasCustodias.SelectMany(c => c.CustodiaFilhotes).ToList();
+
+        var historicoCompra = contasCustodias.SelectMany(c => c.HistoricoComprar).ToList();
 
         var custodiasSalvas = await _custodiaFilhoteRepository.AtualizarCustodiasAsync(custodias, cancellationToken);
 

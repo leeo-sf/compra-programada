@@ -5,5 +5,5 @@ namespace CompraProgramada.Domain.Interface;
 public interface IContaGraficaRepository
 {
     Task<ContaGrafica> CriarAsync(ContaGrafica conta, CancellationToken cancellationToken);
-    Task AtualizarCustodiasAysnc(List<ContaGrafica> contas, CancellationToken cancellationToken);
+    Task RegistrarHistoricoCompraAysnc(List<HistoricoCompra> compras, CancellationToken cancellationToken);
 }

@@ -66,12 +66,7 @@ public class ClienteService : IClienteService
 
         var clienteSalvo = await _clienteRepository.CriarAsync(cliente, cancellationToken);
 
-        var contaSalva = await _contaService.GerarContaGraficaAsync(new ContaGraficaDto
-            {
-                Id = 0,
-                DataCriacao = DateTime.Now,
-                ClienteId = clienteSalvo.Id
-            }, cancellationToken);
+        var contaSalva = await _contaService.GerarContaGraficaAsync(cliente.Id, cancellationToken);
 
         return GerarClienteDto(cliente);
     }
@@ -152,20 +147,24 @@ public class ClienteService : IClienteService
             ValorMensal = cliente.ValorMensal,
             Ativo = cliente.Ativo,
             DataAdesao = cliente.DataAdesao,
-            ContaGrafica = new ContaGraficaDto
-            {
-                Id = cliente.ContaGrafica!.Id,
-                NumeroConta = cliente.ContaGrafica.NumeroConta,
-                DataCriacao = cliente.ContaGrafica.DataCriacao,
-                ClienteId = cliente.ContaGrafica.Id,
-                Tipo = cliente.ContaGrafica.Tipo,
-                CustodiaFilhote = cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
+            ContaGrafica = new ContaGraficaDto(
+                cliente.ContaGrafica!.Id,
+                cliente.ContaGrafica.NumeroConta,
+                cliente.ContaGrafica.DataCriacao,
+                cliente.Id,
+                cliente.ContaGrafica.Tipo,
+                cliente.ContaGrafica.HistoricoComprar.Select(hc => new HistoricoCompraDto(
+                    hc.Id,
+                    hc.Valor,
+                    hc.Data,
+                    hc.ContaGraficaId)).ToList(),
+                cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
                     cf.Id,
                     cf.ContaGraficaId,
                     cf.Ticker ?? string.Empty,
                     cf.PrecoMedio,
                     cf.Quantidade
                 )).ToList()
-            }
+            )
         };
 }

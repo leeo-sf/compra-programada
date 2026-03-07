@@ -21,4 +21,10 @@ public class ContaGraficaRepository : IContaGraficaRepository
         _context.ContaGrafica.UpdateRange(contas);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task RegistrarHistoricoCompraAysnc(List<HistoricoCompra> compras, CancellationToken cancellationToken)
+    {
+        _context.HistoricoCompra.AddRange(compras);
+        await _context.SaveChangesAsync();
+    }
 }

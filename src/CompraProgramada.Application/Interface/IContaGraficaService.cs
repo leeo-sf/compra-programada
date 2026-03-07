@@ -5,6 +5,6 @@ namespace CompraProgramada.Application.Interface;
 
 public interface IContaGraficaService
 {
-    Task<Result> AlterarCustodiasAsync(List<ContaGraficaDto> contas, CancellationToken cancellationToken);
-    Task<Result<ContaGraficaDto>> GerarContaGraficaAsync(ContaGraficaDto clienteDto, CancellationToken cancellationToken);
+    Task<Result<ContaGraficaDto>> GerarContaGraficaAsync(int clienteId, CancellationToken cancellationToken);
+    Task<Result> RegistrarComprasAsync(List<HistoricoCompraDto> compras, CancellationToken cancellationToken);
 }
