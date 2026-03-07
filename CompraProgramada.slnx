@@ -7,4 +7,7 @@
     <Project Path="src/CompraProgramada.Infra/CompraProgramada.Infra.csproj" />
     <Project Path="src/CompraProgramada.Worker/CompraProgramada.Worker.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CompraProgramada.Api.Tests/CompraProgramada.Api.Tests.csproj" />
+  </Folder>
 </Solution>
