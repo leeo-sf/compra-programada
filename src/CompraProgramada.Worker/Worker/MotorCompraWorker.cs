@@ -8,22 +8,19 @@ public class MotorCompraWorker : BackgroundService
     private readonly ILogger<MotorCompraWorker> _logger;
     private readonly AppConfig _appConfig;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ICotahistParserService _cotahistParser;
 
     public MotorCompraWorker(ILogger<MotorCompraWorker> logger,
         AppConfig appConfig,
-        IServiceScopeFactory serviceScopeFactory,
-        ICotahistParserService cotahistParser)
+        IServiceScopeFactory serviceScopeFactory)
     {
         _logger = logger;
         _appConfig = appConfig;
         _serviceScopeFactory = serviceScopeFactory;
-        _cotahistParser = cotahistParser;
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var periodo = TimeSpan.FromHours(_appConfig.MotorCompra?.TempoEmHoraAhCadaExecucao ?? 2);
+        //var periodo = TimeSpan.FromHours(_appConfig.MotorCompra?.TempoEmHoraAhCadaExecucao ?? 1);
         var timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
@@ -36,7 +33,7 @@ public class MotorCompraWorker : BackgroundService
 
                 var motorCompraService = scope.ServiceProvider.GetRequiredService<ICompraService>();
 
-                await motorCompraService.ExecutarCompraAsync(stoppingToken);
+                await motorCompraService.ExecutarCompraAsync(null, stoppingToken);
             }
             catch (Exception ex)
             {

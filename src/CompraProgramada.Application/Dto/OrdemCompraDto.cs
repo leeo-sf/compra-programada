@@ -6,4 +6,5 @@ public class OrdemCompraDto
     public required string Ticker { get; init; }
     public required int QuantidadeCompra { get; init; }
     public required decimal PrecoExecucao { get; init; }
+    public required DateTime Data { get; init; }
 }

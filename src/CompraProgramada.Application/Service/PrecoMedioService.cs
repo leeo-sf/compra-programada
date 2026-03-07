@@ -8,6 +8,9 @@ public class PrecoMedioService : IPrecoMedioService
 {
     public Result<decimal> CalcularPrecoMedio(PrecoMedioDto custodia)
     {
+        if (custodia.QuantidadeNovosAtivos == 0)
+            return 0;
+
         decimal precoMedio = 0;
         var valorCompraAnterior = custodia.QuantidadeAtivosAnterior * custodia.PrecoMedioAnterior;
         var valorCompraAtual = custodia.QuantidadeNovosAtivos * custodia.PrecoFechamentoAtivo;
