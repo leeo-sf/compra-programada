@@ -38,7 +38,7 @@ public class DistribuicaoService : IDistribuicaoService
         _contaGraficaService = contaGraficaService;
     }
 
-    public async Task<(List<GrupoAtivoCompraDto>, List<OrdemCompraDto>)> RealizaDistribuicaoGrupoAtivo(List<ClienteDto> clientesAtivos, decimal totalConsolidado, CancellationToken cancellationToken)
+    public async Task<(List<GrupoAtivoCompraDto>, List<OrdemCompraDto>)> RealizaDistribuicaoGrupoAtivo(List<ClienteDto> clientesAtivos, decimal totalConsolidado, DateTime dataExeucao,  CancellationToken cancellationToken)
     {
         var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
         if (!cestaVigente.IsSuccess)
@@ -94,7 +94,8 @@ public class DistribuicaoService : IDistribuicaoService
                 Id = 0,
                 PrecoExecucao = fechamento.PrecoFechamento,
                 QuantidadeCompra = quantidadeDeCompraAtivo,
-                Ticker = fechamento.Ticker
+                Ticker = fechamento.Ticker,
+                Data = dataExeucao
             });
         }
 
@@ -105,7 +106,7 @@ public class DistribuicaoService : IDistribuicaoService
         return (grupoAtivosAhDistribuir, ordensCompra);
     }
 
-    public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasPorAtivo(List<ClienteDto> clientes, List<GrupoAtivoCompraDto> grupoAtivoCompra, decimal totalConsolidado, CancellationToken cancellationToken)
+    public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasPorAtivo(List<ClienteDto> clientes, List<GrupoAtivoCompraDto> grupoAtivoCompra, decimal totalConsolidado, DateTime dataExeucao, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando processo de distribuição dos ativos para os clientes. Grupo: {Ativos}", grupoAtivoCompra);
         var distribuicao = new List<DistribuicaoDto>();
@@ -136,7 +137,7 @@ public class DistribuicaoService : IDistribuicaoService
                 var historicoCompra = new HistoricoCompraDto(
                     0,
                     cliente.ValorAporte,
-                    DateOnly.FromDateTime(DateTime.Now),
+                    DateOnly.FromDateTime(dataExeucao),
                     contaCliente.Id);
 
                 if (custodiaAhSerAtualizada is null)
@@ -165,7 +166,7 @@ public class DistribuicaoService : IDistribuicaoService
                     QuantidadeAlocada = quantidadeNovasAcoes,
                     ValorOperacao = quantidadeNovasAcoes * ativo.PrecoFechamento,
                     ContaGrafica = contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id)!,
-                    Data = DateTime.Now
+                    Data = dataExeucao
                 });
             }
         }

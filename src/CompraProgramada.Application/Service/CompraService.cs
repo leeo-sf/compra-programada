@@ -47,6 +47,8 @@ public class CompraService : ICompraService
             }
         }
 
+        var dataExecucao = date ?? DateTime.Now;
+
         var clientesAtivos = await _clienteService.ObtemClientesAtivoAsync(cancellationToken);
         if (!clientesAtivos.IsSuccess)
             throw clientesAtivos.Exception;
@@ -61,7 +63,7 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 
-        var (grupoAtivosDistribuido, ordensCompraEmitidas) = await _distribuicaoService.RealizaDistribuicaoGrupoAtivo(clientesAtivos.Value, valorTotalConsolidado, cancellationToken);
+        var (grupoAtivosDistribuido, ordensCompraEmitidas) = await _distribuicaoService.RealizaDistribuicaoGrupoAtivo(clientesAtivos.Value, valorTotalConsolidado, dataExecucao, cancellationToken);
 
         // DEFINIR LOTE
 
@@ -73,7 +75,7 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Ordens de compra geradas e salvas: {OrdensCompra}", ordensCompraRegistradas.Value);
 
-        var distribuicaoResult = await _distribuicaoService.DistribuirCustodiasPorAtivo(clientesAtivos.Value, grupoAtivosDistribuido, valorTotalConsolidado, cancellationToken);
+        var distribuicaoResult = await _distribuicaoService.DistribuirCustodiasPorAtivo(clientesAtivos.Value, grupoAtivosDistribuido, valorTotalConsolidado, dataExecucao, cancellationToken);
         if (!distribuicaoResult.IsSuccess)
             throw distribuicaoResult.Exception;
 
@@ -89,7 +91,6 @@ public class CompraService : ICompraService
 
         await _impostoRendaService.CalcularIRDedoDuro(distribuicaoResult.Value, cancellationToken);
 
-        var dataExecucao = DateTime.Now;
         var dataReferencia = _calendarioMotorCompraService.ObterDataReferenciaExecucao(dataExecucao);
         await _historicoExecucaoService.SalvarExecucaoAsync(new ExecucaoMotorCompraDto { DataReferencia = dataReferencia, DataExecucao = dataExecucao }, cancellationToken);
 
