@@ -1,6 +1,7 @@
 ﻿using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
 using Microsoft.Extensions.Logging;
+using OperationResult;
 
 namespace CompraProgramada.Application.Service;
 
@@ -36,7 +37,7 @@ public class CompraService : ICompraService
 
     public async Task ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
     {
-        if (date is null)
+        /*if (date is null)
         {
             var deveExecutarCompraHoje = await _historicoExecucaoService.ExecutarCompraHojeAsync(cancellationToken);
             if (!deveExecutarCompraHoje)
@@ -45,7 +46,7 @@ public class CompraService : ICompraService
                 _logger.LogInformation("MotorCompra não será executado hoje. Próxima data de compra prevista para {DataProximaExecucao}. Encerrando processo.", dataProximaExecucao);
                 return;
             }
-        }
+        }*/
 
         var dataExecucao = date ?? DateTime.Now;
 
@@ -63,22 +64,27 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 
-        var (grupoAtivosDistribuido, ordensCompraEmitidas) = await _distribuicaoService.RealizaDistribuicaoGrupoAtivo(clientesAtivos.Value, valorTotalConsolidado, dataExecucao, cancellationToken);
-
-        // DEFINIR LOTE
+        var (grupoAtivosDistribuido, fechamentos) = await _distribuicaoService.RealizaDistribuicaoGrupoAtivo(clientesAtivos.Value, valorTotalConsolidado, dataExecucao, cancellationToken);
 
         _logger.LogInformation("Calculo de quantidade de realizados ativos a comprar: {Grupos}", grupoAtivosDistribuido);
 
-        var ordensCompraRegistradas = await _ordemCompraService.RegistrarOrdensDeCompraAsync(ordensCompraEmitidas, cancellationToken);
+        var ordensCompraResult = await SeparacaoLoteDeCompra(fechamentos, dataExecucao, cancellationToken);
+        if (!ordensCompraResult.IsSuccess)
+            throw ordensCompraResult.Exception;
+
+        _logger.LogInformation("Ordens de compra geradas: {OrdensCompra}", ordensCompraResult);
+
+        var ordensCompraRegistradas = await _ordemCompraService.RegistrarOrdensDeCompraAsync(ordensCompraResult.Value, cancellationToken);
         if (!ordensCompraRegistradas.IsSuccess)
             throw ordensCompraRegistradas.Exception;
 
-        _logger.LogInformation("Ordens de compra geradas e salvas: {OrdensCompra}", ordensCompraRegistradas.Value);
+        _logger.LogInformation("Ordens de compra registradas.");
 
         var distribuicaoResult = await _distribuicaoService.DistribuirCustodiasPorAtivo(clientesAtivos.Value, grupoAtivosDistribuido, valorTotalConsolidado, dataExecucao, cancellationToken);
         if (!distribuicaoResult.IsSuccess)
             throw distribuicaoResult.Exception;
 
+        //
         await _distribuicaoService.SalvarRegistroDistribuicoes(distribuicaoResult.Value, ordensCompraRegistradas.Value, cancellationToken);
 
         _logger.LogInformation("Distribuição para as custodias realizada.");
@@ -97,8 +103,41 @@ public class CompraService : ICompraService
         _logger.LogInformation("Registrado histórico da execução na base de dados.");
     }
 
-    public Task SeparacaoLoteDeCompra()
+    public async Task<Result<List<OrdemCompraDto>>> SeparacaoLoteDeCompra(List<FechamentoAtivoB3Dto> fechamentoAtivos, DateTime dataExecucao, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (!fechamentoAtivos.Any())
+            return new ApplicationException("É necessário os dados de fechamento da B3 para emitir as ordens de compra.");
+
+        var residuosNaoDistribuidos = await _custodiaMasterService.ObterResiduosNaoDistribuidos(cancellationToken);
+        if (!residuosNaoDistribuidos.IsSuccess)
+            throw residuosNaoDistribuidos.Exception;
+
+        var ordensCompra = new List<OrdemCompraDto>();
+
+        foreach (var fechamento in fechamentoAtivos)
+        {
+            var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker)!;
+            var residuosAtuais = custodia.QuantidadeResiduos;
+            var qtdNecessariaParaDistribuicao = (int)Math.Truncate(fechamento.ValorAhCompra / fechamento.PrecoFechamento);
+
+            var quantidadeDeCompraAtivo = _custodiaMasterService.SubtrairResiduosParaCompra(custodia!, qtdNecessariaParaDistribuicao);
+
+            var multiplosPresente = Math.DivRem(quantidadeDeCompraAtivo, 100, out int restos);
+            var detalhes = new List<DetalheOrdemCompraDto>() { new DetalheOrdemCompraDto("FRACIONARIO", $"{fechamento.Ticker}F", restos) };
+
+            if (multiplosPresente > 0)
+                detalhes.Add(new DetalheOrdemCompraDto("PADRAO", fechamento.Ticker, multiplosPresente * 100));
+
+
+            ordensCompra.Add(new OrdemCompraDto(
+                0,
+                fechamento.Ticker,
+                quantidadeDeCompraAtivo,
+                detalhes,
+                fechamento.PrecoFechamento
+            ));
+        }
+
+        return ordensCompra;
     }
 }
