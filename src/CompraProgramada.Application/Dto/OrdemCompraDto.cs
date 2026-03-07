@@ -1,16 +1,13 @@
-﻿namespace CompraProgramada.Application.Dto;
+﻿using System.Text.Json.Serialization;
 
-public class OrdemCompraDto(
-    int id,
-    string ticker,
-    int quantidadeTotal,
-    List<DetalheOrdemCompraDto> detalhes,
-    decimal precoUnitario)
+namespace CompraProgramada.Application.Dto;
+
+public record OrdemCompraDto(
+    [property: JsonIgnore] int Id,
+    string Ticker,
+    int QuantidadeTotal,
+    List<DetalheOrdemCompraDto> Detalhes,
+    decimal PrecoUnitario)
 {
-    public int Id { get; private set; } = id;
-    public string Ticker { get; private set; } = ticker;
-    public int QuantidadeTotal { get; private set; } = quantidadeTotal;
-    public List<DetalheOrdemCompraDto> Detalhes { get; private set; } = detalhes;
-    public decimal PrecoUnitario { get; private set; } = precoUnitario;
     public decimal ValorTotal => QuantidadeTotal * PrecoUnitario;
 }

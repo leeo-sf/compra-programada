@@ -1,5 +1,5 @@
 ﻿namespace CompraProgramada.Application.Dto;
 
-public record AtivoDto(
+public record ResiduoCustodiaMasterDto(
     string Ticker,
     int Quantidade);

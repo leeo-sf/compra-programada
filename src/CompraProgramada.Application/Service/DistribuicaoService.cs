@@ -38,7 +38,7 @@ public class DistribuicaoService : IDistribuicaoService
         _contaGraficaService = contaGraficaService;
     }
 
-    public async Task<(List<GrupoAtivoCompraDto>, List<FechamentoAtivoB3Dto>)> RealizaDistribuicaoGrupoAtivo(List<ClienteDto> clientesAtivos, decimal totalConsolidado, DateTime dataExeucao,  CancellationToken cancellationToken)
+    public async Task<(List<AtivoAhCompraDto>, List<FechamentoAtivoB3Dto>)> DistribuirGrupoAtivoAsync(List<ClienteDto> clientesAtivos, decimal totalConsolidado, DateTime dataExeucao,  CancellationToken cancellationToken)
     {
         var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
         if (!cestaVigente.IsSuccess)
@@ -70,8 +70,8 @@ public class DistribuicaoService : IDistribuicaoService
         if (!residuosNaoDistribuidos.IsSuccess)
             throw residuosNaoDistribuidos.Exception;
 
-        var grupoAtivosAhDistribuir = new List<GrupoAtivoCompraDto>();
-        var residuosAtualizados = new List<GrupoAtivoCompraDto>();
+        var grupoAtivosAhDistribuir = new List<AtivoAhCompraDto>();
+        var residuosAtualizados = new List<ResiduoCustodiaMasterDto>();
 
         foreach (var fechamento in combinacoesFechamentoECompra)
         {
@@ -82,9 +82,9 @@ public class DistribuicaoService : IDistribuicaoService
             var quantidadeDeCompraAtivo = _custodiaMasterService.SubtrairResiduosParaCompra(custodia!, qtdNecessariaParaDistribuicao);
             var qtdSobraResiduos = residuosAtuais - Math.Abs(quantidadeDeCompraAtivo - qtdNecessariaParaDistribuicao);
 
-            var grupo = new GrupoAtivoCompraDto(fechamento.Ticker, qtdSobraResiduos, fechamento.PrecoFechamento);
+            var grupo = new ResiduoCustodiaMasterDto(fechamento.Ticker, qtdSobraResiduos);
 
-            grupoAtivosAhDistribuir.Add(grupo with { Quantidade = qtdNecessariaParaDistribuicao });
+            grupoAtivosAhDistribuir.Add(new AtivoAhCompraDto(fechamento.Ticker, qtdNecessariaParaDistribuicao, fechamento.PrecoFechamento));
             residuosAtualizados.Add(grupo);
         }
 
@@ -95,10 +95,11 @@ public class DistribuicaoService : IDistribuicaoService
         return (grupoAtivosAhDistribuir, combinacoesFechamentoECompra);
     }
 
-    public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasPorAtivo(List<ClienteDto> clientes, List<GrupoAtivoCompraDto> grupoAtivoCompra, decimal totalConsolidado, DateTime dataExeucao, CancellationToken cancellationToken)
+    public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasAsync(List<ClienteDto> clientes, List<AtivoAhCompraDto> grupoAtivoCompra, decimal totalConsolidado, DateTime dataExeucao, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando processo de distribuição dos ativos para os clientes. Grupo: {Ativos}", grupoAtivoCompra);
         var distribuicao = new List<DistribuicaoDto>();
+        var ativos = new List<AtivoDto>();
         var contasClientesAtualizadas = new List<ContaGraficaDto>();
 
         foreach (var cliente in clientes.OrderByDescending(x => x.ClienteId))
@@ -145,18 +146,21 @@ public class DistribuicaoService : IDistribuicaoService
                     contasClientesAtualizadas.Find(x => x.Id == contaCliente.Id)?.HistoricoCompra?.Add(historicoCompra);
                 }
 
-                distribuicao.Add(new DistribuicaoDto
-                {
-                    Id = 0,
-                    Cpf = cliente.Cpf,
-                    OrdemCompraId = 0,
-                    ContaGraficaId = custodiaAtualCliente.ContaGraficaId,
-                    Ticker = ativo.Ticker,
-                    QuantidadeAlocada = quantidadeNovasAcoes,
-                    ValorOperacao = quantidadeNovasAcoes * ativo.PrecoFechamento,
-                    ContaGrafica = contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id)!,
-                    Data = dataExeucao
-                });
+                distribuicao.Add(new DistribuicaoDto(
+                    0,
+                    cliente.Cpf,
+                    0,
+                    custodiaAtualCliente.ContaGraficaId,
+                    ativo.Ticker,
+                    quantidadeNovasAcoes,
+                    quantidadeNovasAcoes * ativo.PrecoFechamento,
+                    contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id)!,
+                    dataExeucao,
+                    cliente.ClienteId,
+                    cliente.Nome,
+                    cliente.ValorAporte,
+                    new List<AtivoDto> { new AtivoDto(ativo.Ticker, quantidadeNovasAcoes) }
+                ));
             }
         }
 
@@ -170,7 +174,7 @@ public class DistribuicaoService : IDistribuicaoService
         return distribuicao;
     }
 
-    public async Task<Result> SalvarRegistroDistribuicoes(List<DistribuicaoDto> ditribuicoes, List<OrdemCompraDto> ordensCompraAtivos, CancellationToken cancellationToken)
+    public async Task<Result> SalvarDistribuicoesAsync(List<DistribuicaoDto> ditribuicoes, List<OrdemCompraDto> ordensCompraAtivos, CancellationToken cancellationToken)
     {
         var distribuicoesAhSeremSalvas = ditribuicoes.Select(d => new Distribuicao(
             0, ordensCompraAtivos.First(x => x.Ticker == d.Ticker).Id, d.ContaGraficaId, d.Ticker, d.QuantidadeAlocada, d.ValorOperacao)).ToList();

@@ -1,5 +1,6 @@
 ﻿using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Response;
 using Microsoft.Extensions.Logging;
 using OperationResult;
 
@@ -35,7 +36,7 @@ public class CompraService : ICompraService
         _custodiaMasterService = custodiaMasterService;
     }
 
-    public async Task ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
+    public async Task<Result<ExecutarCompraResponse>> ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
     {
         /*if (date is null)
         {
@@ -64,11 +65,11 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 
-        var (grupoAtivosDistribuido, fechamentos) = await _distribuicaoService.RealizaDistribuicaoGrupoAtivo(clientesAtivos.Value, valorTotalConsolidado, dataExecucao, cancellationToken);
+        var (grupoAtivosDistribuido, fechamentos) = await _distribuicaoService.DistribuirGrupoAtivoAsync(clientesAtivos.Value, valorTotalConsolidado, dataExecucao, cancellationToken);
 
         _logger.LogInformation("Calculo de quantidade de realizados ativos a comprar: {Grupos}", grupoAtivosDistribuido);
 
-        var ordensCompraResult = await SeparacaoLoteDeCompra(fechamentos, dataExecucao, cancellationToken);
+        var ordensCompraResult = await SeparacaoLoteDeCompraAsync(fechamentos, dataExecucao, cancellationToken);
         if (!ordensCompraResult.IsSuccess)
             throw ordensCompraResult.Exception;
 
@@ -80,12 +81,11 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Ordens de compra registradas.");
 
-        var distribuicaoResult = await _distribuicaoService.DistribuirCustodiasPorAtivo(clientesAtivos.Value, grupoAtivosDistribuido, valorTotalConsolidado, dataExecucao, cancellationToken);
+        var distribuicaoResult = await _distribuicaoService.DistribuirCustodiasAsync(clientesAtivos.Value, grupoAtivosDistribuido, valorTotalConsolidado, dataExecucao, cancellationToken);
         if (!distribuicaoResult.IsSuccess)
             throw distribuicaoResult.Exception;
 
-        //
-        await _distribuicaoService.SalvarRegistroDistribuicoes(distribuicaoResult.Value, ordensCompraRegistradas.Value, cancellationToken);
+        await _distribuicaoService.SalvarDistribuicoesAsync(distribuicaoResult.Value, ordensCompraRegistradas.Value, cancellationToken);
 
         _logger.LogInformation("Distribuição para as custodias realizada.");
 
@@ -95,15 +95,44 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Distribuição para as custodias realizada.");
 
-        await _impostoRendaService.CalcularIRDedoDuro(distribuicaoResult.Value, cancellationToken);
+        var qtdIrPublicadoResult = await _impostoRendaService.CalcularIRDedoDuro(distribuicaoResult.Value, cancellationToken);
+        if (!qtdIrPublicadoResult.IsSuccess)
+            throw qtdIrPublicadoResult.Exception;
+
+        _logger.LogInformation("Ir Dedo Duro calculado e publicado para {QtdClientes} clientes.", qtdIrPublicadoResult.Value);
 
         var dataReferencia = _calendarioMotorCompraService.ObterDataReferenciaExecucao(dataExecucao);
         await _historicoExecucaoService.SalvarExecucaoAsync(new ExecucaoMotorCompraDto { DataReferencia = dataReferencia, DataExecucao = dataExecucao }, cancellationToken);
 
         _logger.LogInformation("Registrado histórico da execução na base de dados.");
+
+        var totalClientes = clientesAtivos.Value.Count;
+        List<DistribuicaoDto> distribuicoes = distribuicaoResult.Value
+            .GroupBy(grupo => new { grupo.ClienteId, grupo.Nome, grupo.ValorAporte })
+            .Select(g => new DistribuicaoDto(
+                Id: 0,
+                Cpf: string.Empty,
+                OrdemCompraId: 0,
+                ContaGraficaId: 0,
+                Ticker: string.Empty,
+                QuantidadeAlocada: 0,
+                ValorOperacao: 0,
+                ContaGrafica: default,
+                Data: DateTime.Now,
+                g.Key.ClienteId, g.Key.Nome, g.Key.ValorAporte, g.SelectMany(x => x.Ativos).ToList())).ToList();
+
+        return new ExecutarCompraResponse(
+            dataExecucao,
+            totalClientes,
+            valorTotalConsolidado,
+            ordensCompraRegistradas.Value,
+            distribuicoes,
+            resultResiduosCapturados.Value,
+            qtdIrPublicadoResult.Value,
+            $"Compra programada executada com sucesso para {totalClientes} clientes.");
     }
 
-    public async Task<Result<List<OrdemCompraDto>>> SeparacaoLoteDeCompra(List<FechamentoAtivoB3Dto> fechamentoAtivos, DateTime dataExecucao, CancellationToken cancellationToken)
+    public async Task<Result<List<OrdemCompraDto>>> SeparacaoLoteDeCompraAsync(List<FechamentoAtivoB3Dto> fechamentoAtivos, DateTime dataExecucao, CancellationToken cancellationToken)
     {
         if (!fechamentoAtivos.Any())
             return new ApplicationException("É necessário os dados de fechamento da B3 para emitir as ordens de compra.");

@@ -7,19 +7,19 @@ namespace CompraProgramada.Application.Service;
 
 public class ImpostoRendaService : IImpostoRendaService
 {
-    //private readonly IKafkaProducer _kafkaProducer;
-    //private readonly KafkaConfig _kafkaConfig;
+    private readonly IKafkaProducer _kafkaProducer;
+    private readonly KafkaConfig _kafkaConfig;
     private const decimal ALIQUOTA = 0.00005m;
 
-    /*public ImpostoRendaService(
+    public ImpostoRendaService(
         IKafkaProducer kafkaProducer,
         KafkaConfig kafkaConfig)
     {
         _kafkaProducer = kafkaProducer;
         _kafkaConfig = kafkaConfig;
-    }*/
+    }
 
-    public async Task<Result> CalcularIRDedoDuro(List<DistribuicaoDto> distribuicoes, CancellationToken cancellationToken)
+    public async Task<Result<int>> CalcularIRDedoDuro(List<DistribuicaoDto> distribuicoes, CancellationToken cancellationToken)
     {
         var detalhesIr = distribuicoes.Select(d =>
         {
@@ -35,8 +35,8 @@ public class ImpostoRendaService : IImpostoRendaService
             };
         }).ToList();
 
-        //await _kafkaProducer.PublishProducerAsync(_kafkaConfig.TopicIRDedoDuro, detalhesIr);
+        await _kafkaProducer.PublishProducerAsync(_kafkaConfig.TopicIRDedoDuro, detalhesIr);
 
-        return Result.Success();
+        return detalhesIr.Count;
     }
 }

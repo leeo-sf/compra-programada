@@ -1,14 +1,18 @@
-﻿namespace CompraProgramada.Application.Dto;
+﻿using System.Text.Json.Serialization;
 
-public class DistribuicaoDto
-{
-    public required int Id { get; init; }
-    public required string Cpf { get; init; }
-    public int OrdemCompraId { get; init; }
-    public required int ContaGraficaId { get; init; }
-    public required string Ticker { get; init; }
-    public required int QuantidadeAlocada { get; init; }
-    public required decimal ValorOperacao { get; init; }
-    public required ContaGraficaDto ContaGrafica { get; init; }
-    public required DateTime Data { get; init; }
-}
+namespace CompraProgramada.Application.Dto;
+
+public record DistribuicaoDto(
+    [property: JsonIgnore] int Id,
+    [property: JsonIgnore] string Cpf,
+    [property: JsonIgnore] int OrdemCompraId,
+    [property: JsonIgnore] int ContaGraficaId,
+    [property: JsonIgnore] string Ticker,
+    [property: JsonIgnore] int QuantidadeAlocada,
+    [property: JsonIgnore] decimal ValorOperacao,
+    [property: JsonIgnore] ContaGraficaDto ContaGrafica,
+    [property: JsonIgnore] DateTime Data,
+    int ClienteId,
+    string Nome,
+    decimal ValorAporte,
+    List<AtivoDto> Ativos);

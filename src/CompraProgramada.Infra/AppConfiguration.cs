@@ -22,14 +22,14 @@ public static class AppConfiguration
         services.ConfigurarBancoDeDados(configuration);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
-        //services.ConfigurarKafka(configuration);
+        services.ConfigurarKafka(configuration);
     }
     public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration)
     {
         services.ConfigurarBancoDeDados(configuration);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
-        //services.ConfigurarKafka(configuration);
+        services.ConfigurarKafka(configuration);
     }
 
     private static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration)

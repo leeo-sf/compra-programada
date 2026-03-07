@@ -48,9 +48,9 @@ public class CustodiaMasterService : ICustodiaMasterService
         return Result.Success();
     }
 
-    public async Task<Result> AtualizarResiduosAsync(List<GrupoAtivoCompraDto> grupoAtivos, CancellationToken cancellationToken)
+    public async Task<Result> AtualizarResiduosAsync(List<ResiduoCustodiaMasterDto> residuos, CancellationToken cancellationToken)
     {
-        if (!grupoAtivos.Any())
+        if (!residuos.Any())
             return new ApplicationException("Um grupo para compra deve ser informado.");
 
         var custodias = await _custodiaRepository.ObterResiduosAsync(cancellationToken);
@@ -60,7 +60,7 @@ public class CustodiaMasterService : ICustodiaMasterService
 
         foreach (var custodia in custodias)
         {
-            var ativo = grupoAtivos.FirstOrDefault(a => a.Ticker == custodia.Ticker);
+            var ativo = residuos.FirstOrDefault(a => a.Ticker == custodia.Ticker);
             if (ativo is null)
                 continue;
 
@@ -72,12 +72,12 @@ public class CustodiaMasterService : ICustodiaMasterService
         return Result.Success();
     }
 
-    public async Task<Result> CapturarResiduosDeCustodiaDistribuida(List<GrupoAtivoCompraDto> grupoAhDistribuir, List<DistribuicaoDto> distribuicaoRealizada, CancellationToken cancellationToken)
+    public async Task<Result<List<ResiduoCustodiaMasterDto>>> CapturarResiduosDeCustodiaDistribuida(List<AtivoAhCompraDto> grupoAhDistribuir, List<DistribuicaoDto> distribuicaoRealizada, CancellationToken cancellationToken)
     {
         if (!grupoAhDistribuir.Any() || !distribuicaoRealizada.Any())
             return new ApplicationException("Para a captura de resíduos ser realizada precisa ser informado os grupos de distribuição");
 
-        var custodiasParaAtualizar = new List<GrupoAtivoCompraDto>();
+        var custodiasParaAtualizar = new List<ResiduoCustodiaMasterDto>();
 
         foreach (var grupo in grupoAhDistribuir)
         {
@@ -85,15 +85,16 @@ public class CustodiaMasterService : ICustodiaMasterService
 
             var residuo = Math.Abs(quantidadeDistribuida - grupo.Quantidade);
 
-            custodiasParaAtualizar.Add(new GrupoAtivoCompraDto(grupo.Ticker, residuo, grupo.PrecoFechamento));
+            custodiasParaAtualizar.Add(new ResiduoCustodiaMasterDto(grupo.Ticker, residuo));
         }
 
         var result = await AtualizarResiduosAsync(custodiasParaAtualizar, cancellationToken);
         if (!result.IsSuccess)
             return result.Exception;
 
-        return Result.Success();
+        return custodiasParaAtualizar;
     }
+    
     public int SubtrairResiduosParaCompra(CustodiaMasterDto custodia, int quantidadeCompraAtivo)
     {
         var residuoAtual = custodia?.QuantidadeResiduos ?? 0;
