@@ -1,6 +1,5 @@
 ﻿using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
-using CompraProgramada.Domain.Entity;
 using Microsoft.Extensions.Logging;
 
 namespace CompraProgramada.Application.Service;
@@ -35,15 +34,18 @@ public class CompraService : ICompraService
         _custodiaMasterService = custodiaMasterService;
     }
 
-    public async Task ExecutarCompraAsync(CancellationToken cancellationToken)
+    public async Task ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
     {
-        /*var deveExecutarCompraHoje = await _historicoExecucaoService.ExecutarCompraHojeAsync(cancellationToken);
-        if (!deveExecutarCompraHoje)
+        if (date is null)
         {
-            var dataProximaExecucao = _calendarioMotorCompraService.ObterProximaDataCompra();
-            _logger.LogInformation("MotorCompra não será executado hoje. Próxima data de compra prevista para {DataProximaExecucao}. Encerrando processo.", dataProximaExecucao);
-            return;
-        }*/
+            var deveExecutarCompraHoje = await _historicoExecucaoService.ExecutarCompraHojeAsync(cancellationToken);
+            if (!deveExecutarCompraHoje)
+            {
+                var dataProximaExecucao = _calendarioMotorCompraService.ObterProximaDataCompra();
+                _logger.LogInformation("MotorCompra não será executado hoje. Próxima data de compra prevista para {DataProximaExecucao}. Encerrando processo.", dataProximaExecucao);
+                return;
+            }
+        }
 
         var clientesAtivos = await _clienteService.ObtemClientesAtivoAsync(cancellationToken);
         if (!clientesAtivos.IsSuccess)
