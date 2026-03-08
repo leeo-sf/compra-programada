@@ -147,7 +147,6 @@ public class ClienteService : IClienteService
             return new ApplicationException("Cliente ainda não tem compras realizadas.");
 
         var conta = cliente.ContaGrafica;
-
         var contaDto = new ContaGraficaDto(
             conta.Id,
             conta.NumeroConta,
@@ -157,32 +156,15 @@ public class ClienteService : IClienteService
             conta.HistoricoCompra.Select(hc => new HistoricoCompraDto(conta.Id, hc.Ticker, hc.Quantidade, hc.ValorAporte, hc.PrecoExecutado, hc.PrecoMedio, hc.Data)).ToList(),
             conta.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList());
 
-        var result = await _custodiaFilhoteService.ObterDetalhesEvolucaoDaCertira(contaDto, cancellationToken);
+        var rentabilidadeResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(contaDto.CustodiaFilhotes, cancellationToken);
+        if (!rentabilidadeResult.IsSuccess)
+            return rentabilidadeResult.Exception;
 
-        throw new NotImplementedException();
-        /*var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
-        if (cliente is null)
-            return ClienteNaoEncontradoResult();
+        var result = await _custodiaFilhoteService.ObterEvolucaoDaCertira(contaDto, cancellationToken);
+        if (!result.IsSuccess)
+            return result.Exception;
 
-        var conta = cliente.ContaGrafica;
-
-        var contaDto = new ContaGraficaDto(
-            cliente.ContaGrafica.Id,
-            cliente.ContaGrafica.NumeroConta,
-            cliente.ContaGrafica.DataCriacao,
-            clienteId,
-            cliente.ContaGrafica.Tipo,
-            conta.HistoricoCompra.Select(hc => new HistoricoCompraDto(conta.Id, hc.Ticker, hc.Quantidade, hc.ValorAporte, hc.PrecoExecutado, hc.PrecoMedio, null)).ToList(),
-            conta.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(cf.Id, cf.ContaGraficaId, cf.Ticker!, cf.PrecoMedio, cf.Quantidade)).ToList());
-
-        var resumoRentabilidadeResult = await _custodiaFilhoteService.ObterDetalhesEvolucaoDaCertira(contaDto, 10m, cancellationToken);
-        if (!resumoRentabilidadeResult.IsSuccess)
-            return new ApplicationException("Falha ao obter detalhes da carteira.");
-
-        var resumoRentabilidadeValue = resumoRentabilidadeResult.Value.Resumo;
-        var ativosCarteitaValue = resumoRentabilidadeResult.Value.Ativos;
-
-        return new CarteiraCustodiaResponse(cliente.Id, cliente.Nome, cliente.ContaGrafica.NumeroConta, DateTime.Now, resumoRentabilidadeValue, ativosCarteitaValue);*/
+        return new RentabilidadeResponse(cliente.Id, cliente.Nome, DateTime.Now, rentabilidadeResult.Value.Resumo, result.Value.HistoricoAportes, result.Value.EvolucaoCarteira);
     }
 
     private ErroMapeadoException ClienteNaoEncontradoResult()
@@ -212,7 +194,7 @@ public class ClienteService : IClienteService
                     hc.ValorAporte,
                     hc.PrecoExecutado,
                     hc.PrecoMedio,
-                    null)).ToList(),
+                    hc.Data)).ToList(),
                 cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
                     cf.Id,
                     cf.ContaGraficaId,

@@ -2,7 +2,6 @@
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
-using Confluent.Kafka;
 using OperationResult;
 
 namespace CompraProgramada.Application.Service;
@@ -53,7 +52,7 @@ public class ContaGraficaService : IContaGraficaService
         if (!compras.Any())
             return new ApplicationException("Nenhuma compra informada para registro.");
 
-        var comprarAhRegistrar = compras.Select(hc => HistoricoCompra.RegistrarHistorico(hc.ContaGraficaId, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte)).ToList();
+        var comprarAhRegistrar = compras.Select(hc => HistoricoCompra.RegistrarHistorico(hc.ContaGraficaId, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte, hc.Data)).ToList();
 
         await _contaGraficaRepository.RegistrarHistoricoCompraAysnc(comprarAhRegistrar, cancellationToken);
 

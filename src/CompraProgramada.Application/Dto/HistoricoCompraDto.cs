@@ -7,4 +7,4 @@ public record HistoricoCompraDto(
     decimal ValorAporte,
     decimal PrecoExecutado,
     decimal PrecoMedio,
-    DateOnly? Data);
+    DateOnly Data);

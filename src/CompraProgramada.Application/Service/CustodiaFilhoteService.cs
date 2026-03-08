@@ -3,6 +3,7 @@ using CompraProgramada.Application.Exceptions;
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using Confluent.Kafka;
 using OperationResult;
 
 namespace CompraProgramada.Application.Service;
@@ -35,7 +36,7 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
             CustodiaFilhotes = c.CustodiaFilhotes!
                 .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList(),
             HistoricoCompra = c.HistoricoCompra!
-                .Select(hc => HistoricoCompra.RegistrarHistorico(c.Id, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte)).ToList(),
+                .Select(hc => HistoricoCompra.RegistrarHistorico(c.Id, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte, hc.Data)).ToList(),
         }).ToList();
 
         var custodias = contasCustodias.SelectMany(c => c.CustodiaFilhotes).ToList();
@@ -83,9 +84,40 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
         return new CarteiraDto(resumo, detalhesResult);
     }
 
-    public Task<Result<List<CarteiraDto>>> ObterDetalhesEvolucaoDaCertira(ContaGrafica custodias, CancellationToken cancellationToken)
+    public async Task<Result<RentabilidadeDto>> ObterEvolucaoDaCertira(ContaGraficaDto conta, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (conta.HistoricoCompra is null || !conta.HistoricoCompra.Any())
+            throw new ApplicationException("Cliente ainda não tem compras realizadas.");
+
+        var cotacoesFechamentoCesta = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
+        if (!cotacoesFechamentoCesta.IsSuccess)
+            return new ErroMapeadoException("Falha ao obter cotações do ativo na B3", "COTACOES_FECHAMENTO");
+
+        var historicoCompra = conta.HistoricoCompra!
+            .DistinctBy(d => d.Data)
+            .OrderBy(g => g.Data)
+            .Select((t, index) => new HistoricoAporteDto(
+                0,
+                t.Data,
+                t.ValorAporte,
+                $"{index + 1}/{conta.HistoricoCompra!.Select(x => x.Data).Distinct().Count()}"
+            )).ToList();
+
+        var evolucaoCarteira = conta.HistoricoCompra
+            .DistinctBy(x => x.Data)
+            .OrderBy(x => x.Data)
+            .Select(x =>
+            {
+                var fechamentoAtivo = cotacoesFechamentoCesta.Value.Itens.FirstOrDefault(x => x.Ticker == x.Ticker)!;
+
+                var valorCarteira = x.Quantidade < 1 ? 0 : x.Quantidade * fechamentoAtivo.PrecoFechamento;
+                var valorInvestido = x.Quantidade < 1 ? 0 : x.Quantidade * x.ValorAporte;
+                var rentabilidade = x.Quantidade < 1 ? 0 : ((valorCarteira / valorInvestido) - 1) * 100;
+
+                return new EvolucaoCarteiraDto(0, x.Data, valorCarteira, valorInvestido, rentabilidade);
+            }).ToList();
+
+        return new RentabilidadeDto(historicoCompra, evolucaoCarteira);
     }
 
     private List<DetalheAtivoCarteiraDto> ObterDetalhesDaCerteira(List<CustodiaFilhoteDto> custodias, CotacaoDto cotacoesFechamentoCesta, decimal valorTotalCarteira)
@@ -113,21 +145,5 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
             }).ToList();
 
         return detalhesAtivos;
-    }
-
-    public Task<Result<List<DetalheAtivoCarteiraDto>>> ObterDetalhesEvolucaoDaCertira(ContaGraficaDto conta, CancellationToken cancellationToken)
-    {
-        var historicoAportes = new List<HistoricoAporteDto>();
-        var comprasOrdenadaPorData = conta.HistoricoCompra!
-            .OrderBy(x => x.Data!.Value).ToList()
-            .Select(g => new HistoricoAporteDto(
-                0,
-                g.Data!.Value,
-                ""
-            )).ToList();
-
-        
-
-        throw new NotImplementedException();
     }
 }

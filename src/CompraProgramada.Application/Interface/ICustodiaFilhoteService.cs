@@ -7,5 +7,5 @@ public interface ICustodiaFilhoteService
 {
     Task<Result<List<CustodiaFilhoteDto>>> AtualizarCustodiaFilhoteContasAsync(List<ContaGraficaDto> contas, CancellationToken cancellationToken);
     Task<Result<CarteiraDto>> ObterRentabilidadeDaCertira(List<CustodiaFilhoteDto> custodias, CancellationToken cancellationToken);
-    Task<Result<List<DetalheAtivoCarteiraDto>>> ObterDetalhesEvolucaoDaCertira(ContaGraficaDto conta, CancellationToken cancellationToken);
+    Task<Result<RentabilidadeDto>> ObterEvolucaoDaCertira(ContaGraficaDto conta, CancellationToken cancellationToken);
 }

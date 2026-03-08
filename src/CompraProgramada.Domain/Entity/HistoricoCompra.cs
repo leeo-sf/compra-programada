@@ -27,7 +27,7 @@ public class HistoricoCompra
     }
 
     public static HistoricoCompra RegistrarHistorico
-        (int contaGraficaId, string ticker, int quantidade, decimal precoExecutado, decimal precoMedio, decimal valorAporte)
+        (int contaGraficaId, string ticker, int quantidade, decimal precoExecutado, decimal precoMedio, decimal valorAporte, DateOnly data)
     {
         if (string.IsNullOrEmpty(ticker))
             throw new ApplicationException("O ativo precisa ser definido!");
@@ -38,6 +38,6 @@ public class HistoricoCompra
         if (precoExecutado < 0)
             throw new ApplicationException("Preco de fechamento não pode ser negativo");
 
-        return new HistoricoCompra(0, contaGraficaId, ticker, quantidade, precoExecutado, precoMedio, valorAporte, DateOnly.FromDateTime(DateTime.Now));
+        return new HistoricoCompra(0, contaGraficaId, ticker, quantidade, precoExecutado, precoMedio, valorAporte, data);
     }
 }

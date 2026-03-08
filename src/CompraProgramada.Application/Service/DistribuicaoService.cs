@@ -131,7 +131,7 @@ public class DistribuicaoService : IDistribuicaoService
                     cliente.ValorAporte,
                     ativo.PrecoFechamento,
                     precoMedio.Value,
-                    null);
+                    DateOnly.FromDateTime(dataExeucao));
 
                 if (custodiaAhSerAtualizada is null)
                     contasClientesAtualizadas.Add(new ContaGraficaDto(

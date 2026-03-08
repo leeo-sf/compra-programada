@@ -117,7 +117,7 @@ public class CompraService : ICompraService
                 Ticker: string.Empty,
                 QuantidadeAlocada: 0,
                 ValorOperacao: 0,
-                ContaGrafica: default,
+                ContaGrafica: null!,
                 Data: DateTime.Now,
                 g.Key.ClienteId, g.Key.Nome, g.Key.ValorAporte, g.SelectMany(x => x.Ativos).ToList())).ToList();
 
