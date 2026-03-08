@@ -11,7 +11,8 @@ public class ClienteHandle
     : IRequestHandler<AdesaoRequest, Result<AdesaoResponse>>,
         IRequestHandler<SaidaProdutoRequest, Result<SaidaProdutoResponse>>,
         IRequestHandler<AtualizarValorMensalRequest, Result<AtualizarValorMensalResponse>>,
-        IRequestHandler<CarteiraCustodiaRequest, Result<CarteiraCustodiaResponse>>
+        IRequestHandler<CarteiraCustodiaRequest, Result<CarteiraCustodiaResponse>>,
+        IRequestHandler<RentabilidadeRequest, Result<RentabilidadeResponse>>
 {
     private readonly ILogger<ClienteHandle> _logger;
     private readonly IClienteService _clienteService;
@@ -109,6 +110,21 @@ public class ClienteHandle
         _logger.LogInformation("Cliente solicitando consulta da carteira: {ClienteId}", request);
 
         var carteiraResult = await _clienteService.ConsultarCarteiraAsync(request.ClienteId, cancellationToken);
+
+        if (!carteiraResult.IsSuccess)
+        {
+            _logger.LogError("Ocorreu um erro na consulta da carteira. {Error}", carteiraResult.Exception);
+            return carteiraResult.Exception;
+        }
+
+        return carteiraResult.Value;
+    }
+
+    public async Task<Result<RentabilidadeResponse>> Handle(RentabilidadeRequest request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Cliente solicitando consulta de rentabilidade da carteira: {ClienteId}", request);
+
+        var carteiraResult = await _clienteService.ConsultarRentabilidadeAsync(request.ClienteId, cancellationToken);
 
         if (!carteiraResult.IsSuccess)
         {

@@ -125,10 +125,13 @@ public class DistribuicaoService : IDistribuicaoService
                 );
 
                 var historicoCompra = new HistoricoCompraDto(
-                    0,
+                    contaCliente.Id,
+                    ativo.Ticker,
+                    quantidadeNovasAcoes,
                     cliente.ValorAporte,
-                    DateOnly.FromDateTime(dataExeucao),
-                    contaCliente.Id);
+                    ativo.PrecoFechamento,
+                    precoMedio.Value,
+                    DateOnly.FromDateTime(dataExeucao));
 
                 if (custodiaAhSerAtualizada is null)
                     contasClientesAtualizadas.Add(new ContaGraficaDto(

@@ -86,7 +86,7 @@ public class ClienteService : IClienteService
         var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
 
         if (cliente is null)
-            return new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
+            return ClienteNaoEncontradoResult();
 
         if (!cliente.Ativo)
             return new ErroMapeadoException("Cliente já está com status inativo", CLIENTE_INATIVO_CODIGO);
@@ -106,7 +106,7 @@ public class ClienteService : IClienteService
         var cliente = await _clienteRepository.ObterClienteAsync(request.ClienteId, cancellationToken);
 
         if (cliente is null)
-            return new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
+            return ClienteNaoEncontradoResult();
 
         if (!cliente.Ativo)
             return new ErroMapeadoException("Cliente com status inativo", CLIENTE_INATIVO_CODIGO);
@@ -122,21 +122,55 @@ public class ClienteService : IClienteService
     {
         var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
         if (cliente is null)
-            return new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
+            return ClienteNaoEncontradoResult();
 
         var custodiasDto = cliente.ContaGrafica!.CustodiaFilhotes
             .Select(x => new CustodiaFilhoteDto(x.Id, x.ContaGraficaId, x.Ticker!, x.PrecoMedio, x.Quantidade)).ToList();
 
-        var carteiraResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(custodiasDto, cancellationToken);
-        if (!carteiraResult.IsSuccess)
+        var resumoRentabilidadeResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(custodiasDto, cancellationToken);
+        if (!resumoRentabilidadeResult.IsSuccess)
             return new ApplicationException("Falha ao obter detalhes da carteira.");
 
-        var carteiraValue = carteiraResult.Value;
+        var resumoRentabilidadeValue = resumoRentabilidadeResult.Value.Resumo;
+        var ativosCarteitaValue = resumoRentabilidadeResult.Value.Ativos;
 
-        return new CarteiraCustodiaResponse(cliente.Id, cliente.Nome, cliente.ContaGrafica.NumeroConta, DateTime.Now, carteiraValue.Resumo, carteiraValue.Ativos);
+        return new CarteiraCustodiaResponse(cliente.Id, cliente.Nome, cliente.ContaGrafica.NumeroConta, DateTime.Now, resumoRentabilidadeValue, ativosCarteitaValue);
     }
 
-    public ClienteDto GerarClienteDto(Cliente cliente)
+    public async Task<Result<RentabilidadeResponse>> ConsultarRentabilidadeAsync(int clienteId, CancellationToken cancellationToken)
+    {
+        var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
+        if (cliente is null)
+            return ClienteNaoEncontradoResult();
+
+        if (!cliente!.ContaGrafica.HistoricoCompra.Any())
+            return new ApplicationException("Cliente ainda não tem compras realizadas.");
+
+        var conta = cliente.ContaGrafica;
+        var contaDto = new ContaGraficaDto(
+            conta.Id,
+            conta.NumeroConta,
+            conta.DataCriacao,
+            conta.ClienteId,
+            conta.Tipo,
+            conta.HistoricoCompra.Select(hc => new HistoricoCompraDto(conta.Id, hc.Ticker, hc.Quantidade, hc.ValorAporte, hc.PrecoExecutado, hc.PrecoMedio, hc.Data)).ToList(),
+            conta.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList());
+
+        var rentabilidadeResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(contaDto.CustodiaFilhotes, cancellationToken);
+        if (!rentabilidadeResult.IsSuccess)
+            return rentabilidadeResult.Exception;
+
+        var result = await _custodiaFilhoteService.ObterEvolucaoDaCertira(contaDto, cancellationToken);
+        if (!result.IsSuccess)
+            return result.Exception;
+
+        return new RentabilidadeResponse(cliente.Id, cliente.Nome, DateTime.Now, rentabilidadeResult.Value.Resumo, result.Value.HistoricoAportes, result.Value.EvolucaoCarteira);
+    }
+
+    private ErroMapeadoException ClienteNaoEncontradoResult()
+        => new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
+
+    private ClienteDto GerarClienteDto(Cliente cliente)
         => new ClienteDto
         {
             ClienteId = cliente.Id,
@@ -153,11 +187,14 @@ public class ClienteService : IClienteService
                 cliente.ContaGrafica.DataCriacao,
                 cliente.Id,
                 cliente.ContaGrafica.Tipo,
-                cliente.ContaGrafica.HistoricoComprar.Select(hc => new HistoricoCompraDto(
-                    hc.Id,
-                    hc.Valor,
-                    hc.Data,
-                    hc.ContaGraficaId)).ToList(),
+                cliente.ContaGrafica.HistoricoCompra.Select(hc => new HistoricoCompraDto(
+                    cliente.ContaGrafica.Id,
+                    hc.Ticker,
+                    hc.Quantidade,
+                    hc.ValorAporte,
+                    hc.PrecoExecutado,
+                    hc.PrecoMedio,
+                    hc.Data)).ToList(),
                 cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
                     cf.Id,
                     cf.ContaGraficaId,
