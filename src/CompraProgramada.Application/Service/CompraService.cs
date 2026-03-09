@@ -36,18 +36,18 @@ public class CompraService : ICompraService
         _custodiaMasterService = custodiaMasterService;
     }
 
-    public async Task<Result<ExecutarCompraResponse>> ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
+    public async Task<Result<ExecutarCompraResponse>?> ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
     {
-        /*if (date is null)
+        if (date is null)
         {
             var deveExecutarCompraHoje = await _historicoExecucaoService.ExecutarCompraHojeAsync(cancellationToken);
             if (!deveExecutarCompraHoje)
             {
                 var dataProximaExecucao = _calendarioMotorCompraService.ObterProximaDataCompra();
                 _logger.LogInformation("MotorCompra não será executado hoje. Próxima data de compra prevista para {DataProximaExecucao}. Encerrando processo.", dataProximaExecucao);
-                return;
+                return null;
             }
-        }*/
+        }
 
         var dataExecucao = date ?? DateTime.Now;
 

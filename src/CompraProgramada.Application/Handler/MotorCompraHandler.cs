@@ -24,9 +24,9 @@ public class MotorCompraHandler : IRequestHandler<ExecutarCompraRequest, Result<
         _logger.LogInformation("Solicitado execucação do motor de compra com a data {Data}", request);
 
         var compraResult = await _compraService.ExecutarCompraAsync(request.DataReferencia.ToDateTime(TimeOnly.MinValue), cancellationToken);
-        if (!compraResult.IsSuccess)
-            return compraResult.Exception;
+        if (compraResult.HasValue && !compraResult.Value.IsSuccess)
+            return compraResult.Value.Exception;
 
-        return compraResult;
+        return compraResult.Value;
     }
 }

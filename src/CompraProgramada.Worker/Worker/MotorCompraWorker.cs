@@ -20,8 +20,8 @@ public class MotorCompraWorker : BackgroundService
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //var periodo = TimeSpan.FromHours(_appConfig.MotorCompra?.TempoEmHoraAhCadaExecucao ?? 1);
-        var timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
+        var periodo = TimeSpan.FromHours(_appConfig.MotorCompra?.TempoEmHoraAhCadaExecucao ?? 1);
+        var timer = new PeriodicTimer(periodo);
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
@@ -34,14 +34,14 @@ public class MotorCompraWorker : BackgroundService
                 var motorCompraService = scope.ServiceProvider.GetRequiredService<ICompraService>();
 
                 await motorCompraService.ExecutarCompraAsync(null, stoppingToken);
+
+                _logger.LogInformation("MotorCompra finalizado com sucesso.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ocorreu um um erro ao executar o motor de compras.");
                 throw;
             }
-
-            _logger.LogInformation("MotorCompra finalizado com sucesso.");
         }
     }
 }
