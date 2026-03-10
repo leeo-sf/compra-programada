@@ -56,6 +56,8 @@ public class AdministradorHandler
 
     public async Task<Result<CestaRecomendadaResponse>> Handle(CestaAtualRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Iniciando consulta da cesta atual.");
+
         var result = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
 
         if (!result.IsSuccess)
@@ -75,6 +77,8 @@ public class AdministradorHandler
 
     public async Task<Result<List<CestaRecomendadaResponse>>> Handle(CestaHistoricoRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Iniciando processo de consulta de histórico de cestas.");
+
         var cestas = await _cestaService.HistoricoCestasAsync(cancellationToken);
 
         if (cestas.Value is null)
