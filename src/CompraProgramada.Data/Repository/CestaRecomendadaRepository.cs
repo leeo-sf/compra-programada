@@ -17,11 +17,11 @@ public class CestaRecomendadaRepository : ICestaRecomendadaRepository
         return cesta;
     }
 
-    public async Task<CestaRecomendada> AtualizarAsync(CestaRecomendada cestaAnterior, CestaRecomendada novaCesta, CancellationToken cancellationToken)
+    public async Task<CestaRecomendada> AtualizarAsync(CestaRecomendada cesta, CancellationToken cancellationToken)
     {
-        _context.Entry(cestaAnterior).CurrentValues.SetValues(novaCesta);
+        _context.Entry(cesta).CurrentValues.SetValues(cesta);
         await _context.SaveChangesAsync(cancellationToken);
-        return novaCesta;
+        return cesta;
     }
 
     public async Task<CestaRecomendada?> ObterCestaAtivaAsync(CancellationToken cancellationToken)

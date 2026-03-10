@@ -1,11 +1,45 @@
 ﻿namespace CompraProgramada.Domain.Entity;
 
-public record CestaRecomendada(int Id, string Nome, DateTime DataCriacao, DateTime DataDesativacao, bool Ativa = true)
+public class CestaRecomendada
 {
-    public int Id { get; init; } = Id;
-    public string Nome { get; init; } = Nome;
-    public DateTime DataCriacao { get; init; } = DataCriacao;
-    public DateTime DataDesativacao { get; init; } = DataDesativacao;
-    public bool Ativa { get; init; } = Ativa;
-    public List<ComposicaoCesta> ComposicaoCesta { get; init; } = default!;
+    public int Id { get; private set; }
+    public string Nome { get; private set; } = default!;
+    public DateTime DataCriacao { get; private set; }
+    public DateTime? DataDesativacao { get; private set; }
+    public bool Ativa { get; private set; }
+    public List<ComposicaoCesta> ComposicaoCesta { get; private set; } = default!;
+
+    private CestaRecomendada() { }
+
+    internal CestaRecomendada(int id, string nome, DateTime dataCriacao, DateTime? dataDesativacao, bool ativa, List<ComposicaoCesta> itens)
+    {
+        Id = id;
+        Nome = nome;
+        DataCriacao = dataCriacao;
+        DataDesativacao = dataDesativacao;
+        Ativa = ativa;
+        ComposicaoCesta = itens;
+    }
+
+    public static CestaRecomendada CriarCesta(string nome, List<ComposicaoCesta> itens)
+    {
+        if (itens.Count != 5)
+            throw new ApplicationException("A cesta deve conter exatamente 5 ativos.");
+
+        var somaPercentuaisAtivos = itens.Sum(item => item.Percentual);
+
+        if (somaPercentuaisAtivos != 100)
+            throw new ApplicationException("A soma dos percentuais deve ser exatamente 100%.");
+
+        return new CestaRecomendada(0, nome.ToUpper(), DateTime.Now, null, true, itens);
+    }
+
+    public void DesativarCesta()
+    {
+        if (!Ativa)
+            throw new ApplicationException("A cesta já se encontra desativada.");
+
+        Ativa = false;
+        DataDesativacao = DateTime.Now;
+    }
 }

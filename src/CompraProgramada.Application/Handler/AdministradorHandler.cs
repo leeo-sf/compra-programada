@@ -41,15 +41,16 @@ public class AdministradorHandler
 
         if (!result.Value!.CestaAtualizada)
             return MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, default, default, default, PRIMEIRA_CESTA_CADASTRADA_MENSAGEM);
+        
+        _logger.LogInformation("Cesta criada com sucesso!");
 
-        var usuariosAtivos = await _clienteService.QuantidadeAtivosAsync(cancellationToken);
-
-        if (!usuariosAtivos.IsSuccess)
-            return usuariosAtivos.Exception;
+        var quantidadeUsuariosAtivos = await _clienteService.QuantidadeAtivosAsync(cancellationToken);
+        if (!quantidadeUsuariosAtivos.IsSuccess)
+            return quantidadeUsuariosAtivos.Exception;
 
         var (ativosRemovidos, ativosAdicionados) = _cestaService.ObterMudancasDeAtivos(result.Value.CestaAnterior!.Itens, result.Value.CestaAtual.Itens).Value;
 
-        var mensagemOperacao = $"Cesta atualizada. Rebalanceamento disparado para {usuariosAtivos.Value} clientes ativos.";
+        var mensagemOperacao = $"Cesta atualizada. Rebalanceamento disparado para {quantidadeUsuariosAtivos.Value} clientes ativos.";
         return MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, result.Value.CestaAnterior, ativosRemovidos, ativosAdicionados, mensagemOperacao);
     }
 
@@ -97,7 +98,7 @@ public class AdministradorHandler
             Ativa = cesta.Ativa,
             DataCriacao = cesta.DataCriacao,
             Itens = cesta.Itens.Select(cc => new ComposicaoCestaDto(cc.Ticker, cc.Percentual)).ToList(),
-            CestaAnteriorDesativada = cestaAnterior is null ? default : new CestaDesativadaDto { CestaId = cestaAnterior!.Id, Nome = cestaAnterior.Nome, DataDesativacao = cestaAnterior.DataDesativacao },
+            CestaAnteriorDesativada = cestaAnterior is null ? default : new CestaDesativadaDto(cestaAnterior!.Id, cestaAnterior.Nome, cestaAnterior.DataDesativacao!.Value),
             AtivosRemovidos = ativosRemovidos is not null ? ativosRemovidos : default,
             AtivosAdicionados = ativosAdicionados is not null ? ativosAdicionados : default,
             RebalanceamentoDisparado = !atualizouCesta ? false : true,

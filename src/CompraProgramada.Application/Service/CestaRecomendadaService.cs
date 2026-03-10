@@ -11,33 +11,31 @@ namespace CompraProgramada.Application.Service;
 public class CestaRecomendadaService : ICestaRecomendadaService
 {
     private readonly ICestaRecomendadaRepository _cestaRepository;
+    private const string QUANTIDADE_INVALIDA_CODE = "QUANTIDADE_ATIVOS_INVALIDA";
+    private const string PERCENTUAIS_INVALIDO_CODE = "PERCENTUAIS_INVALIDOS";
 
     public CestaRecomendadaService(ICestaRecomendadaRepository cestaRepository) => _cestaRepository = cestaRepository;
 
     public async Task<Result<CriarAlterarCestaDto>> CriarCestaAsync(CriarAlterarCestaRequest request, CancellationToken cancellationToken)
     {
         if (request.Itens.Count != 5)
-            return new ErroMapeadoException($"A cesta deve conter exatamente 5 ativos. Quantidade informada: {request.Itens.Count}.", "QUANTIDADE_ATIVOS_INVALIDA");
+            return new ErroMapeadoException($"A cesta deve conter exatamente 5 ativos. Quantidade informada: {request.Itens.Count}.", QUANTIDADE_INVALIDA_CODE);
 
         var somaPercentuais = (int)request.Itens.Sum(i => i.Percentual);
 
         if (somaPercentuais != 100)
-            return new ErroMapeadoException($"A soma dos percentuais deve ser exatamente 100%. Soma atual: {somaPercentuais}%.", "PERCENTUAIS_INVALIDOS");
+            return new ErroMapeadoException($"A soma dos percentuais deve ser exatamente 100%. Soma atual: {somaPercentuais}%.", PERCENTUAIS_INVALIDO_CODE);
 
-        var (cestaAnterior, atualizouCesta) = await DesativaCestaAtualAsync(cancellationToken);
+        var cestaAnterior = await DesativaCestaAtualAsync(cancellationToken);
 
-        var itensComposicaoCesta = request.Itens.Select(i => new ComposicaoCesta(0, 0, i.Ticker, i.Percentual)).ToList();
+        var itensCesta = request.Itens.Select(i => ComposicaoCesta.CriaItemNaCesta(i.Ticker, i.Percentual)).ToList();
 
-        var cestaCriada = await _cestaRepository.CriarAsync(new (0, request.Nome, DateTime.UtcNow, DateTime.UtcNow) { ComposicaoCesta = itensComposicaoCesta }, cancellationToken);
+        var cestaCriada = await _cestaRepository.CriarAsync(CestaRecomendada.CriarCesta(request.Nome, itensCesta), cancellationToken);
 
-        var resposta = new CriarAlterarCestaDto
-        {
-            CestaAtualizada = atualizouCesta,
-            CestaAtual = GerarCestaDto(cestaCriada),
-            CestaAnterior = atualizouCesta ? cestaAnterior : null
-        };
-
-        return resposta;
+        return new CriarAlterarCestaDto(
+            cestaAnterior is not null ? true : false,
+            GerarCestaDto(cestaCriada),
+            cestaAnterior is not null ? cestaAnterior : null);
     }
 
     public async Task<Result<CestaRecomandadaDto?>> ObterCestaAtivaAsync(CancellationToken cancellationToken)
@@ -75,20 +73,20 @@ public class CestaRecomendadaService : ICestaRecomendadaService
         return (ativosRemovidos, ativosAdicionados);
     }
 
-    private async Task<(CestaRecomandadaDto cestaAnterior, bool atualizouCesta)> DesativaCestaAtualAsync(CancellationToken cancellationToken)
+    private async Task<CestaRecomandadaDto?> DesativaCestaAtualAsync(CancellationToken cancellationToken)
     {
         var cestaAtual = await _cestaRepository.ObterCestaAtivaAsync(cancellationToken);
 
         if (cestaAtual is not null)
         {
-            var cestaAnteriorAtualizada = cestaAtual with { Ativa = false, DataDesativacao = DateTime.Now };
+            cestaAtual.DesativarCesta();
 
-            await _cestaRepository.AtualizarAsync(cestaAtual, cestaAnteriorAtualizada, cancellationToken);
+            await _cestaRepository.AtualizarAsync(cestaAtual, cancellationToken);
 
-            return (GerarCestaDto(cestaAnteriorAtualizada), true);
+            return GerarCestaDto(cestaAtual);
         }
 
-        return (GerarCestaDto(cestaAtual!), false);
+        return null;
     }
 
     public Result<List<ValorAtivoConsolidadoDto>> ValorPorAtivoConsolidado(CestaRecomandadaDto cesta, decimal totalConsolidado)
@@ -101,19 +99,17 @@ public class CestaRecomendadaService : ICestaRecomendadaService
     }
 
     private CestaRecomandadaDto GerarCestaDto(CestaRecomendada cesta)
-        => new CestaRecomandadaDto
-        {
-            Id = cesta.Id,
-            Nome = cesta.Nome,
-            DataCriacao = cesta.DataCriacao,
-            DataDesativacao = cesta.DataDesativacao,
-            Ativa = cesta.Ativa,
-            Itens = cesta.ComposicaoCesta.Select(cc => new ComposicaoCestaRecomendadaDto
-            {
-                Id = cc.Id,
-                CestaId = cc.Id,
-                Ticker = cc.Ticker,
-                Percentual = cc.Percentual
-            }).ToList()
-        };
+        => new CestaRecomandadaDto(
+            cesta.Id,
+            cesta.Nome,
+            cesta.DataCriacao,
+            cesta.DataDesativacao,
+            cesta.Ativa,
+            cesta.ComposicaoCesta.Select(cc => new ComposicaoCestaRecomendadaDto(
+                cc.Id,
+                cc.Id,
+                cc.Ticker,
+                cc.Percentual
+            )).ToList()
+        );
 }
