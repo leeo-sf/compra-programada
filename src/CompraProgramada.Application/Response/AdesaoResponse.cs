@@ -2,14 +2,12 @@
 
 namespace CompraProgramada.Application.Response;
 
-public class AdesaoResponse
-{
-    public required int ClienteId { get; set; }
-    public required string Nome { get; set; }
-    public required string Cpf { get; set; }
-    public required string Email { get; set; }
-    public required decimal ValorMensal { get; set; }
-    public required bool Ativo { get; set; }
-    public required DateTime DataAdesao { get; set; }
-    public required ContaGraficaResponse ContaGrafica { get; set; }
-}
+public record AdesaoResponse(
+    int ClienteId,
+    string Nome,
+    string Cpf,
+    string Email,
+    decimal ValorMensal,
+    bool Ativo,
+    DateTime DataAdesao,
+    ContaGraficaResponse ContaGrafica);

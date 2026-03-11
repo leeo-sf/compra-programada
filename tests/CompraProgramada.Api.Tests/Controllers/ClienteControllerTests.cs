@@ -1,13 +1,10 @@
 using CompraProgramada.Api.Controllers;
 using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Exceptions;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using MediatR;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using NSubstitute;
 using OperationResult;
-using System.Net;
 
 namespace CompraProgramada.Api.Tests.Controllers;
 
@@ -22,23 +19,21 @@ public class ClienteControllerTests
     public async Task Deve_Retornar_Sucesso_AoAderirAoProduto_Quando_Mediator_RetornaSucesso()
     {
         var request = new AdesaoRequest("Teste", "11111111111", "email@teste.com", 100);
-        var response = new AdesaoResponse
-        {
-            ClienteId = 1,
-            Nome = request.Nome,
-            Cpf = request.Cpf,
-            Email = request.Email,
-            ValorMensal = request.ValorMensal,
-            Ativo = true,
-            DataAdesao = DateTime.Now,
-            ContaGrafica = new ContaGraficaResponse
-            {
-                Id = 1,
-                NumeroConta = "number",
-                Tipo = "FILHOTE",
-                DataCriacao = DateTime.Now,
-            }
-        };
+        var response = new AdesaoResponse(
+            1,
+            request.Nome,
+            request.Cpf,
+            request.Email,
+            request.ValorMensal,
+            true,
+            DateTime.Now,
+            new ContaGraficaResponse(
+                1,
+                "number",
+                "FILHOTE",
+                DateTime.Now
+            )
+        );
 
         _mediator.Send(request).Returns(Result.Success(response));
 
@@ -51,7 +46,7 @@ public class ClienteControllerTests
     public async Task Deve_Retornar_Erro_AoAderirAoProduto_Quando_Mediator_RetornaErro()
     {
         var request = new AdesaoRequest("Teste", "11111111111", "email@teste.com", 100);
-        var erroMapeado = new ErroMapeadoException("bad", "CODE");
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<AdesaoResponse>(erroMapeado));
 
@@ -83,7 +78,7 @@ public class ClienteControllerTests
     public async Task Deve_Retornar_Erro_AoConsultarCarteira_Quando_Mediator_RetornaErro()
     {
         var request = new CarteiraCustodiaRequest(1);
-        var erroMapeado = new ErroMapeadoException("bad", "CODE");
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<CarteiraCustodiaResponse>(erroMapeado));
 
@@ -116,7 +111,7 @@ public class ClienteControllerTests
     public async Task Deve_Retornar_Erro_AoSairDoProduto_Quando_Mediator_RetornaErro()
     {
         var request = new SaidaProdutoRequest(1);
-        var erroMapeado = new ErroMapeadoException("bad", "CODE");
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<SaidaProdutoResponse>(erroMapeado));
 
@@ -147,7 +142,7 @@ public class ClienteControllerTests
     public async Task Deve_Retornar_Erro_AoAlterarValorMensal_Quando_Mediator_RetornaErro()
     {
         var request = new AtualizarValorMensalRequest(1, 1000);
-        var erroMapeado = new ErroMapeadoException("bad", "CODE");
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<AtualizarValorMensalResponse>(erroMapeado));
 

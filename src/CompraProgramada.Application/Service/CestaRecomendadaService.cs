@@ -1,5 +1,4 @@
 ﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Exceptions;
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Domain.Entity;
@@ -18,14 +17,6 @@ public class CestaRecomendadaService : ICestaRecomendadaService
 
     public async Task<Result<CriarAlterarCestaDto>> CriarCestaAsync(CriarAlterarCestaRequest request, CancellationToken cancellationToken)
     {
-        if (request.Itens.Count != 5)
-            return new ErroMapeadoException($"A cesta deve conter exatamente 5 ativos. Quantidade informada: {request.Itens.Count}.", QUANTIDADE_INVALIDA_CODE);
-
-        var somaPercentuais = (int)request.Itens.Sum(i => i.Percentual);
-
-        if (somaPercentuais != 100)
-            return new ErroMapeadoException($"A soma dos percentuais deve ser exatamente 100%. Soma atual: {somaPercentuais}%.", PERCENTUAIS_INVALIDO_CODE);
-
         var cestaAnterior = await DesativaCestaAtualAsync(cancellationToken);
 
         var itensCesta = request.Itens.Select(i => ComposicaoCesta.CriaItemNaCesta(i.Ticker, i.Percentual)).ToList();

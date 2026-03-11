@@ -41,23 +41,21 @@ public class ClienteHandle
 
         _logger.LogInformation("Adesão realizada com sucesso para o cliente {Nome} com CPF {Cpf}.", request.Nome, request.Cpf);
         
-        return new AdesaoResponse
-        {
-            ClienteId = cliente.ClienteId,
-            Nome = cliente.Nome,
-            Cpf = cliente.Cpf,
-            Email = cliente.Email,
-            ValorMensal = cliente.ValorMensal,
-            Ativo = cliente.Ativo,
-            DataAdesao = cliente.DataAdesao,
-            ContaGrafica = new ContaGraficaResponse
-            {
-                Id = contaGraficaCliente.Id,
-                Tipo = contaGraficaCliente.Tipo,
-                NumeroConta = contaGraficaCliente.NumeroConta,
-                DataCriacao = contaGraficaCliente.DataCriacao,
-            }
-        };
+        return new AdesaoResponse(
+            cliente.ClienteId,
+            cliente.Nome,
+            cliente.Cpf,
+            cliente.Email,
+            cliente.ValorMensal,
+            cliente.Ativo,
+            cliente.DataAdesao,
+            new ContaGraficaResponse(
+                contaGraficaCliente.Id,
+                contaGraficaCliente.Tipo,
+                contaGraficaCliente.NumeroConta,
+                contaGraficaCliente.DataCriacao
+            )
+        );
     }
 
     public async Task<Result<SaidaProdutoResponse>> Handle(SaidaProdutoRequest request, CancellationToken cancellationToken)

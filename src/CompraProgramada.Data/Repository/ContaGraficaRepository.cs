@@ -1,5 +1,6 @@
 ﻿using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompraProgramada.Data.Repository;
 
@@ -26,5 +27,23 @@ public class ContaGraficaRepository : IContaGraficaRepository
     {
         _context.HistoricoCompra.AddRange(compras);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<ContaGrafica>> ObterContasAtivas(CancellationToken cancellationToken)
+    {
+        var clientes = await _context.Cliente
+            .Where(c => c.Ativo)
+            .Include(c => c.ContaGrafica)
+                .ThenInclude(c => c.CustodiaFilhotes)
+            .ToListAsync(cancellationToken);
+
+        return clientes.Select(x => x.ContaGrafica).ToList();
+    }
+
+    public async Task<List<CustodiaFilhote>> AtualizarCustodiasAsync(List<CustodiaFilhote> custodias, CancellationToken cancellationToken)
+    {
+        _context.Entry(custodias).CurrentValues.SetValues(custodias);
+        await _context.SaveChangesAsync(cancellationToken);
+        return custodias;
     }
 }

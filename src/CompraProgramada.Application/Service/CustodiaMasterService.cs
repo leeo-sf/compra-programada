@@ -43,7 +43,9 @@ public class CustodiaMasterService : ICustodiaMasterService
 
         var custodias = residuos.Select(x => new CustodiaMaster { Id = 0, ContaMasterId = contaMaster.Id, Ticker = x.Ticker, QuantidadeResiduo = x.Quantidade }).ToList();
 
-        await _contaRepository.AtualizarResiduosAysnc(contaMaster with { CustodiaMasters = custodias }, cancellationToken);
+        contaMaster.AtualizaCustodia(custodias);
+
+        await _contaRepository.AtualizarResiduosAysnc(contaMaster, cancellationToken);
 
         return Result.Success();
     }

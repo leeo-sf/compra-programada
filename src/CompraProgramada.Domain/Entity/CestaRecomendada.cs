@@ -1,4 +1,6 @@
-﻿namespace CompraProgramada.Domain.Entity;
+﻿using CompraProgramada.Domain.Exceptions;
+
+namespace CompraProgramada.Domain.Entity;
 
 public class CestaRecomendada
 {
@@ -8,6 +10,8 @@ public class CestaRecomendada
     public DateTime? DataDesativacao { get; private set; }
     public bool Ativa { get; private set; }
     public List<ComposicaoCesta> ComposicaoCesta { get; private set; } = default!;
+    private const int QUANTIDADE_EXATA_ITENS_CESTA = 5;
+    private const int SOMA_PERCENTUAIS_EXATA = 100;
 
     private CestaRecomendada() { }
 
@@ -23,13 +27,12 @@ public class CestaRecomendada
 
     public static CestaRecomendada CriarCesta(string nome, List<ComposicaoCesta> itens)
     {
-        if (itens.Count != 5)
-            throw new ApplicationException("A cesta deve conter exatamente 5 ativos.");
+        if (itens.Count != QUANTIDADE_EXATA_ITENS_CESTA)
+            throw new QuantidadeItensCestaException(itens.Count);
 
         var somaPercentuaisAtivos = itens.Sum(item => item.Percentual);
-
-        if (somaPercentuaisAtivos != 100)
-            throw new ApplicationException("A soma dos percentuais deve ser exatamente 100%.");
+        if (somaPercentuaisAtivos != SOMA_PERCENTUAIS_EXATA)
+            throw new PercentualCestaException(somaPercentuaisAtivos);
 
         return new CestaRecomendada(0, nome.ToUpper(), DateTime.Now, null, true, itens);
     }

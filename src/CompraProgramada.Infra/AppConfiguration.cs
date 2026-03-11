@@ -5,6 +5,7 @@ using CompraProgramada.Data;
 using CompraProgramada.Data.Repository;
 using CompraProgramada.Domain.Interface;
 using CompraProgramada.Infra.Converter;
+using CompraProgramada.Infra.Middleware;
 using Confluent.Kafka;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -24,6 +25,7 @@ public static class AppConfiguration
                 options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
             });
 
+        services.ConfigurarExceptionHandler();
         services.ConfigurarMediatR();
         services.ConfigurarFluentValidation();
         services.ConfigurarBancoDeDados(configuration);
@@ -31,6 +33,7 @@ public static class AppConfiguration
         services.ConfigurarRegrasDaAplicacao(configuration);
         services.ConfigurarKafka(configuration);
     }
+
     public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration)
     {
         services.ConfigurarBancoDeDados(configuration);
@@ -110,5 +113,11 @@ public static class AppConfiguration
         services.AddSingleton(producerConfig);
         services.AddSingleton(opt => configuration.GetSection("Service:Kafka").Get<KafkaConfig>()!);
         services.AddSingleton<IKafkaProducer, KafkaProducer>();
+    }
+
+    private static void ConfigurarExceptionHandler(this IServiceCollection services)
+    {
+        services.AddExceptionHandler<DomainExceptionHandler>();
+        services.AddProblemDetails();
     }
 }

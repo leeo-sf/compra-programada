@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Application.Exceptions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OperationResult;
 
@@ -27,7 +26,6 @@ public class BaseController(IMediator mediator) : ControllerBase
     protected ActionResult HandleError(Exception error)
         => error switch
         {
-            ErroMapeadoException mapeado => StatusCode((int)mapeado.StatusCode, mapeado.ErroDetalhes),
             ApplicationException applicationException => StatusCode(StatusCodes.Status422UnprocessableEntity, new { applicationException.Message }),
             _ => StatusCode(500)
         };

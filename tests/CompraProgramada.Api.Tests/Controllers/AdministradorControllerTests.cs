@@ -2,7 +2,6 @@ using System.Net;
 using CompraProgramada.Api.Controllers;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
-using CompraProgramada.Application.Exceptions;
 using MediatR;
 using CompraProgramada.Application.Dto;
 using OperationResult;
@@ -74,7 +73,7 @@ public class AdministradorControllerTests
             }
         );
 
-        var erroMapeado = new ErroMapeadoException("bad", "CODE");
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<CriarAlterarCestaResponse>(erroMapeado));
 
@@ -116,7 +115,7 @@ public class AdministradorControllerTests
     {
         var request = new CestaAtualRequest();
 
-        var erroMapeado = new ErroMapeadoException("bad", "CODE");
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<CestaRecomendadaResponse>(erroMapeado));
 
@@ -161,7 +160,7 @@ public class AdministradorControllerTests
     {
         var request = new CestaHistoricoRequest();
 
-        var erroMapeado = new ErroMapeadoException("bad", "CODE", HttpStatusCode.UnprocessableEntity);
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<List<CestaRecomendadaResponse>>(erroMapeado));
 

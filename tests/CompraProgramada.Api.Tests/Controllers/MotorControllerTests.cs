@@ -1,12 +1,10 @@
 using CompraProgramada.Api.Controllers;
 using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Exceptions;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using MediatR;
 using NSubstitute;
 using OperationResult;
-using System.Net;
 
 namespace CompraProgramada.Api.Tests.Controllers;
 
@@ -46,7 +44,7 @@ public class MotorControllerTests
     public async Task Deve_Retornar_ErroMapeado_Quando_Mediator_RetornaErro()
     {
         var request = new ExecutarCompraRequest(DateTime.Now, DateOnly.FromDateTime(DateTime.Now));
-        var erroMapeado = new ErroMapeadoException("bad", "CODE", HttpStatusCode.InternalServerError);
+        var erroMapeado = new Exception("bad");
 
         _mediator.Send(request).Returns(Result.Error<ExecutarCompraResponse>(erroMapeado));
 

@@ -41,10 +41,10 @@ public class ClienteRepository : IClienteRepository
                 .ThenInclude(conta => conta.HistoricoCompra)
             .FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<Cliente> AtualizarClienteAsync(Cliente dadosAntigos, Cliente novosDados, CancellationToken cancellationToken)
+    public async Task<Cliente> AtualizarClienteAsync(Cliente cliente, CancellationToken cancellationToken)
     {
-        _context.Entry(dadosAntigos).CurrentValues.SetValues(novosDados);
+        _context.Entry(cliente).CurrentValues.SetValues(cliente);
         await _context.SaveChangesAsync(cancellationToken);
-        return novosDados;
+        return cliente;
     }
 }

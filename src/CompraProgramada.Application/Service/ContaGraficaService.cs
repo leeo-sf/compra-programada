@@ -21,14 +21,15 @@ public class ContaGraficaService : IContaGraficaService
     public async Task<Result<ContaGraficaDto>> GerarContaGraficaAsync(int clienteId, CancellationToken cancellationToken)
     {
         var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
+        if (!cestaVigente.IsSuccess)
+            return cestaVigente.Exception;
 
-        var custodiaConta = cestaVigente.Value!.Itens
-            .Select(x => new CustodiaFilhote(0, 0, x.Ticker)).ToList();
+        var custodiasConta = cestaVigente.Value!.Itens
+            .Select(x => CustodiaFilhote.GerarCustodia(x.Ticker)).ToList();
 
-        var numeroConta = GerarNumeroConta(clienteId, ehContaGrafica: true);
-        var novaConta = new ContaGrafica(0, numeroConta, DateTime.Now, clienteId) { CustodiaFilhotes = custodiaConta };
+        var conta = ContaGrafica.Gerar(clienteId, custodiasConta);
 
-        var contaSalva = await _contaGraficaRepository.CriarAsync(novaConta, cancellationToken);
+        var contaSalva = await _contaGraficaRepository.CriarAsync(conta, cancellationToken);
 
         return new ContaGraficaDto(
             contaSalva.Id,
@@ -40,7 +41,7 @@ public class ContaGraficaService : IContaGraficaService
             contaSalva.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
                 cf.Id,
                 cf.ContaGraficaId,
-                cf.Ticker ?? string.Empty,
+                cf.Ticker,
                 cf.PrecoMedio,
                 cf.Quantidade
             )).ToList()
@@ -59,9 +60,39 @@ public class ContaGraficaService : IContaGraficaService
         return Result.Success();
     }
 
-    private string GerarNumeroConta(int id, bool ehContaGrafica)
+    public async Task<Result<List<CustodiaFilhoteDto>>> AtualizarCustodiasContasAsync(List<ContaGraficaDto> contasAhSeremAtualizadas, CancellationToken cancellationToken)
     {
-        var prefixo = ehContaGrafica ? "FLH" : "MST";
-        return $"{prefixo}-{id:D6}";
+        if (!contasAhSeremAtualizadas.Any())
+            return new ApplicationException("Nenhuma conta gráfica informada para atualização.");
+
+        var contas = await _contaGraficaRepository.ObterContasAtivas(cancellationToken);
+
+        var contasAtualizadas = contas.Select(conta =>
+        {
+            var contaDto = contasAhSeremAtualizadas.FirstOrDefault(c => c.NumeroConta == conta.NumeroConta);
+            var custodiasDto = contaDto?.CustodiaFilhotes;
+
+            custodiasDto?.Select(ct =>
+            {
+                var custodia = conta.CustodiaFilhotes.FirstOrDefault(x => x.ContaGraficaId == ct.ContaGraficaId);
+                custodia?.Atualizar(ct.PrecoMedio, ct.Quantidade);
+                return custodia;
+            }).ToList();
+
+            return conta;
+
+        }).ToList();
+
+        var custodias = contasAtualizadas.SelectMany(c => c.CustodiaFilhotes).ToList();
+
+        var custodiasSalvas = await _contaGraficaRepository.AtualizarCustodiasAsync(custodias, cancellationToken);
+
+        return custodiasSalvas.Select(c => new CustodiaFilhoteDto(
+            c.Id,
+            c.ContaGraficaId,
+            c.Ticker!,
+            c.PrecoMedio,
+            c.Quantidade
+        )).ToList();
     }
 }

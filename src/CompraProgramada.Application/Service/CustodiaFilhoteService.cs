@@ -1,9 +1,6 @@
 ﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Exceptions;
 using CompraProgramada.Application.Interface;
-using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
-using Confluent.Kafka;
 using OperationResult;
 
 namespace CompraProgramada.Application.Service;
@@ -20,43 +17,11 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
         _cotacaoService = cotacaoService;
     }
 
-    public async Task<Result<List<CustodiaFilhoteDto>>> AtualizarCustodiaFilhoteContasAsync(List<ContaGraficaDto> contas, CancellationToken cancellationToken)
-    {
-        if (!contas.Any())
-            return new ApplicationException("Nenhuma conta gráfica informada para atualização.");
-
-        var contasCustodias = contas.Select(c => new ContaGrafica
-        (
-            c.Id,
-            c.NumeroConta,
-            c.DataCriacao,
-            c.ClienteId
-        )
-        {
-            CustodiaFilhotes = c.CustodiaFilhotes!
-                .Select(cf => new CustodiaFilhote(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList(),
-            HistoricoCompra = c.HistoricoCompra!
-                .Select(hc => HistoricoCompra.RegistrarHistorico(c.Id, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte, hc.Data)).ToList(),
-        }).ToList();
-
-        var custodias = contasCustodias.SelectMany(c => c.CustodiaFilhotes).ToList();
-
-        var custodiasSalvas = await _custodiaFilhoteRepository.AtualizarCustodiasAsync(custodias, cancellationToken);
-
-        return custodiasSalvas.Select(c => new CustodiaFilhoteDto(
-            c.Id,
-            c.ContaGraficaId,
-            c.Ticker!,
-            c.PrecoMedio,
-            c.Quantidade
-        )).ToList();
-    }
-
     public async Task<Result<CarteiraDto>> ObterRentabilidadeDaCertira(List<CustodiaFilhoteDto> custodias, CancellationToken cancellationToken)
     {
         var cotacoesFechamentoCesta = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
         if (!cotacoesFechamentoCesta.IsSuccess)
-            return new ErroMapeadoException("Falha ao obter cotações do ativo na B3", "COTACOES_FECHAMENTO");
+            return new ApplicationException("Falha ao obter cotações do ativo na B3");
 
         decimal valorTotalInvestido = 0;
         decimal valorTotalAtualCarteira = 0;
@@ -91,7 +56,7 @@ public class CustodiaFilhoteService : ICustodiaFilhoteService
 
         var cotacoesFechamentoCesta = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
         if (!cotacoesFechamentoCesta.IsSuccess)
-            return new ErroMapeadoException("Falha ao obter cotações do ativo na B3", "COTACOES_FECHAMENTO");
+            return new ApplicationException("Falha ao obter cotações do ativo na B3");
 
         var historicoCompra = conta.HistoricoCompra!
             .DistinctBy(d => d.Data)

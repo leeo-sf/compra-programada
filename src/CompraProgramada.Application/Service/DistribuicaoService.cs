@@ -12,7 +12,6 @@ public class DistribuicaoService : IDistribuicaoService
     private readonly ILogger<DistribuicaoService> _logger;
     private readonly IDistribuicaoRepository _distribuicaoRepository;
     private readonly ICustodiaMasterService _custodiaMasterService;
-    private readonly ICustodiaFilhoteService _custodiaFilhoteService;
     private readonly ICotacaoService _cotacaoService;
     private readonly ICestaRecomendadaService _cestaService;
     private readonly IPrecoMedioService _precoMedioService;
@@ -21,7 +20,6 @@ public class DistribuicaoService : IDistribuicaoService
     public DistribuicaoService(ILogger<DistribuicaoService> logger,
         IDistribuicaoRepository distribuicaoRepository,
         ICustodiaMasterService custodiaMasterService,
-        ICustodiaFilhoteService custodiaFilhoteService,
         ICotahistParserService cotahistParser,
         ICotacaoService cotacaoService,
         ICestaRecomendadaService cestaService,
@@ -31,7 +29,6 @@ public class DistribuicaoService : IDistribuicaoService
         _logger = logger;
         _distribuicaoRepository = distribuicaoRepository;
         _custodiaMasterService = custodiaMasterService;
-        _custodiaFilhoteService = custodiaFilhoteService;
         _cotacaoService = cotacaoService;
         _cestaService = cestaService;
         _precoMedioService = precoMedioService;
@@ -167,7 +164,7 @@ public class DistribuicaoService : IDistribuicaoService
             }
         }
 
-        await _custodiaFilhoteService.AtualizarCustodiaFilhoteContasAsync(contasClientesAtualizadas, cancellationToken);
+        await _contaGraficaService.AtualizarCustodiasContasAsync(contasClientesAtualizadas, cancellationToken);
         _logger.LogInformation("Atualizando custodias das contas ativas na base de dados.");
 
         var historicosCompra = contasClientesAtualizadas.SelectMany(x => x.HistoricoCompra!).ToList();

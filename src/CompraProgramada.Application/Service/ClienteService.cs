@@ -1,12 +1,11 @@
 ﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Exceptions;
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using CompraProgramada.Domain.Entity;
+using CompraProgramada.Domain.Exceptions;
 using CompraProgramada.Domain.Interface;
 using OperationResult;
-using System.Net;
 
 namespace CompraProgramada.Application.Service;
 
@@ -16,11 +15,6 @@ public class ClienteService : IClienteService
     private readonly IContaGraficaService _contaService;
     private readonly ICestaRecomendadaService _cestaRecomendadaService;
     private readonly ICustodiaFilhoteService _custodiaFilhoteService;
-    private const string VALOR_MENSAL_MINIMO_CODIGO = "VALOR_MENSAL_INVALIDO";
-    private const string CPF_CADASTRADO_CODIGO = "CLIENTE_CPF_DUPLICADO";
-    private const string CLIENTE_NAO_ENCONTRADO_CODIGO = "CLIENTE_NAO_ENCONTRADO";
-    private const string CLIENTE_INATIVO_CODIGO = "CLIENTE_INATIVO";
-    private const decimal VALOR_MINIMO_ADESAO = 100;
 
     public ClienteService(IClienteRepository clienteRepository,
         IContaGraficaService contaService,
@@ -42,31 +36,21 @@ public class ClienteService : IClienteService
 
     public async Task<Result<ClienteDto>> AdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken)
     {
-        if (request.ValorMensal < VALOR_MINIMO_ADESAO)
-            return new ErroMapeadoException($"O valor mensal minimo e de R$ {VALOR_MINIMO_ADESAO.ToString("F2")}", VALOR_MENSAL_MINIMO_CODIGO);
-
         var clienteExistente = await _clienteRepository.ExisteAsync(request.Cpf, cancellationToken);
-
         if (clienteExistente)
-            return new ErroMapeadoException("CPF ja cadastrado no sistema.", CPF_CADASTRADO_CODIGO);
+            throw new CpfExistenteException();
 
         var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
-
         if (!cestaVigente.IsSuccess)
             return cestaVigente.Exception;
 
-        var cliente = new Cliente(
-            0,
-            request.Nome,
-            request.Cpf,
-            request.Email,
-            request.ValorMensal,
-            request.ValorMensal,
-            DateTime.UtcNow);
+        var cliente = Cliente.Criar(request.Nome, request.Cpf, request.Email, request.ValorMensal);
 
         var clienteSalvo = await _clienteRepository.CriarAsync(cliente, cancellationToken);
 
-        var contaSalva = await _contaService.GerarContaGraficaAsync(cliente.Id, cancellationToken);
+        var contaSalva = await _contaService.GerarContaGraficaAsync(clienteSalvo.Id, cancellationToken);
+        if (!contaSalva.IsSuccess)
+            return contaSalva.Exception;
 
         return GerarClienteDto(cliente);
     }
@@ -86,34 +70,31 @@ public class ClienteService : IClienteService
         var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
 
         if (cliente is null)
-            return ClienteNaoEncontradoResult();
+            throw new ClienteNaoEncontradoException();
 
         if (!cliente.Ativo)
-            return new ErroMapeadoException("Cliente já está com status inativo", CLIENTE_INATIVO_CODIGO);
+            return new ApplicationException("Cliente já está com status inativo");
 
-        var dadosAtualizadosCliente = cliente with { Ativo = false };
+        cliente.Desativar();
 
-        var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, dadosAtualizadosCliente, cancellationToken);
+        var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
 
         return GerarClienteDto(cliente);
     }
 
     public async Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
     {
-        if (request.NovoValorMensal < VALOR_MINIMO_ADESAO)
-            return new ErroMapeadoException("O valor mensal minimo e de R$ 100,00.", VALOR_MENSAL_MINIMO_CODIGO);
-
         var cliente = await _clienteRepository.ObterClienteAsync(request.ClienteId, cancellationToken);
 
         if (cliente is null)
-            return ClienteNaoEncontradoResult();
+            throw new ClienteNaoEncontradoException();
 
         if (!cliente.Ativo)
-            return new ErroMapeadoException("Cliente com status inativo", CLIENTE_INATIVO_CODIGO);
+            return new ApplicationException("Cliente com status inativo");
 
-        var dadosAtualizadosCliente = cliente with { ValorMensal = request.NovoValorMensal };
+        cliente.AtualizarValorMensal(request.NovoValorMensal);
 
-        var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, dadosAtualizadosCliente, cancellationToken);
+        var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
 
         return GerarClienteDto(clienteAtualizado);
     }
@@ -122,7 +103,7 @@ public class ClienteService : IClienteService
     {
         var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
         if (cliente is null)
-            return ClienteNaoEncontradoResult();
+            throw new ClienteNaoEncontradoException();
 
         var custodiasDto = cliente.ContaGrafica!.CustodiaFilhotes
             .Select(x => new CustodiaFilhoteDto(x.Id, x.ContaGraficaId, x.Ticker!, x.PrecoMedio, x.Quantidade)).ToList();
@@ -141,7 +122,7 @@ public class ClienteService : IClienteService
     {
         var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
         if (cliente is null)
-            return ClienteNaoEncontradoResult();
+            throw new ClienteNaoEncontradoException();
 
         if (!cliente!.ContaGrafica.HistoricoCompra.Any())
             return new ApplicationException("Cliente ainda não tem compras realizadas.");
@@ -166,9 +147,6 @@ public class ClienteService : IClienteService
 
         return new RentabilidadeResponse(cliente.Id, cliente.Nome, DateTime.Now, rentabilidadeResult.Value.Resumo, result.Value.HistoricoAportes, result.Value.EvolucaoCarteira);
     }
-
-    private ErroMapeadoException ClienteNaoEncontradoResult()
-        => new ErroMapeadoException("Cliente nao encontrado.", CLIENTE_NAO_ENCONTRADO_CODIGO, HttpStatusCode.NotFound);
 
     private ClienteDto GerarClienteDto(Cliente cliente)
         => new ClienteDto
