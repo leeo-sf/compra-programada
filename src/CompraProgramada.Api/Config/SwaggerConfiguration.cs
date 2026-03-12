@@ -13,6 +13,12 @@ internal static class SwaggerConfiguration
                 Version = "v1",
                 Description = "API compra programada de ações"
             });
+
+            var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
+            foreach (var xmlFile in xmlFiles)
+            {
+                opt.IncludeXmlComments(xmlFile);
+            }
         });
 
     public static void UseSwaggerConfiguration(this WebApplication app)

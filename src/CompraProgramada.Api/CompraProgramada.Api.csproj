@@ -6,7 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+	<ItemGroup>
 	<Content Include="..\..\cotacoes\**\*.*">
 	  <Link>cotacoes/%(RecursiveDir)%(FileName)%(Extension)</Link>
 	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
