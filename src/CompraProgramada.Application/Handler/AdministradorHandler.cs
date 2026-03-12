@@ -9,14 +9,13 @@ using OperationResult;
 namespace CompraProgramada.Application.Handler;
 
 public class AdministradorHandler
-    : IRequestHandler<CriarAlterarCestaRequest, Result<CriarAlterarCestaResponse>>,
+    : IRequestHandler<CriarCestaRecomendadaRequest, Result<CriarCestaRecomendadaResponse>>,
         IRequestHandler<CestaAtualRequest, Result<CestaRecomendadaResponse>>,
         IRequestHandler<CestaHistoricoRequest, Result<List<CestaRecomendadaResponse>>>
 {
     private readonly ILogger<AdministradorHandler> _logger;
     private readonly ICestaRecomendadaService _cestaService;
     private readonly IClienteService _clienteService;
-    private const string PRIMEIRA_CESTA_CADASTRADA_MENSAGEM = "Primeira cesta cadastrada com sucesso.";
 
     public AdministradorHandler(ILogger<AdministradorHandler> logger,
         IClienteService clienteService,
@@ -27,7 +26,7 @@ public class AdministradorHandler
         _cestaService = cestaService;
     }
 
-    public async Task<Result<CriarAlterarCestaResponse>> Handle(CriarAlterarCestaRequest request, CancellationToken cancellationToken)
+    public async Task<Result<CriarCestaRecomendadaResponse>> Handle(CriarCestaRecomendadaRequest request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando processo de criação de cesta: {Request}", request);
 
@@ -40,9 +39,12 @@ public class AdministradorHandler
         }
 
         if (!result.Value!.CestaAtualizada)
-            return MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, default, default, default, PRIMEIRA_CESTA_CADASTRADA_MENSAGEM);
-        
-        _logger.LogInformation("Cesta criada com sucesso!");
+        {
+            _logger.LogInformation("Cesta criada com sucesso!");
+            return MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, default, default, default, "Primeira cesta cadastrada com sucesso.");
+        }
+
+        _logger.LogInformation("Cesta alterada com sucesso!");
 
         var quantidadeUsuariosAtivos = await _clienteService.QuantidadeAtivosAsync(cancellationToken);
         if (!quantidadeUsuariosAtivos.IsSuccess)
@@ -94,8 +96,8 @@ public class AdministradorHandler
         }).ToList();
     }
 
-    private CriarAlterarCestaResponse MontarResponseCriarAlterarCesta(CestaRecomandadaDto cesta, bool atualizouCesta, CestaRecomandadaDto? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados, string mensagemOperacao)
-        => new CriarAlterarCestaResponse
+    private CriarCestaRecomendadaResponse MontarResponseCriarAlterarCesta(CestaRecomandadaDto cesta, bool atualizouCesta, CestaRecomandadaDto? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados, string mensagemOperacao)
+        => new CriarCestaRecomendadaResponse
         {
             CestaId = cesta.Id,
             Nome = cesta.Nome,

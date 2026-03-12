@@ -10,7 +10,7 @@ namespace CompraProgramada.Api.Controllers;
 public class AdministradorController(IMediator mediator) : BaseController(mediator)
 {
     [HttpPost("cesta")]
-    public async Task<ActionResult<CriarAlterarCestaResponse>> CestaAsync(CriarAlterarCestaRequest request)
+    public async Task<ActionResult<CriarCestaRecomendadaResponse>> CestaAsync(CriarCestaRecomendadaRequest request)
         => await SendCommand(request, 201);
 
     [HttpGet("cesta/atual")]

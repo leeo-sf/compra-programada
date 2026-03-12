@@ -41,7 +41,7 @@ public class CustodiaMasterService : ICustodiaMasterService
         if (contaMaster is null)
             return new ApplicationException("Conta master não encontrada!");
 
-        var custodias = residuos.Select(x => new CustodiaMaster { Id = 0, ContaMasterId = contaMaster.Id, Ticker = x.Ticker, QuantidadeResiduo = x.Quantidade }).ToList();
+        var custodias = residuos.Select(x => CustodiaMaster.CriarCustodia(contaMaster.Id, x.Ticker, x.Quantidade)).ToList();
 
         contaMaster.AtualizaCustodia(custodias);
 
@@ -60,13 +60,22 @@ public class CustodiaMasterService : ICustodiaMasterService
         if (custodias is null)
             return new ApplicationException("Conta master não encontrada!");
 
+        if (!custodias.Any())
+        {
+            var result = await RegistrarResiduosAsync(residuos.Select(x => new AtivoDto(x.Ticker, x.Quantidade)).ToList(), cancellationToken);
+            if (!result.IsSuccess)
+                return result.Exception;
+
+            return Result.Success();
+        }
+
         foreach (var custodia in custodias)
         {
             var ativo = residuos.FirstOrDefault(a => a.Ticker == custodia.Ticker);
             if (ativo is null)
                 continue;
 
-            custodia.QuantidadeResiduo = ativo.Quantidade;
+            custodia.AtualizarResiduo(ativo.Quantidade);
         }
 
         await _custodiaRepository.AtualizarResiduosAysnc(custodias, cancellationToken);
@@ -97,7 +106,7 @@ public class CustodiaMasterService : ICustodiaMasterService
         return custodiasParaAtualizar;
     }
     
-    public int SubtrairResiduosParaCompra(CustodiaMasterDto custodia, int quantidadeCompraAtivo)
+    public int SubtrairResiduosParaCompra(CustodiaMasterDto? custodia, int quantidadeCompraAtivo)
     {
         var residuoAtual = custodia?.QuantidadeResiduos ?? 0;
 

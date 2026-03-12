@@ -19,7 +19,7 @@ public class AdministradorControllerTests
     [Fact]
     public async Task Deve_Retornar_Sucesso_AoCriarCesta_Quando_Mediator_RetornaSucesso()
     {
-        var request = new CriarAlterarCestaRequest(
+        var request = new CriarCestaRecomendadaRequest(
             "Cesta Top Five",
             new List<ComposicaoCestaDto>
             {
@@ -31,7 +31,7 @@ public class AdministradorControllerTests
             }
         );
 
-        var response = new CriarAlterarCestaResponse
+        var response = new CriarCestaRecomendadaResponse
         {
             CestaId = 1,
             Nome = "Cesta Top Five",
@@ -62,7 +62,7 @@ public class AdministradorControllerTests
     [Fact]
     public async Task Deve_Retornar_Erro_AoCriarCesta_Quando_Mediator_RetornaErro()
     {
-        var request = new CriarAlterarCestaRequest(
+        var request = new CriarCestaRecomendadaRequest(
             "Cesta Top Five",
             new List<ComposicaoCestaDto>
             {
@@ -75,7 +75,7 @@ public class AdministradorControllerTests
 
         var erroMapeado = new Exception("bad");
 
-        _mediator.Send(request).Returns(Result.Error<CriarAlterarCestaResponse>(erroMapeado));
+        _mediator.Send(request).Returns(Result.Error<CriarCestaRecomendadaResponse>(erroMapeado));
 
         await _sut.CestaAsync(request);
 

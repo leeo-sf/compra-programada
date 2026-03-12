@@ -78,7 +78,6 @@ public static class AppConfiguration
         services.AddScoped<IClienteService, ClienteService>();
         services.AddScoped<IContaGraficaService, ContaGraficaService>();
         services.AddScoped<ICotacaoService, CotacaoService>();
-        services.AddScoped<ICustodiaFilhoteService, CustodiaFilhoteService>();
         services.AddScoped<ICustodiaMasterService, CustodiaMasterService>();
         services.AddScoped<IDistribuicaoService, DistribuicaoService>();
         services.AddScoped<IHistoricoExecucaoMotorService, HistoricoExecucaoMotorService>();

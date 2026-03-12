@@ -42,7 +42,7 @@ public class ContaGraficaRepository : IContaGraficaRepository
 
     public async Task<List<CustodiaFilhote>> AtualizarCustodiasAsync(List<CustodiaFilhote> custodias, CancellationToken cancellationToken)
     {
-        _context.Entry(custodias).CurrentValues.SetValues(custodias);
+        _context.CustodiaFilhote.UpdateRange(custodias);
         await _context.SaveChangesAsync(cancellationToken);
         return custodias;
     }

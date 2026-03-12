@@ -14,17 +14,14 @@ public class ClienteService : IClienteService
     private readonly IClienteRepository _clienteRepository;
     private readonly IContaGraficaService _contaService;
     private readonly ICestaRecomendadaService _cestaRecomendadaService;
-    private readonly ICustodiaFilhoteService _custodiaFilhoteService;
 
     public ClienteService(IClienteRepository clienteRepository,
         IContaGraficaService contaService,
-        ICestaRecomendadaService cestaRecomendadaService,
-        ICustodiaFilhoteService custodiaFilhoteService)
+        ICestaRecomendadaService cestaRecomendadaService)
     {
         _clienteRepository = clienteRepository;
         _contaService = contaService;
         _cestaRecomendadaService = cestaRecomendadaService;
-        _custodiaFilhoteService = custodiaFilhoteService;
     }
 
     public async Task<Result<List<ClienteDto>>> ObtemClientesAtivoAsync(CancellationToken cancellationToken)
@@ -61,9 +58,6 @@ public class ClienteService : IClienteService
 
         return quantidade;
     }
-
-    public Result<decimal> TotalConsolidade(List<ClienteDto> clientesAtivos)
-        => clientesAtivos.Sum(cliente => cliente.ValorMensal / 3);
 
     public async Task<Result<ClienteDto>> SairDoProdutoAsync(int clienteId, CancellationToken cancellationToken)
     {
@@ -108,7 +102,7 @@ public class ClienteService : IClienteService
         var custodiasDto = cliente.ContaGrafica!.CustodiaFilhotes
             .Select(x => new CustodiaFilhoteDto(x.Id, x.ContaGraficaId, x.Ticker!, x.PrecoMedio, x.Quantidade)).ToList();
 
-        var resumoRentabilidadeResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(custodiasDto, cancellationToken);
+        var resumoRentabilidadeResult = await _contaService.ObterRentabilidadeDaCertira(custodiasDto, cancellationToken);
         if (!resumoRentabilidadeResult.IsSuccess)
             return new ApplicationException("Falha ao obter detalhes da carteira.");
 
@@ -137,11 +131,11 @@ public class ClienteService : IClienteService
             conta.HistoricoCompra.Select(hc => new HistoricoCompraDto(conta.Id, hc.Ticker, hc.Quantidade, hc.ValorAporte, hc.PrecoExecutado, hc.PrecoMedio, hc.Data)).ToList(),
             conta.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(cf.Id, cf.ContaGraficaId, cf.Ticker, cf.PrecoMedio, cf.Quantidade)).ToList());
 
-        var rentabilidadeResult = await _custodiaFilhoteService.ObterRentabilidadeDaCertira(contaDto.CustodiaFilhotes, cancellationToken);
+        var rentabilidadeResult = await _contaService.ObterRentabilidadeDaCertira(contaDto.CustodiaFilhotes, cancellationToken);
         if (!rentabilidadeResult.IsSuccess)
             return rentabilidadeResult.Exception;
 
-        var result = await _custodiaFilhoteService.ObterEvolucaoDaCertira(contaDto, cancellationToken);
+        var result = await _contaService.ObterEvolucaoDaCertira(contaDto, cancellationToken);
         if (!result.IsSuccess)
             return result.Exception;
 
@@ -149,17 +143,16 @@ public class ClienteService : IClienteService
     }
 
     private ClienteDto GerarClienteDto(Cliente cliente)
-        => new ClienteDto
-        {
-            ClienteId = cliente.Id,
-            Nome = cliente.Nome,
-            Cpf = cliente.Cpf,
-            Email = cliente.Email,
-            ValorAnterior = cliente.ValorAnterior,
-            ValorMensal = cliente.ValorMensal,
-            Ativo = cliente.Ativo,
-            DataAdesao = cliente.DataAdesao,
-            ContaGrafica = new ContaGraficaDto(
+        => new ClienteDto(
+            cliente.Id,
+            cliente.Nome,
+            cliente.Cpf,
+            cliente.Email,
+            cliente.ValorAnterior,
+            cliente.ValorMensal,
+            cliente.Ativo,
+            cliente.DataAdesao,
+            new ContaGraficaDto(
                 cliente.ContaGrafica!.Id,
                 cliente.ContaGrafica.NumeroConta,
                 cliente.ContaGrafica.DataCriacao,
@@ -181,5 +174,5 @@ public class ClienteService : IClienteService
                     cf.Quantidade
                 )).ToList()
             )
-        };
+        );
 }

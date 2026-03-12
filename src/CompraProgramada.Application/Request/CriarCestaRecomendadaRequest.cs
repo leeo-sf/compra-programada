@@ -5,4 +5,5 @@ using OperationResult;
 
 namespace CompraProgramada.Application.Request;
 
-public record CriarAlterarCestaRequest(string Nome, List<ComposicaoCestaDto> Itens) : IRequest<Result<CriarAlterarCestaResponse>>;
+public record CriarCestaRecomendadaRequest(string Nome, List<ComposicaoCestaDto> Itens)
+    : IRequest<Result<CriarCestaRecomendadaResponse>>;

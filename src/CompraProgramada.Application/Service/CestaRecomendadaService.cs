@@ -10,12 +10,10 @@ namespace CompraProgramada.Application.Service;
 public class CestaRecomendadaService : ICestaRecomendadaService
 {
     private readonly ICestaRecomendadaRepository _cestaRepository;
-    private const string QUANTIDADE_INVALIDA_CODE = "QUANTIDADE_ATIVOS_INVALIDA";
-    private const string PERCENTUAIS_INVALIDO_CODE = "PERCENTUAIS_INVALIDOS";
 
     public CestaRecomendadaService(ICestaRecomendadaRepository cestaRepository) => _cestaRepository = cestaRepository;
 
-    public async Task<Result<CriarAlterarCestaDto>> CriarCestaAsync(CriarAlterarCestaRequest request, CancellationToken cancellationToken)
+    public async Task<Result<CriarCestaRecomendadaDto>> CriarCestaAsync(CriarCestaRecomendadaRequest request, CancellationToken cancellationToken)
     {
         var cestaAnterior = await DesativaCestaAtualAsync(cancellationToken);
 
@@ -23,7 +21,7 @@ public class CestaRecomendadaService : ICestaRecomendadaService
 
         var cestaCriada = await _cestaRepository.CriarAsync(CestaRecomendada.CriarCesta(request.Nome, itensCesta), cancellationToken);
 
-        return new CriarAlterarCestaDto(
+        return new CriarCestaRecomendadaDto(
             cestaAnterior is not null ? true : false,
             GerarCestaDto(cestaCriada),
             cestaAnterior is not null ? cestaAnterior : null);
@@ -83,7 +81,7 @@ public class CestaRecomendadaService : ICestaRecomendadaService
     public Result<List<ValorAtivoConsolidadoDto>> ValorPorAtivoConsolidado(CestaRecomandadaDto cesta, decimal totalConsolidado)
     {
         var valorPorAtivoConsolidado = cesta.Itens
-            .Select(ativo => new ValorAtivoConsolidadoDto { Ticker = ativo.Ticker, ValorDeCompraPorAtivo = totalConsolidado * (ativo.Percentual / 100) })
+            .Select(ativo => new ValorAtivoConsolidadoDto(ativo.Ticker, totalConsolidado * (ativo.Percentual / 100)))
             .ToList();
 
         return valorPorAtivoConsolidado;

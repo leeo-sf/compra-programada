@@ -28,22 +28,6 @@ public class CotacaoService : ICotacaoService
         _cestaService = cestaService;
     }
 
-    public async Task<Result<CotacaoDto>> ObterCotacaoAsync(DateTime dataPregao, CancellationToken cancellationToken)
-    {
-        var cotacao = await _cotacaoRepository.ObterCotacaoAsync(dataPregao, cancellationToken);
-
-        if (cotacao is null)
-            return new ApplicationException($"Não existe cotação para a data informada {dataPregao:dd/mm/yyyy}");
-
-        var result = new CotacaoDto
-        {
-            DataPregao = cotacao.DataPregao,
-            Itens = cotacao.ComposicaoCotacao.Select(i => new ComposicaoCotacaoDto(i.Ticker, i.PrecoFechamento)).ToList()
-        };
-
-        return result;
-    }
-
     public async Task<Result<CotacaoDto>> ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(CancellationToken cancellationToken)
     {
         var caminhoArquivoUltimoPregao = _fileService.ObterCaminhoCompletoArquivoCotacoes();
@@ -51,7 +35,6 @@ public class CotacaoService : ICotacaoService
         var cotacoesB3 = _cotahistParser.ParseArquivo(caminhoArquivoUltimoPregao);
 
         var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
-
         if (!cestaVigente.IsSuccess)
             throw new ApplicationException(cestaVigente.Exception.Message);
 
@@ -73,10 +56,43 @@ public class CotacaoService : ICotacaoService
         return result;
     }
 
+    public async Task<Result<List<FechamentoAtivoB3Dto>>> ObterCombinacoesFechamentoECompraAtivoAsync(decimal totalConsolidado, CancellationToken cancellationToken)
+    {
+        var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
+        if (!cestaVigente.IsSuccess)
+            throw new ApplicationException(cestaVigente.Exception!.Message);
+
+        _logger.LogInformation("Obtido cesta vigente para processamento: {CestaRecomendada}", cestaVigente.Value);
+
+        var valoresPorAtivoConsolidado = _cestaService.ValorPorAtivoConsolidado(cestaVigente.Value!, totalConsolidado);
+        if (!valoresPorAtivoConsolidado.IsSuccess || valoresPorAtivoConsolidado.Value is null)
+            throw new ApplicationException("Erro ao obter valor por ativo consolidado");
+
+        _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado.Value);
+
+        var combinacoesFechamento = await ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
+        if (!combinacoesFechamento.IsSuccess)
+            throw combinacoesFechamento.Exception;
+
+        _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado.Value);
+
+        var combinacoesFechamentoECompra = combinacoesFechamento.Value.Itens.Join(
+            valoresPorAtivoConsolidado.Value!,
+            cotacaoFechamento => cotacaoFechamento.Ticker,
+            valorPorAtivoConsolidado => valorPorAtivoConsolidado.Ticker,
+            (cotacaoFechamento, valorPorAtivoConsolidado) => new FechamentoAtivoB3Dto(
+                cotacaoFechamento.Ticker,
+                cotacaoFechamento.PrecoFechamento,
+                valorPorAtivoConsolidado.ValorDeCompraAtivo
+            )).ToList();
+
+        return combinacoesFechamentoECompra;
+    }
+
     public async Task<Result<CotacaoDto>> SalvarCotacaoAsync(CotacaoDto cotacao, CancellationToken cancellationToken)
     {
-        var itensComposicao = cotacao.Itens.Select(i => new ComposicaoCotacao(0, 0, i.Ticker, i.PrecoFechamento)).ToList();
-        var cotacaoSalva = await _cotacaoRepository.SalvarCotacaoAsync(new(0, cotacao.DataPregao) { ComposicaoCotacao = itensComposicao }, cancellationToken);
+        var itensComposicao = cotacao.Itens.Select(i => ComposicaoCotacao.CriarItem(i.Ticker, i.PrecoFechamento)).ToList();
+        var cotacaoSalva = await _cotacaoRepository.SalvarCotacaoAsync(Cotacao.CriarRegistro(cotacao.DataPregao, itensComposicao), cancellationToken);
 
         var result = new CotacaoDto
         {

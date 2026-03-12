@@ -35,33 +35,11 @@ public class DistribuicaoService : IDistribuicaoService
         _contaGraficaService = contaGraficaService;
     }
 
-    public async Task<(List<AtivoAhCompraDto>, List<FechamentoAtivoB3Dto>)> DistribuirGrupoAtivoAsync(List<ClienteDto> clientesAtivos, decimal totalConsolidado, DateTime dataExeucao,  CancellationToken cancellationToken)
+    public async Task<Result<List<AtivoAhCompraDto>>> DistribuirGrupoAtivoAsync(List<ClienteDto> clientesAtivos, decimal totalConsolidado, DateTime dataExeucao,  CancellationToken cancellationToken)
     {
-        var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
-        if (!cestaVigente.IsSuccess)
-            throw new ApplicationException(cestaVigente.Exception!.Message);
-
-        _logger.LogInformation("Obtido cesta vigente para processamento: {CestaRecomendada}", cestaVigente.Value);
-
-        var valoresPorAtivoConsolidado = _cestaService.ValorPorAtivoConsolidado(cestaVigente.Value!, totalConsolidado);
-        if (!valoresPorAtivoConsolidado.IsSuccess || valoresPorAtivoConsolidado.Value is null)
-            throw new ApplicationException("Erro ao obter valor por ativo consolidado");
-
-        _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado.Value);
-
-        var cotacoesFechamento = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
-        if (!cotacoesFechamento.IsSuccess)
-            throw cotacoesFechamento.Exception;
-
-        var combinacoesFechamentoECompra = cotacoesFechamento.Value.Itens.Join(
-            valoresPorAtivoConsolidado.Value!,
-            cotacaoFechamento => cotacaoFechamento.Ticker,
-            valorPorAtivoConsolidado => valorPorAtivoConsolidado.Ticker,
-            (cotacaoFechamento, valorPorAtivoConsolidado) => new FechamentoAtivoB3Dto(
-                cotacaoFechamento.Ticker,
-                cotacaoFechamento.PrecoFechamento,
-                valorPorAtivoConsolidado.ValorDeCompraPorAtivo
-            )).ToList();
+        var combinacoesFechamentoECompra = await _cotacaoService.ObterCombinacoesFechamentoECompraAtivoAsync(totalConsolidado, cancellationToken);
+        if (!combinacoesFechamentoECompra.IsSuccess)
+            throw combinacoesFechamentoECompra.Exception;
 
         var residuosNaoDistribuidos = await _custodiaMasterService.ObterResiduosNaoDistribuidos(cancellationToken);
         if (!residuosNaoDistribuidos.IsSuccess)
@@ -70,13 +48,13 @@ public class DistribuicaoService : IDistribuicaoService
         var grupoAtivosAhDistribuir = new List<AtivoAhCompraDto>();
         var residuosAtualizados = new List<ResiduoCustodiaMasterDto>();
 
-        foreach (var fechamento in combinacoesFechamentoECompra)
+        foreach (var fechamento in combinacoesFechamentoECompra.Value)
         {
-            var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker)!;
-            var residuosAtuais = custodia.QuantidadeResiduos;
+            var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
+            var residuosAtuais = custodia?.QuantidadeResiduos ?? 0;
             var qtdNecessariaParaDistribuicao = (int)Math.Truncate(fechamento.ValorAhCompra / fechamento.PrecoFechamento);
 
-            var quantidadeDeCompraAtivo = _custodiaMasterService.SubtrairResiduosParaCompra(custodia!, qtdNecessariaParaDistribuicao);
+            var quantidadeDeCompraAtivo = _custodiaMasterService.SubtrairResiduosParaCompra(custodia, qtdNecessariaParaDistribuicao);
             var qtdSobraResiduos = residuosAtuais - Math.Abs(quantidadeDeCompraAtivo - qtdNecessariaParaDistribuicao);
 
             var grupo = new ResiduoCustodiaMasterDto(fechamento.Ticker, qtdSobraResiduos);
@@ -89,7 +67,7 @@ public class DistribuicaoService : IDistribuicaoService
         if (!residuosAtualizadosResult.IsSuccess)
             throw residuosAtualizadosResult.Exception;
 
-        return (grupoAtivosAhDistribuir, combinacoesFechamentoECompra);
+        return grupoAtivosAhDistribuir;
     }
 
     public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasAsync(List<ClienteDto> clientes, List<AtivoAhCompraDto> grupoAtivoCompra, decimal totalConsolidado, DateTime dataExeucao, CancellationToken cancellationToken)
@@ -176,8 +154,9 @@ public class DistribuicaoService : IDistribuicaoService
 
     public async Task<Result> SalvarDistribuicoesAsync(List<DistribuicaoDto> ditribuicoes, List<OrdemCompraDto> ordensCompraAtivos, CancellationToken cancellationToken)
     {
-        var distribuicoesAhSeremSalvas = ditribuicoes.Select(d => new Distribuicao(
-            0, ordensCompraAtivos.First(x => x.Ticker == d.Ticker).Id, d.ContaGraficaId, d.Ticker, d.QuantidadeAlocada, d.ValorOperacao)).ToList();
+        var distribuicoesAhSeremSalvas = ditribuicoes
+            .Select(d => Distribuicao.CriarDistribuicao(
+                ordensCompraAtivos.First(x => x.Ticker == d.Ticker).Id, d.ContaGraficaId, d.Ticker, d.QuantidadeAlocada, d.ValorOperacao)).ToList();
 
         await _distribuicaoRepository.SalvarDistribuicoesAsync(distribuicoesAhSeremSalvas, cancellationToken);
 

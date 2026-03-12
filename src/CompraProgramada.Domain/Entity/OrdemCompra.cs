@@ -3,7 +3,7 @@
 public class OrdemCompra
 {
     public int Id { get; protected set; }
-    public string Ticker { get; protected set; }
+    public string Ticker { get; protected set; } = string.Empty;
     public int QuantidadeTotal { get; protected set; }
     public decimal PrecoUnitario { get; protected set; }
     public decimal ValorTotal { get; protected set; }
@@ -11,7 +11,9 @@ public class OrdemCompra
     public List<Distribuicao> Distribuicoes { get; init; } = new List<Distribuicao>();
     public List<OrdemCompraDetalhe> Detalhes { get; init; } = new List<OrdemCompraDetalhe>();
 
-    public OrdemCompra(int id, string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal, DateTime data)
+    private OrdemCompra() { }
+
+    internal OrdemCompra(int id, string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal, DateTime data)
     {
         Id = id;
         Ticker = ticker;
