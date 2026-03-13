@@ -8,8 +8,8 @@ namespace CompraProgramada.Application.Interface;
 public interface IClienteService
 {
     Task<Result<List<ClienteDto>>> ObtemClientesAtivoAsync(CancellationToken cancellationToken);
-    Task<Result<int>> QuantidadeAtivosAsync(CancellationToken cancellationToken);
-    Task<Result<ClienteDto>> AdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken);
+    Task<Result<int>> QuantidadeClientesAtivosAsync(CancellationToken cancellationToken);
+    Task<Result<ClienteDto>> RealizarAdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken);
     Task<Result<ClienteDto>> SairDoProdutoAsync(int clienteId, CancellationToken cancellationToken);
     Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken);
     Task<Result<CarteiraCustodiaResponse>> ConsultarCarteiraAsync(int clienteId, CancellationToken cancellationToken);

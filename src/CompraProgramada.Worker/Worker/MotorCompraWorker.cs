@@ -27,7 +27,7 @@ public class MotorCompraWorker : BackgroundService
         {
             try
             {
-                _logger.LogInformation("Iniciando o MotorCompra...");
+                _logger.LogInformation("Iniciando o motor de compra...");
 
                 using var scope = _serviceScopeFactory.CreateScope();
 
@@ -35,11 +35,11 @@ public class MotorCompraWorker : BackgroundService
 
                 await motorCompraService.ExecutarCompraAsync(null, stoppingToken);
 
-                _logger.LogInformation("MotorCompra finalizado com sucesso.");
+                _logger.LogInformation("Motor de compra finalizado com sucesso.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ocorreu um um erro ao executar o motor de compras.");
+                _logger.LogError(ex, "Ocorreu um erro ao executar o motor de compra.");
                 throw;
             }
         }

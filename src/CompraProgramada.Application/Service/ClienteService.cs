@@ -31,7 +31,7 @@ public class ClienteService : IClienteService
         return clientes.Select(c => GerarClienteDto(c)).ToList();
     }
 
-    public async Task<Result<ClienteDto>> AdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken)
+    public async Task<Result<ClienteDto>> RealizarAdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken)
     {
         var clienteExistente = await _clienteRepository.ExisteAsync(request.Cpf, cancellationToken);
         if (clienteExistente)
@@ -52,7 +52,7 @@ public class ClienteService : IClienteService
         return GerarClienteDto(cliente);
     }
 
-    public async Task<Result<int>> QuantidadeAtivosAsync(CancellationToken cancellationToken)
+    public async Task<Result<int>> QuantidadeClientesAtivosAsync(CancellationToken cancellationToken)
     {
         var quantidade = await _clienteRepository.QuantidadeAtivosAsync(cancellationToken);
 

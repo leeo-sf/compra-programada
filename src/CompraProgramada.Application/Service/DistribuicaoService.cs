@@ -35,8 +35,10 @@ public class DistribuicaoService : IDistribuicaoService
         _contaGraficaService = contaGraficaService;
     }
 
-    public async Task<Result<List<AtivoAhCompraDto>>> DistribuirGrupoAtivoAsync(List<ClienteDto> clientesAtivos, decimal totalConsolidado, DateTime dataExeucao,  CancellationToken cancellationToken)
+    public async Task<(List<DistribuicaoDto>, List<AtivoAhCompraDto>)> RealizarDistribuicoesAsync(List<ClienteDto> clientesAtivos, DateTime dataExecucao, List<OrdemCompraDto> ordensCompra, CancellationToken cancellationToken)
     {
+        var totalConsolidado = clientesAtivos.Sum(cliente => cliente.ValorMensal / 3);
+
         var combinacoesFechamentoECompra = await _cotacaoService.ObterCombinacoesFechamentoECompraAtivoAsync(totalConsolidado, cancellationToken);
         if (!combinacoesFechamentoECompra.IsSuccess)
             throw combinacoesFechamentoECompra.Exception;
@@ -67,10 +69,16 @@ public class DistribuicaoService : IDistribuicaoService
         if (!residuosAtualizadosResult.IsSuccess)
             throw residuosAtualizadosResult.Exception;
 
-        return grupoAtivosAhDistribuir;
+        var distribuicoesRealizadasResult = await DistribuirCustodiasAsync(clientesAtivos, grupoAtivosAhDistribuir, totalConsolidado, dataExecucao, ordensCompra, cancellationToken);
+        if (!distribuicoesRealizadasResult.IsSuccess)
+            throw distribuicoesRealizadasResult.Exception;
+
+        _logger.LogInformation("Distribuição para as custodias realizada.");
+
+        return (distribuicoesRealizadasResult.Value, grupoAtivosAhDistribuir);
     }
 
-    public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasAsync(List<ClienteDto> clientes, List<AtivoAhCompraDto> grupoAtivoCompra, decimal totalConsolidado, DateTime dataExeucao, CancellationToken cancellationToken)
+    public async Task<Result<List<DistribuicaoDto>>> DistribuirCustodiasAsync(List<ClienteDto> clientes, List<AtivoAhCompraDto> grupoAtivoCompra, decimal totalConsolidado, DateTime dataExeucao, List<OrdemCompraDto> ordensCompra, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando processo de distribuição dos ativos para os clientes. Grupo: {Ativos}", grupoAtivoCompra);
         var distribuicao = new List<DistribuicaoDto>();
@@ -148,6 +156,8 @@ public class DistribuicaoService : IDistribuicaoService
         var historicosCompra = contasClientesAtualizadas.SelectMany(x => x.HistoricoCompra!).ToList();
         await _contaGraficaService.RegistrarComprasAsync(historicosCompra, cancellationToken);
         _logger.LogInformation("Registrado o histórico de compras dos clientes na base.");
+
+        await SalvarDistribuicoesAsync(distribuicao, ordensCompra, cancellationToken);
 
         return distribuicao;
     }

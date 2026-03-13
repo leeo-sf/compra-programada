@@ -2,14 +2,14 @@
 
 public class OrdemCompra
 {
-    public int Id { get; protected set; }
-    public string Ticker { get; protected set; } = string.Empty;
-    public int QuantidadeTotal { get; protected set; }
-    public decimal PrecoUnitario { get; protected set; }
-    public decimal ValorTotal { get; protected set; }
-    public DateTime Data { get; protected set; }
-    public List<Distribuicao> Distribuicoes { get; init; } = new List<Distribuicao>();
-    public List<OrdemCompraDetalhe> Detalhes { get; init; } = new List<OrdemCompraDetalhe>();
+    public int Id { get; init; }
+    public string Ticker { get; init; } = string.Empty;
+    public int QuantidadeTotal { get; init; }
+    public decimal PrecoUnitario { get; init; }
+    public decimal ValorTotal { get; init; }
+    public DateTime Data { get; init; }
+    public List<Distribuicao> Distribuicoes { get; private set; } = new List<Distribuicao>();
+    public List<OrdemCompraDetalhe> Detalhes { get; private set; } = new List<OrdemCompraDetalhe>();
 
     private OrdemCompra() { }
 
@@ -34,6 +34,14 @@ public class OrdemCompra
         Detalhes = detalhes;
     }
 
-    public static OrdemCompra GerarOrdemCompra(string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal, List<OrdemCompraDetalhe> detalhes)
-        => new OrdemCompra(0, ticker, quantidadeTotal, precoUnitario, quantidadeTotal * precoUnitario, DateTime.Now, detalhes);
+    public static OrdemCompra GerarOrdemCompra(string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal)
+    {
+        var multiplosPresente = Math.DivRem(quantidadeTotal, 100, out int restos);
+        var detalhes = new List<OrdemCompraDetalhe>() { OrdemCompraDetalhe.GerarDetalhes("FRACIONARIO", $"{ticker}F", restos, 0) };
+
+        if (multiplosPresente > 0)
+            detalhes.Add(OrdemCompraDetalhe.GerarDetalhes("PADRAO", ticker, multiplosPresente * 100, 0));
+
+        return new OrdemCompra(0, ticker, quantidadeTotal, precoUnitario, valorTotal, DateTime.Now, detalhes);
+    }
 }

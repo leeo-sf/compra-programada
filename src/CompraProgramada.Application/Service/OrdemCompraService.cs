@@ -2,35 +2,73 @@
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using Microsoft.Extensions.Logging;
 using OperationResult;
 
 namespace CompraProgramada.Application.Service;
 
 public class OrdemCompraService : IOrdemCompraService
 {
+    private readonly ILogger<OrdemCompraService> _logger;
     private readonly IOrdemCompraRepository _ordemCompraRepository;
+    private readonly ICotacaoService _cotacaoService;
+    private readonly ICustodiaMasterService _custodiaMasterService;
 
-    public OrdemCompraService(IOrdemCompraRepository ordemCompraRepository) => _ordemCompraRepository = ordemCompraRepository;
-
-    public async Task<Result<List<OrdemCompraDto>>> RegistrarOrdensDeCompraAsync(List<OrdemCompraDto> ordensCompraDto, CancellationToken cancellationToken)
+    public OrdemCompraService(ILogger<OrdemCompraService> logger,
+        IOrdemCompraRepository ordemCompraRepository,
+        ICotacaoService cotacaoService,
+        ICustodiaMasterService custodiaMasterService)
     {
-        if (!ordensCompraDto.Any())
-            return new ApplicationException("Pelo menos uma ordem de compra deve ser informada para registro");
+        _logger = logger;
+        _ordemCompraRepository = ordemCompraRepository;
+        _cotacaoService = cotacaoService;
+        _custodiaMasterService = custodiaMasterService;
+    }
 
-        var ordensCompra = ordensCompraDto
-            .Select(oc => OrdemCompra.GerarOrdemCompra(oc.Ticker, oc.QuantidadeTotal, oc.PrecoUnitario, oc.ValorTotal,
-                oc.Detalhes.Select(d => OrdemCompraDetalhe.GerarDetalhes(d.Tipo, d.Ticker, d.Quantidade, 0)).ToList())).ToList();
+    public async Task<Result<List<OrdemCompraDto>>> EmitirOrdensDeCompraAsync(decimal valorTotalConsolidado, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Iniciando emissão de ordens de compra...");
 
-        var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensDeCompra(ordensCompra, cancellationToken);
+        var fechamentosResult = await _cotacaoService.ObterCombinacoesFechamentoECompraAtivoAsync(valorTotalConsolidado, cancellationToken);
+        if (!fechamentosResult.IsSuccess)
+            throw fechamentosResult.Exception;
 
-        var result = ordensCompraEmitidas
+        var fechamentos = fechamentosResult.Value;
+
+        _logger.LogInformation("Fechamento dos ativos correspondentes a cesta atual obtidos: {Fechamentos}", fechamentos);
+
+        var residuosNaoDistribuidos = await _custodiaMasterService.ObterResiduosNaoDistribuidos(cancellationToken);
+        if (!residuosNaoDistribuidos.IsSuccess)
+            throw residuosNaoDistribuidos.Exception;
+
+        var ordensDeCompra = new List<OrdemCompra>();
+        foreach (var fechamento in fechamentos)
+        {
+            var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
+
+            var qtdNecessariaParaDistribuicao = (int)Math.Truncate(fechamento.ValorAhCompra / fechamento.PrecoFechamento);
+
+            var quantidadeDeCompraAtivo = _custodiaMasterService.SubtrairResiduosParaCompra(custodia, qtdNecessariaParaDistribuicao);
+
+            var valorTotal = quantidadeDeCompraAtivo * fechamento.PrecoFechamento;
+
+            ordensDeCompra.Add(OrdemCompra.GerarOrdemCompra(
+                fechamento.Ticker,
+                quantidadeDeCompraAtivo,
+                fechamento.PrecoFechamento,
+                valorTotal));
+        }
+
+        var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensDeCompra(ordensDeCompra, cancellationToken);
+
+        _logger.LogInformation("Ordens de compra emitidas e registradas.");
+
+        return ordensCompraEmitidas
             .Select(oc => new OrdemCompraDto(
                 oc.Id,
                 oc.Ticker,
                 oc.QuantidadeTotal,
                 oc.Detalhes.Select(d => new DetalheOrdemCompraDto(d.Tipo, d.Ticker, d.Quantidade)).ToList(),
                 oc.PrecoUnitario)).ToList();
-
-        return result;
     }
 }

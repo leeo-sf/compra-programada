@@ -46,7 +46,7 @@ public class AdministradorHandler
 
         _logger.LogInformation("Cesta alterada com sucesso!");
 
-        var quantidadeUsuariosAtivos = await _clienteService.QuantidadeAtivosAsync(cancellationToken);
+        var quantidadeUsuariosAtivos = await _clienteService.QuantidadeClientesAtivosAsync(cancellationToken);
         if (!quantidadeUsuariosAtivos.IsSuccess)
             return quantidadeUsuariosAtivos.Exception;
 

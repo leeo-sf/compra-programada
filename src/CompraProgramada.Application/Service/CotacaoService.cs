@@ -58,15 +58,9 @@ public class CotacaoService : ICotacaoService
 
     public async Task<Result<List<FechamentoAtivoB3Dto>>> ObterCombinacoesFechamentoECompraAtivoAsync(decimal totalConsolidado, CancellationToken cancellationToken)
     {
-        var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
-        if (!cestaVigente.IsSuccess)
-            throw new ApplicationException(cestaVigente.Exception!.Message);
-
-        _logger.LogInformation("Obtido cesta vigente para processamento: {CestaRecomendada}", cestaVigente.Value);
-
-        var valoresPorAtivoConsolidado = _cestaService.ValorPorAtivoConsolidado(cestaVigente.Value!, totalConsolidado);
-        if (!valoresPorAtivoConsolidado.IsSuccess || valoresPorAtivoConsolidado.Value is null)
-            throw new ApplicationException("Erro ao obter valor por ativo consolidado");
+        var valoresPorAtivoConsolidado = await _cestaService.ValorPorAtivoConsolidado(totalConsolidado, cancellationToken);
+        if (!valoresPorAtivoConsolidado.IsSuccess)
+            return valoresPorAtivoConsolidado.Exception;
 
         _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado.Value);
 
