@@ -13,8 +13,6 @@ public class DistribuicaoService : IDistribuicaoService
     private readonly IDistribuicaoRepository _distribuicaoRepository;
     private readonly ICustodiaMasterService _custodiaMasterService;
     private readonly ICotacaoService _cotacaoService;
-    private readonly ICestaRecomendadaService _cestaService;
-    private readonly IPrecoMedioService _precoMedioService;
     private readonly IContaGraficaService _contaGraficaService;
 
     public DistribuicaoService(ILogger<DistribuicaoService> logger,
@@ -22,16 +20,12 @@ public class DistribuicaoService : IDistribuicaoService
         ICustodiaMasterService custodiaMasterService,
         ICotahistParserService cotahistParser,
         ICotacaoService cotacaoService,
-        ICestaRecomendadaService cestaService,
-        IPrecoMedioService precoMedioService,
         IContaGraficaService contaGraficaService)
     {
         _logger = logger;
         _distribuicaoRepository = distribuicaoRepository;
         _custodiaMasterService = custodiaMasterService;
         _cotacaoService = cotacaoService;
-        _cestaService = cestaService;
-        _precoMedioService = precoMedioService;
         _contaGraficaService = contaGraficaService;
     }
 
@@ -95,7 +89,7 @@ public class DistribuicaoService : IDistribuicaoService
 
                 var quantidadeNovasAcoes = (int)Math.Truncate(ativo.Quantidade * (cliente.ValorAporte / totalConsolidado));
 
-                var precoMedio = _precoMedioService.CalcularPrecoMedio(new PrecoMedioDto { PrecoMedioAnterior = custodiaAtualCliente!.PrecoMedio, PrecoFechamentoAtivo = ativo.PrecoFechamento, QuantidadeAtivosAnterior = custodiaAtualCliente.Quantidade, QuantidadeNovosAtivos = quantidadeNovasAcoes });
+                var precoMedio = CalcularPrecoMedio(new PrecoMedioDto { PrecoMedioAnterior = custodiaAtualCliente!.PrecoMedio, PrecoFechamentoAtivo = ativo.PrecoFechamento, QuantidadeAtivosAnterior = custodiaAtualCliente.Quantidade, QuantidadeNovosAtivos = quantidadeNovasAcoes });
 
                 var custodiaAhSerAtualizada = contasClientesAtualizadas.FirstOrDefault(x => x.Id == contaCliente.Id);
 
@@ -103,7 +97,7 @@ public class DistribuicaoService : IDistribuicaoService
                     custodiaAtualCliente!.Id,
                     custodiaAtualCliente.ContaGraficaId,
                     custodiaAtualCliente.Ticker!,
-                    precoMedio.Value,
+                    precoMedio,
                     custodiaAtualCliente.Quantidade + quantidadeNovasAcoes
                 );
 
@@ -113,7 +107,7 @@ public class DistribuicaoService : IDistribuicaoService
                     quantidadeNovasAcoes,
                     cliente.ValorAporte,
                     ativo.PrecoFechamento,
-                    precoMedio.Value,
+                    precoMedio,
                     DateOnly.FromDateTime(dataExeucao));
 
                 if (custodiaAhSerAtualizada is null)
@@ -173,5 +167,22 @@ public class DistribuicaoService : IDistribuicaoService
         _logger.LogInformation("Registrado distribuições de custodias na base de dados");
 
         return Result.Success();
+    }
+
+    public decimal CalcularPrecoMedio(PrecoMedioDto custodia)
+    {
+        if (custodia.QuantidadeNovosAtivos == 0)
+            return 0;
+
+        decimal precoMedio = 0;
+        var valorCompraAnterior = custodia.QuantidadeAtivosAnterior * custodia.PrecoMedioAnterior;
+        var valorCompraAtual = custodia.QuantidadeNovosAtivos * custodia.PrecoFechamentoAtivo;
+
+        if (custodia.QuantidadeAtivosAnterior > 0)
+            precoMedio = (valorCompraAnterior + valorCompraAtual) / custodia.QuantidadeAtivosAnterior + custodia.QuantidadeNovosAtivos;
+        else
+            precoMedio = valorCompraAtual / custodia.QuantidadeNovosAtivos;
+
+        return precoMedio;
     }
 }
