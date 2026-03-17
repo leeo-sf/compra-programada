@@ -1,10 +1,10 @@
 ﻿namespace CompraProgramada.Application.Response;
 
-public class SaidaProdutoResponse
+public record SaidaProdutoResponse(
+    int ClienteId,
+    string Nome,
+    bool Ativo)
 {
-    public required int ClienteId { get; set; }
-    public required string Nome { get; set; }
-    public bool Ativo { get; set; } = false;
-    public DateTime DataSaida { get; set; } = DateTime.Now;
-    public string Mensagem { get; set; } = "Adesao encerrada. Sua posicao em custodia foi mantida.";
+    public DateTime DataSaida { get; } = DateTime.Now;
+    public string Mensagem { get; } = "Adesao encerrada. Sua posicao em custodia foi mantida.";
 }

@@ -91,14 +91,11 @@ public class ClienteControllerTests
     public async Task Deve_Retornar_Sucesso_AoSairDoProduto_Quando_Mediator_RetornaSucesso()
     {
         var request = new SaidaProdutoRequest(1);
-        var response = new SaidaProdutoResponse
-        {
-            ClienteId = 1,
-            Nome = "Nome",
-            Ativo = false,
-            DataSaida = DateTime.Now,
-            Mensagem = "Adesão encerrada"
-        };
+        var response = new SaidaProdutoResponse(
+            1,
+            "Nome",
+            false
+        );
 
         _mediator.Send(request).Returns(Result.Success(response));
 
@@ -124,12 +121,11 @@ public class ClienteControllerTests
     public async Task Deve_Retornar_Sucesso_AoAlterarValorMensal_Quando_Mediator_RetornaSucesso()
     {
         var request = new AtualizarValorMensalRequest(1, 1000m);
-        var response = new AtualizarValorMensalResponse
-        {
-            ClienteId = 1,
-            ValorMensalAnterior = 100,
-            ValorMensalNovo = 1000
-        };
+        var response = new AtualizarValorMensalResponse(
+            1,
+            100,
+            1000
+        );
 
         _mediator.Send(request).Returns(Result.Success(response));
 

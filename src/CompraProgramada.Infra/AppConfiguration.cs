@@ -1,5 +1,6 @@
 ﻿using CompraProgramada.Application.Config;
 using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Data;
 using CompraProgramada.Data.Repository;
@@ -117,5 +118,11 @@ public static class AppConfiguration
     {
         services.AddExceptionHandler<DomainExceptionHandler>();
         services.AddProblemDetails();
+    }
+
+    private static void ConfigurarMappers(this IServiceCollection services)
+    {
+        services.AddSingleton<ClienteMapper>();
+        services.AddSingleton<ContaMapper>();
     }
 }

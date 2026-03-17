@@ -1,5 +1,6 @@
 ﻿using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using CompraProgramada.Domain.Entity;
@@ -14,21 +15,24 @@ public class ClienteService : IClienteService
     private readonly IClienteRepository _clienteRepository;
     private readonly IContaGraficaService _contaService;
     private readonly ICestaRecomendadaService _cestaRecomendadaService;
+    private readonly ClienteMapper _mapper;
 
     public ClienteService(IClienteRepository clienteRepository,
         IContaGraficaService contaService,
-        ICestaRecomendadaService cestaRecomendadaService)
+        ICestaRecomendadaService cestaRecomendadaService,
+        ClienteMapper mapper)
     {
         _clienteRepository = clienteRepository;
         _contaService = contaService;
         _cestaRecomendadaService = cestaRecomendadaService;
+        _mapper = mapper;
     }
 
     public async Task<Result<List<ClienteDto>>> ObtemClientesAtivoAsync(CancellationToken cancellationToken)
     {
         var clientes = await _clienteRepository.ObterClientesAtivosAsync(cancellationToken);
 
-        return clientes.Select(c => GerarClienteDto(c)).ToList();
+        return _mapper.ToResponse(clientes);
     }
 
     public async Task<Result<ClienteDto>> RealizarAdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken)
@@ -49,7 +53,7 @@ public class ClienteService : IClienteService
         if (!contaSalva.IsSuccess)
             return contaSalva.Exception;
 
-        return GerarClienteDto(cliente);
+        return _mapper.ToResponse(cliente);
     }
 
     public async Task<Result<int>> QuantidadeClientesAtivosAsync(CancellationToken cancellationToken)
@@ -73,7 +77,7 @@ public class ClienteService : IClienteService
 
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
 
-        return GerarClienteDto(cliente);
+        return _mapper.ToResponse(clienteAtualizado);
     }
 
     public async Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
@@ -90,7 +94,7 @@ public class ClienteService : IClienteService
 
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
 
-        return GerarClienteDto(clienteAtualizado);
+        return _mapper.ToResponse(clienteAtualizado);
     }
 
     public async Task<Result<CarteiraCustodiaResponse>> ConsultarCarteiraAsync(int clienteId, CancellationToken cancellationToken)
@@ -141,38 +145,4 @@ public class ClienteService : IClienteService
 
         return new RentabilidadeResponse(cliente.Id, cliente.Nome, DateTime.Now, rentabilidadeResult.Value.Resumo, result.Value.HistoricoAportes, result.Value.EvolucaoCarteira);
     }
-
-    private ClienteDto GerarClienteDto(Cliente cliente)
-        => new ClienteDto(
-            cliente.Id,
-            cliente.Nome,
-            cliente.Cpf,
-            cliente.Email,
-            cliente.ValorAnterior,
-            cliente.ValorMensal,
-            cliente.Ativo,
-            cliente.DataAdesao,
-            new ContaGraficaDto(
-                cliente.ContaGrafica!.Id,
-                cliente.ContaGrafica.NumeroConta,
-                cliente.ContaGrafica.DataCriacao,
-                cliente.Id,
-                cliente.ContaGrafica.Tipo,
-                cliente.ContaGrafica.HistoricoCompra.Select(hc => new HistoricoCompraDto(
-                    cliente.ContaGrafica.Id,
-                    hc.Ticker,
-                    hc.Quantidade,
-                    hc.ValorAporte,
-                    hc.PrecoExecutado,
-                    hc.PrecoMedio,
-                    hc.Data)).ToList(),
-                cliente.ContaGrafica.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
-                    cf.Id,
-                    cf.ContaGraficaId,
-                    cf.Ticker ?? string.Empty,
-                    cf.PrecoMedio,
-                    cf.Quantidade
-                )).ToList()
-            )
-        );
 }

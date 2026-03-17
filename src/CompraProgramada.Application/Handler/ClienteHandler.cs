@@ -1,4 +1,5 @@
 ﻿using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using MediatR;
@@ -16,12 +17,15 @@ public class ClienteHandle
 {
     private readonly ILogger<ClienteHandle> _logger;
     private readonly IClienteService _clienteService;
+    private readonly ClienteMapper _mapper;
 
     public ClienteHandle(ILogger<ClienteHandle> logger,
-        IClienteService clienteService)
+        IClienteService clienteService,
+        ClienteMapper mapper)
     {
         _logger = logger;
         _clienteService = clienteService;
+        _mapper = mapper;
     }
 
     public async Task<Result<AdesaoResponse>> Handle(AdesaoRequest request, CancellationToken cancellationToken)
@@ -37,25 +41,10 @@ public class ClienteHandle
         }
 
         var cliente = result.Value!;
-        var contaGraficaCliente = cliente.ContaGrafica!;
 
         _logger.LogInformation("Adesão realizada com sucesso para o cliente {Nome} com CPF {Cpf}.", request.Nome, request.Cpf);
-        
-        return new AdesaoResponse(
-            cliente.ClienteId,
-            cliente.Nome,
-            cliente.Cpf,
-            cliente.Email,
-            cliente.ValorMensal,
-            cliente.Ativo,
-            cliente.DataAdesao,
-            new ContaGraficaResponse(
-                contaGraficaCliente.Id,
-                contaGraficaCliente.Tipo,
-                contaGraficaCliente.NumeroConta,
-                contaGraficaCliente.DataCriacao
-            )
-        );
+
+        return _mapper.ToAdesaoResponse(cliente);
     }
 
     public async Task<Result<SaidaProdutoResponse>> Handle(SaidaProdutoRequest request, CancellationToken cancellationToken)
@@ -72,11 +61,7 @@ public class ClienteHandle
 
         _logger.LogInformation("Solicitação de saída do produto realizada com sucesso.");
 
-        return new SaidaProdutoResponse
-        {
-            ClienteId = result.Value.ClienteId,
-            Nome = result.Value.Nome
-        };
+        return _mapper.ToSaidaProdutoResponse(result.Value);
     }
 
     public async Task<Result<AtualizarValorMensalResponse>> Handle(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
@@ -95,12 +80,7 @@ public class ClienteHandle
 
         _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", cliente.ClienteId, cliente.ValorMensal);
 
-        return new AtualizarValorMensalResponse
-        {
-            ClienteId = cliente.ClienteId,
-            ValorMensalAnterior = cliente.ValorAnterior,
-            ValorMensalNovo = cliente.ValorMensal
-        };
+        return _mapper.ToAtualizarValorMensalResponse(cliente);
     }
 
     public async Task<Result<CarteiraCustodiaResponse>> Handle(CarteiraCustodiaRequest request, CancellationToken cancellationToken)
