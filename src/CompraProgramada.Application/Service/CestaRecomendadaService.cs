@@ -1,5 +1,6 @@
 ﻿using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
@@ -12,12 +13,15 @@ public class CestaRecomendadaService : ICestaRecomendadaService
 {
     private readonly ILogger<CestaRecomendadaService> _logger;
     private readonly ICestaRecomendadaRepository _cestaRepository;
+    private readonly CestaRecomendadaMapper _mapper;
 
     public CestaRecomendadaService(ILogger<CestaRecomendadaService> logger,
-        ICestaRecomendadaRepository cestaRepository)
+        ICestaRecomendadaRepository cestaRepository,
+        CestaRecomendadaMapper mapper)
     {
         _logger = logger;
         _cestaRepository = cestaRepository;
+        _mapper = mapper;
     }
 
     public async Task<Result<CriarCestaRecomendadaDto>> CriarCestaAsync(CriarCestaRecomendadaRequest request, CancellationToken cancellationToken)
@@ -34,7 +38,7 @@ public class CestaRecomendadaService : ICestaRecomendadaService
 
         return new CriarCestaRecomendadaDto(
             cestaAnterior is not null ? true : false,
-            GerarCestaDto(cestaCriada),
+            _mapper.ToResponse(cestaCriada),
             cestaAnterior is not null ? cestaAnterior : null);
     }
 
@@ -45,34 +49,14 @@ public class CestaRecomendadaService : ICestaRecomendadaService
         if (cesta is null)
             return new ApplicationException("Nenhuma Cesta Top Five ativa no momento.");
 
-        return GerarCestaDto(cesta);
+        return _mapper.ToResponse(cesta);
     }
 
-    public async Task<Result<IEnumerable<CestaRecomandadaDto>>> HistoricoCestasAsync(CancellationToken cancellationToken)
+    public async Task<Result<List<CestaRecomandadaDto>>> HistoricoCestasAsync(CancellationToken cancellationToken)
     {
         var cestas = await _cestaRepository.ObterTodasCestasAsync(cancellationToken);
 
-        return cestas.Select(c => GerarCestaDto(c))
-            .OrderByDescending(c => c.Id)
-            .ToList();
-    }
-
-    public Result<(List<string> ativosRemovidos, List<string> ativosAdicionados)> ObterMudancasDeAtivos(List<ComposicaoCestaRecomendadaDto> composicaoAnterior, List<ComposicaoCestaRecomendadaDto> composicaoAtual)
-    {
-        var tickersAnteriores = composicaoAnterior.Select(c => c.Ticker);
-        var tickersAtual = composicaoAtual.Select(c => c.Ticker);
-
-        var ativosRemovidos = tickersAnteriores
-            .Except(tickersAtual)
-            .ToList();
-
-        var ativosAdicionados = tickersAtual
-            .Except(tickersAnteriores)
-            .ToList();
-
-        _logger.LogInformation("Mudanças de ativos identificados {Removidos} - {Adicionados}", ativosRemovidos, ativosAdicionados);
-
-        return (ativosRemovidos, ativosAdicionados);
+        return _mapper.ToResponse(cestas);
     }
 
     public async Task<Result<List<ValorAtivoConsolidadoDto>>> ValorPorAtivoConsolidado(decimal totalConsolidado, CancellationToken cancellationToken)
@@ -100,7 +84,7 @@ public class CestaRecomendadaService : ICestaRecomendadaService
 
             _logger.LogInformation("Cesta atual desativada {Cesta}", cestaAtual);
 
-            return GerarCestaDto(cestaAtual);
+            return _mapper.ToResponse(cestaAtual);
         }
 
         _logger.LogInformation("Nenhuma cesta foi encontrada na base de dados para desatiação");
@@ -108,18 +92,21 @@ public class CestaRecomendadaService : ICestaRecomendadaService
         return null;
     }
 
-    private CestaRecomandadaDto GerarCestaDto(CestaRecomendada cesta)
-        => new CestaRecomandadaDto(
-            cesta.Id,
-            cesta.Nome,
-            cesta.DataCriacao,
-            cesta.DataDesativacao,
-            cesta.Ativa,
-            cesta.ComposicaoCesta.Select(cc => new ComposicaoCestaRecomendadaDto(
-                cc.Id,
-                cc.Id,
-                cc.Ticker,
-                cc.Percentual
-            )).ToList()
-        );
+    public Result<(List<string> ativosRemovidos, List<string> ativosAdicionados)> ObterMudancasDeAtivos(List<ComposicaoCestaRecomendadaDto> composicaoAnterior, List<ComposicaoCestaRecomendadaDto> composicaoAtual)
+    {
+        var tickersAnteriores = composicaoAnterior.Select(c => c.Ticker);
+        var tickersAtual = composicaoAtual.Select(c => c.Ticker);
+
+        var ativosRemovidos = tickersAnteriores
+            .Except(tickersAtual)
+            .ToList();
+
+        var ativosAdicionados = tickersAtual
+            .Except(tickersAnteriores)
+            .ToList();
+
+        _logger.LogInformation("Mudanças de ativos identificados {Removidos} - {Adicionados}", ativosRemovidos, ativosAdicionados);
+
+        return (ativosRemovidos, ativosAdicionados);
+    }
 }

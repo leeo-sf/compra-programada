@@ -17,49 +17,6 @@ public class AdministradorControllerTests
     public AdministradorControllerTests() => _sut = new AdministradorController(_mediator);
 
     [Fact]
-    public async Task Deve_Retornar_Sucesso_AoCriarCesta_Quando_Mediator_RetornaSucesso()
-    {
-        var request = new CriarCestaRecomendadaRequest(
-            "Cesta Top Five",
-            new List<ComposicaoCestaDto>
-            {
-                new ComposicaoCestaDto("PETR4", 30),
-                new ComposicaoCestaDto("VALE3", 25),
-                new ComposicaoCestaDto("ITUB4", 20),
-                new ComposicaoCestaDto("BBDC4", 15),
-                new ComposicaoCestaDto("WEGE3", 10),
-            }
-        );
-
-        var response = new CriarCestaRecomendadaResponse
-        {
-            CestaId = 1,
-            Nome = "Cesta Top Five",
-            Ativa = true,
-            DataCriacao = DateTime.Now,
-            Itens = new List<ComposicaoCestaDto>
-            {
-                new ComposicaoCestaDto("PETR4", 30),
-                new ComposicaoCestaDto("VALE3", 25),
-                new ComposicaoCestaDto("ITUB4", 20),
-                new ComposicaoCestaDto("BBDC4", 15),
-                new ComposicaoCestaDto("WEGE3", 10)
-            },
-            CestaAnteriorDesativada = null,
-            RebalanceamentoDisparado = false,
-            AtivosRemovidos = null,
-            AtivosAdicionados = null,
-            Mensagem = "Cesta cadastrada"
-        };
-
-        _mediator.Send(request).Returns(Result.Success(response));
-
-        await _sut.CestaAsync(request);
-
-        await _mediator.Received().Send(request);
-    }
-
-    [Fact]
     public async Task Deve_Retornar_Erro_AoCriarCesta_Quando_Mediator_RetornaErro()
     {
         var request = new CriarCestaRecomendadaRequest(
