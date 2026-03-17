@@ -147,7 +147,7 @@ public class ContaGraficaService : IContaGraficaService
                 0,
                 t.Data,
                 t.ValorAporte,
-                $"{index + 1}/{conta.HistoricoCompra!.Select(x => x.Data).Distinct().Count()}"
+                $"{index + 1}/3"
             )).ToList();
 
         var evolucaoCarteira = conta.HistoricoCompra

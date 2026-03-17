@@ -33,6 +33,7 @@ public static class AppConfiguration
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
         services.ConfigurarKafka(configuration);
+        services.ConfigurarMappers();
     }
 
     public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration)
@@ -122,6 +123,7 @@ public static class AppConfiguration
 
     private static void ConfigurarMappers(this IServiceCollection services)
     {
+        services.AddSingleton<CestaRecomendadaMapper>();
         services.AddSingleton<ClienteMapper>();
         services.AddSingleton<ContaMapper>();
     }

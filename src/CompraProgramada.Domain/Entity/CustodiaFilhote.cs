@@ -1,4 +1,6 @@
-﻿namespace CompraProgramada.Domain.Entity;
+﻿using CompraProgramada.Domain.Exceptions;
+
+namespace CompraProgramada.Domain.Entity;
 
 public class CustodiaFilhote
 {
@@ -23,6 +25,9 @@ public class CustodiaFilhote
 
     internal CustodiaFilhote(int id, int contaGraficaId, string ticker, decimal precoMedio, int quantidade)
     {
+        if (string.IsNullOrEmpty(ticker))
+            throw new TickerNaoPreenchidoException();
+
         Id = id;
         ContaGraficaId = contaGraficaId;
         Ticker = ticker;
@@ -36,7 +41,7 @@ public class CustodiaFilhote
     public void Atualizar(decimal precoMedio, int novaQuantidade)
     {
         if (novaQuantidade < 0)
-            throw new ApplicationException("Quantidade não pode ser negativa");
+            throw new CustodiaNegativaException();
 
         PrecoMedio = precoMedio;
         Quantidade = novaQuantidade;

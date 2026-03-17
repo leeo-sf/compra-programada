@@ -1,4 +1,3 @@
-using System.Net;
 using CompraProgramada.Api.Controllers;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
