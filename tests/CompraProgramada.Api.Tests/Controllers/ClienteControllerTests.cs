@@ -2,9 +2,12 @@ using CompraProgramada.Api.Controllers;
 using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
+using CompraProgramada.Domain.Exceptions;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using OperationResult;
+using System.Net;
 
 namespace CompraProgramada.Api.Tests.Controllers;
 
@@ -16,7 +19,7 @@ public class ClienteControllerTests
     public ClienteControllerTests() => _sut = new ClienteController(_mediator);
 
     [Fact]
-    public async Task Deve_Retornar_Sucesso_AoAderirAoProduto_Quando_Mediator_RetornaSucesso()
+    public async Task Adesao_DeveRetornarSucesso_QuandoSolicitado()
     {
         var request = new AdesaoRequest("Teste", "11111111111", "email@teste.com", 100);
         var response = new AdesaoResponse(
@@ -43,20 +46,109 @@ public class ClienteControllerTests
     }
 
     [Fact]
-    public async Task Deve_Retornar_Erro_AoAderirAoProduto_Quando_Mediator_RetornaErro()
+    public async Task Dado_UmaRequest_E_ApiRetornarCpfExistenteException_Quando_AderirProduto_Deve_ChamarMediatr_E_RetornarBadRequest()
     {
         var request = new AdesaoRequest("Teste", "11111111111", "email@teste.com", 100);
-        var erroMapeado = new Exception("bad");
+        CpfExistenteException erroMapeado = new();
 
         _mediator.Send(request).Returns(Result.Error<AdesaoResponse>(erroMapeado));
 
-        await _sut.AdesaoAsync(request);
+        var result = await _sut.AdesaoAsync(request);
+
+        await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Mensagem = "CPF ja cadastrado no sistema.", Codigo = "CLIENTE_CPF_DUPLICADO" })
+            { StatusCode = (int)HttpStatusCode.BadRequest },
+            Assert.IsType<ObjectResult>(result.Result));
+    }
+
+    [Fact]
+    public async Task Dado_UmaRequest_E_ApiRetornarValorMensalException_Quando_AderirProduto_Deve_ChamarMediatr_E_RetornarBadRequest()
+    {
+        var request = new AdesaoRequest("Teste", "11111111111", "email@teste.com", 99);
+        ValorMensalException erroMapeado = new(100);
+
+        _mediator.Send(request).Returns(Result.Error<AdesaoResponse>(erroMapeado));
+
+        var result = await _sut.AdesaoAsync(request);
+
+        await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Mensagem = "O valor mensal minimo e de R$ 100,00", Codigo = "VALOR_MENSAL_INVALIDO" })
+            { StatusCode = (int)HttpStatusCode.BadRequest },
+            Assert.IsType<ObjectResult>(result.Result));
+    }
+
+    [Fact]
+    public async Task SaidaProduto_DeveRetornarSucesso_QuandoSolicitado()
+    {
+        var request = new SaidaProdutoRequest(1);
+        var response = new SaidaProdutoResponse(
+            1,
+            "Nome",
+            false
+        );
+
+        _mediator.Send(request).Returns(Result.Success(response));
+
+        await _sut.SaidaProdutoAsync(1);
 
         await _mediator.Received().Send(request);
     }
 
     [Fact]
-    public async Task Deve_Retornar_Sucesso_AoConsultarCarteira_Quando_Mediator_RetornaSucesso()
+    public async Task Dado_UmaRequest_E_ApiRetornarClienteNaoEncontradoException_Quando_SaidaProduto_Deve_ChamarMediatr_E_RetornarNotFound()
+    {
+        var request = new SaidaProdutoRequest(1);
+        ClienteNaoEncontradoException erroMapeado = new();
+
+        _mediator.Send(request).Returns(Result.Error<SaidaProdutoResponse>(erroMapeado));
+
+        var result = await _sut.SaidaProdutoAsync(1);
+
+        await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Mensagem = "Cliente nao encontrado.", Codigo = "CLIENTE_NAO_ENCONTRADO" })
+            { StatusCode = (int)HttpStatusCode.NotFound },
+            Assert.IsType<ObjectResult>(result.Result));
+    }
+
+    [Fact]
+    public async Task AlterarValorMensal_DeveRetornarSucesso_QuandoSolicitado()
+    {
+        var request = new AtualizarValorMensalRequest(1, 1000m);
+        var response = new AtualizarValorMensalResponse(
+            1,
+            100,
+            1000
+        );
+
+        _mediator.Send(request).Returns(Result.Success(response));
+
+        await _sut.AlterarValorMensalAsync(1, new AtualizarValorMensalRequest(1, 1000));
+
+        await _mediator.Received().Send(request);
+    }
+
+    [Fact]
+    public async Task Dado_UmaRequest_E_ApiRetornarClienteNaoEncontradoException_Quando_AlterarValorMensal_Deve_ChamarMediatr_E_RetornarNotFound()
+    {
+        var request = new AtualizarValorMensalRequest(1, 1000);
+        ClienteNaoEncontradoException erroMapeado = new();
+
+        _mediator.Send(request).Returns(Result.Error<AtualizarValorMensalResponse>(erroMapeado));
+
+        var result = await _sut.AlterarValorMensalAsync(1, new AtualizarValorMensalRequest(1, 1000));
+
+        await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Mensagem = "Cliente nao encontrado.", Codigo = "CLIENTE_NAO_ENCONTRADO" })
+            { StatusCode = (int)HttpStatusCode.NotFound },
+            Assert.IsType<ObjectResult>(result.Result));
+    }
+
+    [Fact]
+    public async Task ConsultarCarteira_DeveRetornarSucesso_QuandoSolicitado()
     {
         var request = new CarteiraCustodiaRequest(1);
         var response = new CarteiraCustodiaResponse(
@@ -75,74 +167,20 @@ public class ClienteControllerTests
     }
 
     [Fact]
-    public async Task Deve_Retornar_Erro_AoConsultarCarteira_Quando_Mediator_RetornaErro()
+    public async Task ConsultarRentabilidade_DeveRetornarSucesso_QuandoSolicitado()
     {
-        var request = new CarteiraCustodiaRequest(1);
-        var erroMapeado = new Exception("bad");
-
-        _mediator.Send(request).Returns(Result.Error<CarteiraCustodiaResponse>(erroMapeado));
-
-        await _sut.CustodiaCarteiraAsync(1);
-
-        await _mediator.Received().Send(request);
-    }
-
-    [Fact]
-    public async Task Deve_Retornar_Sucesso_AoSairDoProduto_Quando_Mediator_RetornaSucesso()
-    {
-        var request = new SaidaProdutoRequest(1);
-        var response = new SaidaProdutoResponse(
+        var request = new RentabilidadeRequest(1);
+        var response = new RentabilidadeResponse(
             1,
             "Nome",
-            false
-        );
+            DateTime.Now,
+            new(1000, 1000, 10, 10),
+            new List<HistoricoAporteDto> { new HistoricoAporteDto(1, DateOnly.FromDateTime(DateTime.Now), 1000, "1/3") },
+            new List<EvolucaoCarteiraDto> { new EvolucaoCarteiraDto(1, DateOnly.FromDateTime(DateTime.Now), 1000, 1000, 100) });
 
         _mediator.Send(request).Returns(Result.Success(response));
 
-        await _sut.SaidaProdutoAsync(1);
-
-        await _mediator.Received().Send(request);
-    }
-
-    [Fact]
-    public async Task Deve_Retornar_Erro_AoSairDoProduto_Quando_Mediator_RetornaErro()
-    {
-        var request = new SaidaProdutoRequest(1);
-        var erroMapeado = new Exception("bad");
-
-        _mediator.Send(request).Returns(Result.Error<SaidaProdutoResponse>(erroMapeado));
-
-        await _sut.SaidaProdutoAsync(1);
-
-        await _mediator.Received().Send(request);
-    }
-
-    [Fact]
-    public async Task Deve_Retornar_Sucesso_AoAlterarValorMensal_Quando_Mediator_RetornaSucesso()
-    {
-        var request = new AtualizarValorMensalRequest(1, 1000m);
-        var response = new AtualizarValorMensalResponse(
-            1,
-            100,
-            1000
-        );
-
-        _mediator.Send(request).Returns(Result.Success(response));
-
-        await _sut.AlterarValorMensalAsync(1, new AtualizarValorMensalRequest(1, 1000));
-
-        await _mediator.Received().Send(request);
-    }
-
-    [Fact]
-    public async Task Deve_Retornar_Erro_AoAlterarValorMensal_Quando_Mediator_RetornaErro()
-    {
-        var request = new AtualizarValorMensalRequest(1, 1000);
-        var erroMapeado = new Exception("bad");
-
-        _mediator.Send(request).Returns(Result.Error<AtualizarValorMensalResponse>(erroMapeado));
-
-        await _sut.AlterarValorMensalAsync(1, new AtualizarValorMensalRequest(1, 1000));
+        await _sut.RentabilidadeAsync(1);
 
         await _mediator.Received().Send(request);
     }

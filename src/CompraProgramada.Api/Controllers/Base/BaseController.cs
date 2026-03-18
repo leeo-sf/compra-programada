@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using CompraProgramada.Domain.Exceptions.Base;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OperationResult;
 
@@ -26,6 +27,7 @@ public class BaseController(IMediator mediator) : ControllerBase
     protected ActionResult HandleError(Exception error)
         => error switch
         {
+            DomainException e => StatusCode((int)e.StatusCode, new { Mensagem = e.Message, e.Codigo }),
             ApplicationException applicationException => StatusCode(StatusCodes.Status422UnprocessableEntity, new { applicationException.Message }),
             _ => StatusCode(500)
         };

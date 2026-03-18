@@ -5,6 +5,9 @@ using MediatR;
 using CompraProgramada.Application.Dto;
 using OperationResult;
 using NSubstitute;
+using CompraProgramada.Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace CompraProgramada.Api.Tests.Controllers;
 
@@ -16,7 +19,7 @@ public class AdministradorControllerTests
     public AdministradorControllerTests() => _sut = new AdministradorController(_mediator);
 
     [Fact]
-    public async Task Deve_Retornar_Erro_AoCriarCesta_Quando_Mediator_RetornaErro()
+    public async Task CriarCesta_DeveRetornarSucesso_QuandoSolicitado()
     {
         var request = new CriarCestaRecomendadaRequest(
             "Cesta Top Five",
@@ -29,9 +32,7 @@ public class AdministradorControllerTests
             }
         );
 
-        var erroMapeado = new Exception("bad");
-
-        _mediator.Send(request).Returns(Result.Error<CriarCestaRecomendadaResponse>(erroMapeado));
+        _mediator.Send(request).Returns(Result.Success(new CriarCestaRecomendadaResponse(default, default!, default, default, default!, default, default, default, default, default!)));
 
         await _sut.CestaAsync(request);
 
@@ -39,10 +40,56 @@ public class AdministradorControllerTests
     }
 
     [Fact]
-    public async Task Deve_Retornar_Sucesso_AoConsultarCestaAtual_Quando_Mediator_RetornaSucesso()
+    public async Task Dado_UmaRequest_E_ApiRetornarQuantidadeItensCestaException_Quando_CriarCesta_Deve_ChamarMediatr_E_RetornarBadRequest()
     {
-        var request = new CestaAtualRequest();
+        var request = new CriarCestaRecomendadaRequest(
+            "Cesta Top Five",
+            new List<ComposicaoCestaDto>
+            {
+                new ComposicaoCestaDto("PETR4", 30),
+                new ComposicaoCestaDto("VALE3", 25)
+            }
+        );
+        QuantidadeItensCestaException error = new(3);
 
+        _mediator.Send(request).Returns(Result.Error<CriarCestaRecomendadaResponse>(error));
+
+        var result = await _sut.CestaAsync(request);
+
+        await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Mensagem = "A cesta deve conter exatamente 5 ativos. Quantidade informada: 3.", Codigo = "QUANTIDADE_ATIVOS_INVALIDA" })
+            { StatusCode = (int)HttpStatusCode.BadRequest },
+            Assert.IsType<ObjectResult>(result.Result));
+    }
+
+    [Fact]
+    public async Task Dado_UmaRequest_E_ApiRetornarPercentualCestaException_Quando_CriarCesta_Deve_ChamarMediatr_E_RetornarBadRequest()
+    {
+        var request = new CriarCestaRecomendadaRequest(
+            "Cesta Top Five",
+            new List<ComposicaoCestaDto>
+            {
+                new ComposicaoCestaDto("PETR4", 30),
+                new ComposicaoCestaDto("VALE3", 25)
+            }
+        );
+        PercentualCestaException error = new(98);
+
+        _mediator.Send(request).Returns(Result.Error<CriarCestaRecomendadaResponse>(error));
+
+        var result = await _sut.CestaAsync(request);
+
+        await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Mensagem = "A soma dos percentuais deve ser exatamente 100%. Soma atual: 98%.", Codigo = "PERCENTUAIS_INVALIDOS" })
+            { StatusCode = (int)HttpStatusCode.BadRequest },
+            Assert.IsType<ObjectResult>(result.Result));
+    }
+
+    [Fact]
+    public async Task CestaAtual_DeveRetornarSucesso_QuandoSolicitado()
+    {
         var response = new CestaRecomendadaResponse
         {
             CestaId = 1,
@@ -59,29 +106,32 @@ public class AdministradorControllerTests
             }
         };
 
-        _mediator.Send(request).Returns(Result.Success(response));
+        _mediator.Send(new CestaAtualRequest()).Returns(Result.Success(response));
 
         await _sut.CestaAtualAsync();
 
-        await _mediator.Received().Send(request);
+        await _mediator.Received().Send(new CestaAtualRequest());
     }
 
     [Fact]
-    public async Task Deve_Retornar_Erro_AoConsultarCestaAtual_Quando_Mediator_RetornaErro()
+    public async Task Dado_UmaRequest_E_ApiRetornarNenhumaCestaAtiva_Quando_ConsultarCestaAtual_Deve_ChamarMediatr_E_RetornarUnprocessableEntity()
     {
         var request = new CestaAtualRequest();
+        ApplicationException error = new("Nenhuma cesta cadastrada.");
 
-        var erroMapeado = new Exception("bad");
+        _mediator.Send(request).Returns(Result.Error<CestaRecomendadaResponse>(error));
 
-        _mediator.Send(request).Returns(Result.Error<CestaRecomendadaResponse>(erroMapeado));
-
-        await _sut.CestaAtualAsync();
+        var result = await _sut.CestaAtualAsync();
 
         await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Message = "Nenhuma cesta cadastrada." })
+            { StatusCode = (int)HttpStatusCode.UnprocessableEntity },
+            Assert.IsType<ObjectResult>(result.Result));
     }
 
     [Fact]
-    public async Task Deve_Retornar_Sucesso_AoConsultarHistorico_Quando_Mediator_RetornaSucesso()
+    public async Task HistoricoCesta_DeveRetornarSucesso_QuandoSolicitado()
     {
         var request = new CestaHistoricoRequest();
 
@@ -105,20 +155,6 @@ public class AdministradorControllerTests
         };
 
         _mediator.Send(request).Returns(Result.Success(response));
-
-        await _sut.HistoricoAsync();
-
-        await _mediator.Received().Send(request);
-    }
-
-    [Fact]
-    public async Task Deve_Retornar_Erro_AoConsultarHistoricol_Quando_Mediator_RetornaErro()
-    {
-        var request = new CestaHistoricoRequest();
-
-        var erroMapeado = new Exception("bad");
-
-        _mediator.Send(request).Returns(Result.Error<List<CestaRecomendadaResponse>>(erroMapeado));
 
         await _sut.HistoricoAsync();
 

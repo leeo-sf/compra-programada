@@ -2,9 +2,12 @@ using CompraProgramada.Api.Controllers;
 using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
+using CompraProgramada.Domain.Exceptions.Base;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using OperationResult;
+using System.Net;
 
 namespace CompraProgramada.Api.Tests.Controllers;
 
@@ -16,10 +19,10 @@ public class MotorControllerTests
     public MotorControllerTests() => _sut = new MotorController(_mediator);
 
     [Fact]
-    public async Task Deve_Retornar_Sucesso_Quando_Mediator_RetornaSucesso()
+    public async Task ExecutarCompra_DeveRetornarSucesso_QuandoSolicitado()
     {
         var dataAtual = DateTime.Now;
-        var dataExecucao = dataAtual.AddDays(2);
+        var dataExecucao = dataAtual.AddDays(-2);
 
         var request = new ExecutarCompraRequest(dataAtual, DateOnly.FromDateTime(dataExecucao));
         var response = new ExecutarCompraResponse(
@@ -41,15 +44,19 @@ public class MotorControllerTests
     }
 
     [Fact]
-    public async Task Deve_Retornar_ErroMapeado_Quando_Mediator_RetornaErro()
+    public async Task Dado_UmaRequest_E_ApiRetornarException_Quando_ExecutarCompra_Deve_ChamarMediatr_E_RetornarErro()
     {
         var request = new ExecutarCompraRequest(DateTime.Now, DateOnly.FromDateTime(DateTime.Now));
-        var erroMapeado = new Exception("bad");
+        var erroMapeado = new DomainException("mensagem", "codigo");
 
         _mediator.Send(request).Returns(Result.Error<ExecutarCompraResponse>(erroMapeado));
 
-        await _sut.ExecutarCompraAsync(request);
+        var result = await _sut.ExecutarCompraAsync(request);
 
         await _mediator.Received().Send(request);
+        Assert.Equivalent(
+            new ObjectResult(new { Mensagem = "mensagem", Codigo = "codigo" })
+            { StatusCode = (int)HttpStatusCode.BadRequest },
+            Assert.IsType<ObjectResult>(result.Result));
     }
 }
