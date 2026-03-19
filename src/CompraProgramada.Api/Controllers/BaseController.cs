@@ -3,10 +3,10 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OperationResult;
 
-namespace CompraProgramada.Api.Controllers.Base;
+namespace CompraProgramada.Api.Controllers;
 
 [ApiController]
-public class BaseController(IMediator mediator) : ControllerBase
+public abstract class BaseController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 

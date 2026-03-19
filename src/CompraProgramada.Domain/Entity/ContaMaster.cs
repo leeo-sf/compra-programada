@@ -12,5 +12,14 @@ public class ContaMaster : BaseConta
     internal ContaMaster(int id, string numeroConta, DateTime dataCriacao, List<CustodiaMaster> custodiaMasters)
         : base(id, numeroConta, dataCriacao) => CustodiaMasters = custodiaMasters;
 
+    internal ContaMaster(int id, List<CustodiaMaster> custodiaMasters)
+        : base(0, id) => CustodiaMasters = custodiaMasters;
+
+    public static ContaMaster Gerar(int id, List<CustodiaMaster> custodias)
+        => new ContaMaster(id, custodias);
+
     public void AtualizaCustodia(List<CustodiaMaster> custodias) => CustodiaMasters = custodias;
+
+    protected override string GerarNumeroConta(int id)
+        => $"MST-{id:D6}";
 }

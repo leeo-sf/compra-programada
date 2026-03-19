@@ -1,4 +1,6 @@
-﻿namespace CompraProgramada.Domain.Entity;
+﻿using CompraProgramada.Domain.Exceptions;
+
+namespace CompraProgramada.Domain.Entity;
 
 public class Distribuicao
 {
@@ -27,6 +29,12 @@ public class Distribuicao
 
     internal Distribuicao(int id, int ordemCompraId, int contaGraficaId, string ticker, int quantidadeAlocada, decimal valorOperacao)
     {
+        if (string.IsNullOrEmpty(ticker))
+            throw new TickerNaoPreenchidoException();
+
+        if (quantidadeAlocada < 0)
+            throw new QuantidadeNegativaException();
+
         Id = id;
         OrdemCompraId = ordemCompraId;
         ContaGraficaId = contaGraficaId;

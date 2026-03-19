@@ -41,7 +41,7 @@ public class CustodiaFilhote
     public void Atualizar(decimal precoMedio, int novaQuantidade)
     {
         if (novaQuantidade < 0)
-            throw new CustodiaNegativaException();
+            throw new QuantidadeNegativaException();
 
         PrecoMedio = precoMedio;
         Quantidade = novaQuantidade;

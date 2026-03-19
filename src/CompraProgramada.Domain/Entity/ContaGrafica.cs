@@ -23,13 +23,16 @@ public class ContaGrafica : BaseConta
         HistoricoCompra = historicoCompras;
     }
 
-    internal ContaGrafica(int id, string numeroConta, DateTime dataCriacao, int clienteId, List<CustodiaFilhote> custodias)
-        : base(id, numeroConta, dataCriacao)
+    internal ContaGrafica(int clienteId, List<CustodiaFilhote> custodias)
+        : base(0, clienteId)
     {
         ClienteId = clienteId;
         CustodiaFilhotes = custodias;
     }
 
     public static ContaGrafica Gerar(int clienteId, List<CustodiaFilhote> custodias)
-        => new ContaGrafica(0, GerarNumeroConta(clienteId, true), DateTime.Now, clienteId, custodias);
+        => new ContaGrafica(clienteId, custodias);
+
+    protected override string GerarNumeroConta(int id)
+        => $"FLH-{id:D6}";
 }

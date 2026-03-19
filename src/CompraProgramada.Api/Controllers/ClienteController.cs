@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Api.Controllers.Base;
-using CompraProgramada.Application.Request;
+﻿using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

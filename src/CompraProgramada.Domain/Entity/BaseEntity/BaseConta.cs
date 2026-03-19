@@ -15,9 +15,12 @@ public abstract class BaseConta
         DataCriacao = dataCriacao;
     }
 
-    protected static string GerarNumeroConta(int id, bool ehContaGrafica)
+    protected BaseConta(int id, int correlationId)
     {
-        var prefixo = ehContaGrafica ? "FLH" : "MST";
-        return $"{prefixo}-{id:D6}";
+        Id = id;
+        NumeroConta = GerarNumeroConta(correlationId);
+        DataCriacao = DateTime.Now;
     }
+
+    protected abstract string GerarNumeroConta(int id);
 }

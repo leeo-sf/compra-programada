@@ -36,8 +36,11 @@ public class OrdemCompra
 
     public static OrdemCompra GerarOrdemCompra(string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal)
     {
+        var detalhes = new List<OrdemCompraDetalhe>();
         var multiplosPresente = Math.DivRem(quantidadeTotal, 100, out int restos);
-        var detalhes = new List<OrdemCompraDetalhe>() { OrdemCompraDetalhe.GerarDetalhes("FRACIONARIO", $"{ticker}F", restos, 0) };
+
+        if (restos != 0)
+            detalhes.Add(OrdemCompraDetalhe.GerarDetalhes("FRACIONARIO", $"{ticker}F", restos, 0));
 
         if (multiplosPresente > 0)
             detalhes.Add(OrdemCompraDetalhe.GerarDetalhes("PADRAO", ticker, multiplosPresente * 100, 0));
