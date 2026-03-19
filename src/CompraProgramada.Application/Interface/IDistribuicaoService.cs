@@ -5,5 +5,5 @@ namespace CompraProgramada.Application.Interface;
 
 public interface IDistribuicaoService
 {
-    Task<(List<DistribuicaoDto>, List<AtivoAhCompraDto>)> RealizarDistribuicoesAsync(List<ClienteDto> clientesAtivos, DateTime dataExecucao, List<OrdemCompraDto> ordensCompra, CancellationToken cancellationToken);
+    Task<(List<DistribuicaoDto>, List<AtivoAhCompraDto>)> RealizarDistribuicoesAsync(List<ClienteDto> clientesAtivos, DateTime dataExecucao, CancellationToken cancellationToken);
 }

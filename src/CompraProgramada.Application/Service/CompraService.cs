@@ -67,13 +67,11 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 
-        var ordensCompraRegistradas = await _ordemCompraService.EmitirOrdensDeCompraAsync(valorTotalConsolidado, cancellationToken);
-        if (!ordensCompraRegistradas.IsSuccess)
-            throw ordensCompraRegistradas.Exception;
+        var ordemCompraResult = await _ordemCompraService.EmitirOrdensDeCompraAsync(valorTotalConsolidado, cancellationToken);
+        if (!ordemCompraResult.IsSuccess)
+            throw ordemCompraResult.Exception;
 
-        _logger.LogInformation("Ordens de compra registradas.");
-
-        var (distribuicoes, ativosAhComprar) = await _distribuicaoService.RealizarDistribuicoesAsync(clientesAtivos, dataExecucao, ordensCompraRegistradas.Value, cancellationToken);
+        var (distribuicoes, ativosAhComprar) = await _distribuicaoService.RealizarDistribuicoesAsync(clientesAtivos, dataExecucao, cancellationToken);
 
         _logger.LogInformation("Distribuições para as custodias realizadas.");
 
@@ -112,7 +110,7 @@ public class CompraService : ICompraService
             dataExecucao,
             qtdClientesAtivos,
             valorTotalConsolidado,
-            ordensCompraRegistradas.Value,
+            ordemCompraResult.Value,
             distribuicoesDto,
             resultResiduosCapturados.Value,
             qtdIrPublicadoResult.Value,

@@ -17,7 +17,7 @@ public class OrdemCompraTests
     public void GerarOrdemCompra_DeveRetornarOrdemCompra_ComLoteFracionario_Quando_QuantidadeCompra_InferiorA100(string ticker, int quantidadeTotal, decimal precoUnitario)
     {
         var valorTotal = quantidadeTotal * precoUnitario;
-        var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario, valorTotal);
+        var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario);
 
         ordemCompra.Id.Should().Be(0);
         ordemCompra.Ticker.Should().Be(ticker);
@@ -40,7 +40,7 @@ public class OrdemCompraTests
     [InlineData("WEGE3", 600, 40)]
     public void GerarOrdemCompra_DeveRetornarOrdemCompra_LotePadrao_Quando_QuantidadeCompra_IgualA100(string ticker, int quantidadeTotal, decimal precoUnitario)
     {
-        var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario, quantidadeTotal * precoUnitario);
+        var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario);
 
         ordemCompra.Detalhes.Count.Should().Be(1);
         ordemCompra.Detalhes.First().Id.Should().Be(0);
@@ -59,7 +59,7 @@ public class OrdemCompraTests
     [InlineData("AAPL4", 20044, 72.90, 20000, 44)]
     public void GerarOrdemCompra_DeveRetornarOrdemCompra_LotePadrao_E_Fracionario_Quando_QuantidadeCompra_SuperiorA100(string ticker, int quantidadeTotal, decimal precoUnitario, int qtdLotePadrao, int qtdLoteFracionario)
     {
-        var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario, quantidadeTotal * precoUnitario);
+        var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario);
 
         var lotePadrao = ordemCompra.Detalhes.FirstOrDefault(x => x.Tipo == "PADRAO");
         var loteFracionario = ordemCompra.Detalhes.FirstOrDefault(x => x.Tipo == "FRACIONARIO");

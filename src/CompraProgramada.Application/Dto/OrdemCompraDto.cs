@@ -6,7 +6,7 @@ public record OrdemCompraDto(
     [property: JsonIgnore] int Id,
     string Ticker,
     int QuantidadeTotal,
-    List<DetalheOrdemCompraDto> Detalhes,
+    List<OrdemCompraDetalheDto> Detalhes,
     decimal PrecoUnitario)
 {
     public decimal ValorTotal => QuantidadeTotal * PrecoUnitario;
