@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace CompraProgramada.Application.Validator;
 
-internal sealed class CriarCestaValidator : AbstractValidator<CriarCestaRecomendadaRequest>
+public sealed class CriarCestaValidator : AbstractValidator<CriarCestaRecomendadaRequest>
 {
     public CriarCestaValidator()
     {
