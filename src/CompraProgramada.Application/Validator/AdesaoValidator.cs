@@ -12,7 +12,7 @@ public sealed class AdesaoValidator : AbstractValidator<AdesaoRequest>
 
         RuleFor(ad => ad.Cpf)
             .Matches("^[0-9]*$").WithMessage("O CPF deve conter apenas números.")
-            .MaximumLength(11).WithMessage("O CPF deve conter exatamente 11 caracteres.");
+            .NotEmpty().Length(11).WithMessage("O CPF deve conter exatamente 11 caracteres.");
 
         RuleFor(ad => ad.Email)
             .NotEmpty().WithMessage("O email deve ser preenchido.")
