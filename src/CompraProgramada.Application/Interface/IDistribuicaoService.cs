@@ -1,9 +1,9 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Domain.Entity;
 using OperationResult;
 
 namespace CompraProgramada.Application.Interface;
 
 public interface IDistribuicaoService
 {
-    Task<(List<DistribuicaoDto>, List<AtivoAhCompraDto>)> RealizarDistribuicoesAsync(List<ClienteDto> clientesAtivos, DateTime dataExecucao, CancellationToken cancellationToken);
+    Task<Result<List<Distribuicao>>> DistribuirParaCustodiasAsync(List<Cliente> clientesAtivos, List<OrdemCompra> ordensCompra, DateTime dataExecucao, CancellationToken cancellationToken);
 }

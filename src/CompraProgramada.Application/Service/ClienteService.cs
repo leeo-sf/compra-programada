@@ -28,11 +28,11 @@ public class ClienteService : IClienteService
         _mapper = mapper;
     }
 
-    public async Task<Result<List<ClienteDto>>> ObtemClientesAtivoAsync(CancellationToken cancellationToken)
+    public async Task<Result<List<Cliente>>> ObtemClientesAtivoAsync(CancellationToken cancellationToken)
     {
         var clientes = await _clienteRepository.ObterClientesAtivosAsync(cancellationToken);
 
-        return _mapper.ToResponse(clientes);
+        return clientes;
     }
 
     public async Task<Result<ClienteDto>> RealizarAdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken)

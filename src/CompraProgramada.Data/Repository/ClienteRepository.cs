@@ -14,7 +14,7 @@ public class ClienteRepository : IClienteRepository
         => await _context.Cliente
             .AsNoTracking()
             .Include(x => x.ContaGrafica)
-            .Include(x => x.ContaGrafica!.CustodiaFilhotes)
+            .ThenInclude(x => x.CustodiaFilhotes)
             .Where(c => c.Ativo)
             .ToListAsync(cancellationToken);
 

@@ -33,6 +33,12 @@ public class ContaGrafica : BaseConta
     public static ContaGrafica Gerar(int clienteId, List<CustodiaFilhote> custodias)
         => new ContaGrafica(clienteId, custodias);
 
+    public void AdicionarDistribuicao(Distribuicao distribuicao)
+        => Distribuicoes.Add(distribuicao);
+
+    public void AdicionarCompra(HistoricoCompra compra)
+        => HistoricoCompra.Add(compra);
+
     protected override string GerarNumeroConta(int id)
         => $"FLH-{id:D6}";
 }

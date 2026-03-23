@@ -8,6 +8,6 @@ public record ExecutarCompraResponse(
     decimal TotalConsolidado,
     List<OrdemCompraDto> ordensCompra,
     List<DistribuicaoDto> Distribuicoes,
-    List<ResiduoCustodiaMasterDto> ResiduosCustMaster,
+    List<AtivoDto> ResiduosCustMaster,
     int EventosPublicados,
     string Mensagem);

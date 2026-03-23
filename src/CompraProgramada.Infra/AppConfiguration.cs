@@ -126,5 +126,6 @@ public static class AppConfiguration
         services.AddSingleton<CestaRecomendadaMapper>();
         services.AddSingleton<ClienteMapper>();
         services.AddSingleton<ContaMapper>();
+        services.AddSingleton<OrdemCompraMapper>();
     }
 }

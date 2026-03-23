@@ -31,7 +31,7 @@ public class MotorControllerTests
             100m,
             new List<OrdemCompraDto>(),
             new List<DistribuicaoDto>(),
-            new List<ResiduoCustodiaMasterDto>(),
+            new List<AtivoDto>(),
             0,
             "ok"
         );

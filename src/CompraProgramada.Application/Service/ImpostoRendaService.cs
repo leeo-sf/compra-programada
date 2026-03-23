@@ -1,6 +1,7 @@
 ﻿using CompraProgramada.Application.Config;
 using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
+using CompraProgramada.Domain.Entity;
 using OperationResult;
 
 namespace CompraProgramada.Application.Service;
@@ -19,19 +20,19 @@ public class ImpostoRendaService : IImpostoRendaService
         _kafkaConfig = kafkaConfig;
     }
 
-    public async Task<Result<int>> CalcularIRDedoDuro(List<DistribuicaoDto> distribuicoes, CancellationToken cancellationToken)
+    public async Task<Result<int>> CalcularIRDedoDuro(List<Distribuicao> distribuicoes, CancellationToken cancellationToken)
     {
         var detalhesIr = distribuicoes.Select(d =>
         {
             var irBruto = d.ValorOperacao * ALIQUOTA;
             return new IRDedoDuroDto
             {
-                ClienteId = d.ContaGrafica.Id,
-                Cpf = d.Cpf,
+                ClienteId = d.ContaGrafica.Cliente.Id,
+                Cpf = d.ContaGrafica.Cliente.Cpf,
                 Ticker = d.Ticker,
                 ValorOperacao = d.ValorOperacao,
                 ValorIR = Math.Truncate(irBruto * 100) / 100,
-                Data = d.Data
+                Data = d.OrdemCompra.Data
             };
         }).ToList();
 

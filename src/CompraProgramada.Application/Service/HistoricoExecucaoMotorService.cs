@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 
@@ -34,8 +33,8 @@ public class HistoricoExecucaoMotorService : IHistoricoExecucaoMotorService
         return false;
     }
 
-    public async Task SalvarExecucaoAsync(ExecucaoMotorCompraDto execucaoCompra, CancellationToken cancellationToken)
+    public async Task SalvarExecucaoAsync(DateTime dataReferencia, DateTime dataExecucao, CancellationToken cancellationToken)
         => await _historicoExecucaoRepository.CriarHistoricoExecucaoAsync(
-            HistoricoExecucaoMotor.CriarRegistroHistorico(execucaoCompra.DataReferencia, execucaoCompra.DataExecucao),
+            HistoricoExecucaoMotor.CriarRegistroHistorico(dataReferencia, dataExecucao),
             cancellationToken);
 }

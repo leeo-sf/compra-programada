@@ -34,21 +34,34 @@ public class CustodiaFilhoteTests
     public async Task Atuailzar_DeveRetornarCustodiaFilhoteAtualizadaComSucesso_Quando_DadosValidosInformados()
     {
         var custodia = CustodiaFilhote.GerarCustodia("PETR4");
-        custodia.Atualizar(42, 10);
+        custodia.AdicionarNovaQuantidade(10);
 
         custodia.Id.Should().Be(0);
         custodia.ContaGraficaId.Should().Be(0);
         custodia.Ticker.Should().Be("PETR4");
-        custodia.PrecoMedio.Should().Be(42);
+        custodia.PrecoMedio.Should().Be(0);
         custodia.Quantidade.Should().Be(10);
+    }
+
+    [Fact]
+    public async Task Atuailzar_DeveRetornarCustodiaFilhoteAtualizadaComSucesso_Quando_NovasQuantidadesInformadas()
+    {
+        var custodia = CustodiaFilhote.GerarCustodia("PETR4");
+        custodia.AdicionarNovaQuantidade(8);
+        custodia.AdicionarNovaQuantidade(4);
+
+        custodia.Id.Should().Be(0);
+        custodia.ContaGraficaId.Should().Be(0);
+        custodia.Ticker.Should().Be("PETR4");
+        custodia.PrecoMedio.Should().Be(0);
+        custodia.Quantidade.Should().Be(12);
     }
 
     [Fact]
     public async Task Atuaizar_DeveRetornarQuantidadeNegativaException_Quando_EnviarQuantidadeNegativa()
     {
         var custodia = CustodiaFilhote.GerarCustodia("PETR4");
-        custodia.Atualizar(42, 10);
-        var act = () => custodia.Atualizar(42, -1);
+        var act = () => custodia.AdicionarNovaQuantidade(-1);
         var exception = act.Should().Throw<QuantidadeNegativaException>().Which;
 
         exception.Message.Should().Be("Quantidade não pode ser negativa.");

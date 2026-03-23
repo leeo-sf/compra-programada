@@ -32,7 +32,7 @@ public class MotorCompraHandlerTests
         var response = new ExecutarCompraResponse(DateTime.Now, 1, 1,
             new List<OrdemCompraDto> { new(1, "", 1, new List<OrdemCompraDetalheDto> { new("", "", 1) }, 1) },
             new List<DistribuicaoDto> { new DistribuicaoDto(1, "", 1, 1, "", 1, 1, new(1, "", DateTime.Now, 1, "", null, new List<CustodiaFilhoteDto> { }), DateTime.Now, 1, "", 1, new List<AtivoDto> { }) },
-            new List<ResiduoCustodiaMasterDto> { new ResiduoCustodiaMasterDto("", 1) },
+            new List<AtivoDto> { new AtivoDto("", 1) },
             1, "");
         var result = Result.Success(response);
 

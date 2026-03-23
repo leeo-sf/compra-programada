@@ -26,8 +26,7 @@ public class HistoricoCompra
         Data = data;
     }
 
-    public static HistoricoCompra RegistrarHistorico
-        (int contaGraficaId, string ticker, int quantidade, decimal precoExecutado, decimal precoMedio, decimal valorAporte, DateOnly data)
+    public static HistoricoCompra RegistrarHistorico(int contaGraficaId, string ticker, int quantidade, decimal precoExecutado, decimal precoMedio, decimal valorAporte, DateOnly data)
     {
         if (string.IsNullOrEmpty(ticker))
             throw new ApplicationException("O ativo precisa ser definido!");

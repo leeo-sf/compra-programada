@@ -1,6 +1,8 @@
 ﻿using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Response;
+using CompraProgramada.Domain.Exceptions;
 using Microsoft.Extensions.Logging;
 using OperationResult;
 
@@ -16,7 +18,7 @@ public class CompraService : ICompraService
     private readonly IImpostoRendaService _impostoRendaService;
     private readonly IOrdemCompraService _ordemCompraService;
     private readonly ICustodiaMasterService _custodiaMasterService;
-    private readonly ICotacaoService _cotacaoService;
+    private readonly OrdemCompraMapper _mapperOrdemCompra;
 
     public CompraService(ILogger<CompraService> logger,
         IHistoricoExecucaoMotorService historicoExecucaoService,
@@ -26,7 +28,7 @@ public class CompraService : ICompraService
         IImpostoRendaService impostoRendaService,
         IOrdemCompraService ordemCompraService,
         ICustodiaMasterService custodiaMasterService,
-        ICotacaoService cotacaoService)
+        OrdemCompraMapper mapperOrdemCompra)
     {
         _logger = logger;
         _historicoExecucaoService = historicoExecucaoService;
@@ -36,7 +38,7 @@ public class CompraService : ICompraService
         _impostoRendaService = impostoRendaService;
         _ordemCompraService = ordemCompraService;
         _custodiaMasterService = custodiaMasterService;
-        _cotacaoService = cotacaoService;
+        _mapperOrdemCompra = mapperOrdemCompra;
     }
 
     public async Task<Result<ExecutarCompraResponse>?> ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
@@ -56,10 +58,13 @@ public class CompraService : ICompraService
 
         var clientesAtivosResult = await _clienteService.ObtemClientesAtivoAsync(cancellationToken);
         if (!clientesAtivosResult.IsSuccess)
-            throw clientesAtivosResult.Exception;
+            return clientesAtivosResult.Exception;
 
         var clientesAtivos = clientesAtivosResult.Value;
         var qtdClientesAtivos = clientesAtivos.Count;
+
+        if (qtdClientesAtivos < 1)
+            return new CompraException("Nenhum cliente ativo cadastrado", "QTD_CLIENTES_ATIVOS");
 
         _logger.LogInformation("{QuantidadeClientes} clientes ativos para processamento.", qtdClientesAtivos);
 
@@ -67,52 +72,38 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 
-        var ordemCompraResult = await _ordemCompraService.EmitirOrdensDeCompraAsync(valorTotalConsolidado, cancellationToken);
-        if (!ordemCompraResult.IsSuccess)
-            throw ordemCompraResult.Exception;
+        var ordensCompraResult = await _ordemCompraService.EmitirOrdensDeCompraAsync(valorTotalConsolidado, cancellationToken);
+        if (!ordensCompraResult.IsSuccess)
+            return ordensCompraResult.Exception;
 
-        var (distribuicoes, ativosAhComprar) = await _distribuicaoService.RealizarDistribuicoesAsync(clientesAtivos, dataExecucao, cancellationToken);
+        var distribuicoesResult = await _distribuicaoService.DistribuirParaCustodiasAsync(clientesAtivos, ordensCompraResult.Value, dataExecucao, cancellationToken);
+        if (!distribuicoesResult.IsSuccess)
+            return distribuicoesResult.Exception;
 
         _logger.LogInformation("Distribuições para as custodias realizadas.");
 
-        var resultResiduosCapturados = await _custodiaMasterService.CapturarResiduosDeCustodiaDistribuida(ativosAhComprar, distribuicoes, cancellationToken);
-        if (!resultResiduosCapturados.IsSuccess)
-            throw resultResiduosCapturados.Exception;
+        var residuosResult = await _custodiaMasterService.CapturarResiduosNaoDistribuidosAsync(distribuicoesResult.Value, ordensCompraResult.Value, cancellationToken);
+        if (!residuosResult.IsSuccess)
+            return residuosResult.Exception;
 
-        _logger.LogInformation("Distribuição para as custodias realizada.");
-
-        var qtdIrPublicadoResult = await _impostoRendaService.CalcularIRDedoDuro(distribuicoes, cancellationToken);
+        var qtdIrPublicadoResult = await _impostoRendaService.CalcularIRDedoDuro(distribuicoesResult.Value, cancellationToken);
         if (!qtdIrPublicadoResult.IsSuccess)
-            throw qtdIrPublicadoResult.Exception;
+            return qtdIrPublicadoResult.Exception;
 
         _logger.LogInformation("Ir Dedo Duro calculado e publicado para {QtdClientes} clientes.", qtdIrPublicadoResult.Value);
 
         var dataReferencia = _calendarioMotorCompraService.ObterDataReferenciaExecucao(dataExecucao);
-        await _historicoExecucaoService.SalvarExecucaoAsync(new ExecucaoMotorCompraDto { DataReferencia = dataReferencia, DataExecucao = dataExecucao }, cancellationToken);
+        await _historicoExecucaoService.SalvarExecucaoAsync(dataReferencia, dataExecucao, cancellationToken);
 
-        _logger.LogInformation("Registrado histórico da execução na base de dados.");
-
-        var distribuicoesDto = distribuicoes
-            .GroupBy(grupo => new { grupo.ClienteId, grupo.Nome, grupo.ValorAporte })
-            .Select(g => new DistribuicaoDto(
-                Id: 0,
-                Cpf: string.Empty,
-                OrdemCompraId: 0,
-                ContaGraficaId: 0,
-                Ticker: string.Empty,
-                QuantidadeAlocada: 0,
-                ValorOperacao: 0,
-                ContaGrafica: null!,
-                Data: DateTime.Now,
-                g.Key.ClienteId, g.Key.Nome, g.Key.ValorAporte, g.SelectMany(x => x.Ativos).ToList())).ToList();
+        _logger.LogInformation("Registrado histórico da execução do motor de compra na base de dados.");
 
         return new ExecutarCompraResponse(
             dataExecucao,
             qtdClientesAtivos,
             valorTotalConsolidado,
-            ordemCompraResult.Value,
-            distribuicoesDto,
-            resultResiduosCapturados.Value,
+            _mapperOrdemCompra.ToResponse(ordensCompraResult.Value),
+            new List<DistribuicaoDto>(),
+            residuosResult.Value,
             qtdIrPublicadoResult.Value,
             $"Compra programada executada com sucesso para {qtdClientesAtivos} clientes.");
     }

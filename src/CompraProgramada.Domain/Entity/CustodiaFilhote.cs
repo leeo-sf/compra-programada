@@ -38,12 +38,34 @@ public class CustodiaFilhote
     public static CustodiaFilhote GerarCustodia(string ticker)
         => new CustodiaFilhote(0, 0, ticker, 0, 0);
 
-    public void Atualizar(decimal precoMedio, int novaQuantidade)
+    public void AdicionarNovaQuantidade(int novaQuantidade)
     {
         if (novaQuantidade < 0)
             throw new QuantidadeNegativaException();
 
+        Quantidade += novaQuantidade;
+    }
+
+    /// <summary>
+    /// Calcula e atualiza o valor do preço médio
+    /// </summary>
+    /// <param name="precoFechamentoAtivo">Valor do fechamento do ativo</param>
+    /// <param name="novaQuantidadeDeAtivos">Nova quantidade de ativos que serão atribuídos a conta do cliente</param>
+    /// <returns>Valor do preço médio</returns>
+    public decimal CalcularPrecoMedio(decimal precoFechamentoAtivo, int novaQuantidadeDeAtivos)
+    {
+        if (novaQuantidadeDeAtivos == 0)
+            return 0;
+
+        var valorCompraAnterior = Quantidade * PrecoMedio;
+        var valorCompraAtual = novaQuantidadeDeAtivos * precoFechamentoAtivo;
+
+        decimal precoMedio = valorCompraAtual / novaQuantidadeDeAtivos;
+
+        if (Quantidade > 0)
+            precoMedio = (valorCompraAnterior + valorCompraAtual) / Quantidade + novaQuantidadeDeAtivos;
+
         PrecoMedio = precoMedio;
-        Quantidade = novaQuantidade;
+        return precoMedio;
     }
 }

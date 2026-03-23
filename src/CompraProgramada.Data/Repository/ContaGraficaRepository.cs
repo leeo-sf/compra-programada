@@ -17,33 +17,10 @@ public class ContaGraficaRepository : IContaGraficaRepository
         return conta;
     }
 
-    public async Task AtualizarCustodiasAysnc(List<ContaGrafica> contas, CancellationToken cancellationToken)
+    public async Task<List<ContaGrafica>> AtualizarContasAsync(List<ContaGrafica> contas, CancellationToken cancellationToken)
     {
         _context.ContaGrafica.UpdateRange(contas);
         await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task RegistrarHistoricoCompraAysnc(List<HistoricoCompra> compras, CancellationToken cancellationToken)
-    {
-        _context.HistoricoCompra.AddRange(compras);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<List<ContaGrafica>> ObterContasAtivas(CancellationToken cancellationToken)
-    {
-        var clientes = await _context.Cliente
-            .Where(c => c.Ativo)
-            .Include(c => c.ContaGrafica)
-                .ThenInclude(c => c.CustodiaFilhotes)
-            .ToListAsync(cancellationToken);
-
-        return clientes.Select(x => x.ContaGrafica).ToList();
-    }
-
-    public async Task<List<CustodiaFilhote>> AtualizarCustodiasAsync(List<CustodiaFilhote> custodias, CancellationToken cancellationToken)
-    {
-        _context.CustodiaFilhote.UpdateRange(custodias);
-        await _context.SaveChangesAsync(cancellationToken);
-        return custodias;
+        return contas;
     }
 }

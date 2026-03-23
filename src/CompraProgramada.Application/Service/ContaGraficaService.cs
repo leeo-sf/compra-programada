@@ -51,52 +51,14 @@ public class ContaGraficaService : IContaGraficaService
         );
     }
 
-    public async Task<Result> RegistrarComprasAsync(List<HistoricoCompraDto> compras, CancellationToken cancellationToken)
-    {
-        if (!compras.Any())
-            return new ApplicationException("Nenhuma compra informada para registro.");
-
-        var comprarAhRegistrar = compras.Select(hc => HistoricoCompra.RegistrarHistorico(hc.ContaGraficaId, hc.Ticker, hc.Quantidade, hc.PrecoExecutado, hc.PrecoMedio, hc.ValorAporte, hc.Data)).ToList();
-
-        await _contaGraficaRepository.RegistrarHistoricoCompraAysnc(comprarAhRegistrar, cancellationToken);
-
-        return Result.Success();
-    }
-
-    public async Task<Result<List<CustodiaFilhoteDto>>> AtualizarCustodiasContasAsync(List<ContaGraficaDto> contasAhSeremAtualizadas, CancellationToken cancellationToken)
+    public async Task<Result<List<ContaGrafica>>> AtualizarContasAsync(List<ContaGrafica> contasAhSeremAtualizadas, CancellationToken cancellationToken)
     {
         if (!contasAhSeremAtualizadas.Any())
             return new ApplicationException("Nenhuma conta gráfica informada para atualização.");
 
-        var contas = await _contaGraficaRepository.ObterContasAtivas(cancellationToken);
+        var contasSalvas = await _contaGraficaRepository.AtualizarContasAsync(contasAhSeremAtualizadas, cancellationToken);
 
-        var contasAtualizadas = contas.Select(conta =>
-        {
-            var contaDto = contasAhSeremAtualizadas.FirstOrDefault(c => c.NumeroConta == conta.NumeroConta);
-            var custodiasDto = contaDto?.CustodiaFilhotes;
-
-            custodiasDto?.Select(ct =>
-            {
-                var custodia = conta.CustodiaFilhotes.FirstOrDefault(x => x.ContaGraficaId == ct.ContaGraficaId && x.Ticker == ct.Ticker);
-                custodia?.Atualizar(ct.PrecoMedio, ct.Quantidade);
-                return custodia;
-            }).ToList();
-
-            return conta;
-
-        }).ToList();
-
-        var custodias = contasAtualizadas.SelectMany(c => c.CustodiaFilhotes).ToList();
-
-        var custodiasSalvas = await _contaGraficaRepository.AtualizarCustodiasAsync(custodias, cancellationToken);
-
-        return custodiasSalvas.Select(c => new CustodiaFilhoteDto(
-            c.Id,
-            c.ContaGraficaId,
-            c.Ticker!,
-            c.PrecoMedio,
-            c.Quantidade
-        )).ToList();
+        return contasSalvas;
     }
 
     public async Task<Result<CarteiraDto>> ObterRentabilidadeDaCertira(List<CustodiaFilhoteDto> custodias, CancellationToken cancellationToken)

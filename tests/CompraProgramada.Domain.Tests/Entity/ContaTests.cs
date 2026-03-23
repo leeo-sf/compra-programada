@@ -1,7 +1,5 @@
 ﻿using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Exceptions;
 using FluentAssertions;
-using System.Net;
 
 namespace CompraProgramada.Domain.Tests.Entity;
 
@@ -23,7 +21,7 @@ public class ContaTests
     [Fact]
     public async Task GerarContaMaster_DeveRetornarContaMasterComSucesso_Quando_DadosValidosInformados()
     {
-        List<CustodiaMaster> custodias = new() { CustodiaMaster.CriarCustodia(1, "PETR4", 8) };
+        List<CustodiaMaster> custodias = new() { CustodiaMaster.CriarCustodia(1, "PETR4") };
         var conta = ContaMaster.Gerar(1, custodias);
 
         conta.Id.Should().Be(0);
