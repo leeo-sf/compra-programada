@@ -18,8 +18,6 @@ public class ContaMaster : BaseConta
     public static ContaMaster Gerar(int id, List<CustodiaMaster> custodias)
         => new ContaMaster(id, custodias);
 
-    public void AtualizaCustodia(List<CustodiaMaster> custodias) => CustodiaMasters = custodias;
-
     protected override string GerarNumeroConta(int id)
         => $"MST-{id:D6}";
 }

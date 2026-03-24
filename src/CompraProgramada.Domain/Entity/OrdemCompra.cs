@@ -42,10 +42,10 @@ public class OrdemCompra
         var multiplosPresente = Math.DivRem(quantidadeTotal, 100, out int restos);
 
         if (restos != 0)
-            detalhes.Add(OrdemCompraDetalhe.GerarDetalhes(OrdemCompraTipo.Fracionario, $"{ticker}F", restos, 0));
+            detalhes.Add(OrdemCompraDetalhe.GerarDetalhe(OrdemCompraTipo.Fracionario, $"{ticker}F", restos, 0));
 
         if (multiplosPresente > 0)
-            detalhes.Add(OrdemCompraDetalhe.GerarDetalhes(OrdemCompraTipo.Padrao, ticker, multiplosPresente * 100, 0));
+            detalhes.Add(OrdemCompraDetalhe.GerarDetalhe(OrdemCompraTipo.Padrao, ticker, multiplosPresente * 100, 0));
 
         return new OrdemCompra(0, ticker, quantidadeTotal, precoUnitario, quantidadeTotal * precoUnitario, DateTime.Now, detalhes);
     }

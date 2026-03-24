@@ -32,6 +32,6 @@ public class OrdemCompraDetalhe
         OrdemCompraId = ordemCompraId;
     }
 
-    public static OrdemCompraDetalhe GerarDetalhes(OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId)
+    public static OrdemCompraDetalhe GerarDetalhe(OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId)
         => new OrdemCompraDetalhe(0, tipo, ticker, quantidade, ordemCompraId);
 }
