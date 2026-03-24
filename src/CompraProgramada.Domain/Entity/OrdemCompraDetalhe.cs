@@ -1,9 +1,11 @@
-﻿namespace CompraProgramada.Domain.Entity;
+﻿using CompraProgramada.Domain.Enum;
+
+namespace CompraProgramada.Domain.Entity;
 
 public class OrdemCompraDetalhe
 {
     public int Id { get; protected set; }
-    public string Tipo { get; protected set; } = default!;
+    public OrdemCompraTipo Tipo { get; protected set; } = default!;
     public string Ticker { get; protected set; } = default!;
     public int Quantidade { get; protected set; }
     public int OrdemCompraId { get; protected set; }
@@ -11,7 +13,7 @@ public class OrdemCompraDetalhe
 
     private OrdemCompraDetalhe() { }
 
-    internal OrdemCompraDetalhe(int id, string tipo, string ticker, int quantidade, int ordemCompraId, OrdemCompra ordemCompra)
+    internal OrdemCompraDetalhe(int id, OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId, OrdemCompra ordemCompra)
     {
         Id = id;
         Ticker = ticker;
@@ -21,15 +23,15 @@ public class OrdemCompraDetalhe
         OrdemCompra = ordemCompra;
     }
 
-    internal OrdemCompraDetalhe(int id, string tipo, string ticker, int quantidade, int ordemCompraId)
+    internal OrdemCompraDetalhe(int id, OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId)
     {
         Id = id;
         Ticker = ticker;
-        Tipo= tipo;
+        Tipo = tipo;
         Quantidade = quantidade;
         OrdemCompraId = ordemCompraId;
     }
 
-    public static OrdemCompraDetalhe GerarDetalhes(string tipo, string ticker, int quantidade, int ordemCompraId)
+    public static OrdemCompraDetalhe GerarDetalhes(OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId)
         => new OrdemCompraDetalhe(0, tipo, ticker, quantidade, ordemCompraId);
 }

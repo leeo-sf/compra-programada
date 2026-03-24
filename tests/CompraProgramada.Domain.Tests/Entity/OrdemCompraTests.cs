@@ -1,8 +1,6 @@
 ﻿using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Exceptions;
-using CompraProgramada.Domain.Tests.TestsUtils;
+using CompraProgramada.Domain.Enum;
 using FluentAssertions;
-using System.Net;
 
 namespace CompraProgramada.Domain.Tests.Entity;
 
@@ -26,7 +24,7 @@ public class OrdemCompraTests
         ordemCompra.ValorTotal.Should().Be(valorTotal);
         ordemCompra.Detalhes.Count.Should().Be(1);
         ordemCompra.Detalhes.First().Id.Should().Be(0);
-        ordemCompra.Detalhes.First().Tipo.Should().Be("FRACIONARIO");
+        ordemCompra.Detalhes.First().Tipo.Should().Be(OrdemCompraTipo.Fracionario);
         ordemCompra.Detalhes.First().Ticker.Should().Be($"{ticker}F");
         ordemCompra.Detalhes.First().Quantidade.Should().Be(quantidadeTotal);
         ordemCompra.Detalhes.First().OrdemCompraId.Should().Be(0);
@@ -44,7 +42,7 @@ public class OrdemCompraTests
 
         ordemCompra.Detalhes.Count.Should().Be(1);
         ordemCompra.Detalhes.First().Id.Should().Be(0);
-        ordemCompra.Detalhes.First().Tipo.Should().Be("PADRAO");
+        ordemCompra.Detalhes.First().Tipo.Should().Be(OrdemCompraTipo.Padrao);
         ordemCompra.Detalhes.First().Ticker.Should().Be(ticker);
         ordemCompra.Detalhes.First().Quantidade.Should().Be(quantidadeTotal);
         ordemCompra.Detalhes.First().OrdemCompraId.Should().Be(0);
@@ -61,19 +59,19 @@ public class OrdemCompraTests
     {
         var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario);
 
-        var lotePadrao = ordemCompra.Detalhes.FirstOrDefault(x => x.Tipo == "PADRAO");
-        var loteFracionario = ordemCompra.Detalhes.FirstOrDefault(x => x.Tipo == "FRACIONARIO");
+        var lotePadrao = ordemCompra.Detalhes.FirstOrDefault(x => x.Tipo == OrdemCompraTipo.Padrao);
+        var loteFracionario = ordemCompra.Detalhes.FirstOrDefault(x => x.Tipo == OrdemCompraTipo.Fracionario);
 
         ordemCompra.Detalhes.Count.Should().Be(2);
 
         lotePadrao?.Id.Should().Be(0);
-        lotePadrao?.Tipo.Should().Be("PADRAO");
+        lotePadrao?.Tipo.Should().Be(OrdemCompraTipo.Padrao);
         lotePadrao?.Ticker.Should().Be(ticker);
         lotePadrao?.Quantidade.Should().Be(qtdLotePadrao);
         lotePadrao?.OrdemCompraId.Should().Be(0);
 
         loteFracionario?.Id.Should().Be(0);
-        loteFracionario?.Tipo.Should().Be("FRACIONARIO");
+        loteFracionario?.Tipo.Should().Be(OrdemCompraTipo.Fracionario);
         loteFracionario?.Ticker.Should().Be($"{ticker}F");
         loteFracionario?.Quantidade.Should().Be(qtdLoteFracionario);
         loteFracionario?.OrdemCompraId.Should().Be(0);
