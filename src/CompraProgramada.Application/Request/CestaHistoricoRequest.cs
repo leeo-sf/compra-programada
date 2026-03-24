@@ -4,4 +4,4 @@ using OperationResult;
 
 namespace CompraProgramada.Application.Request;
 
-public record CestaHistoricoRequest() : IRequest<Result<List<CestaRecomendadaResponse>>>;
+public record CestaHistoricoRequest() : IRequest<Result<HistoricoCestasResponse>>;

@@ -11,8 +11,8 @@ namespace CompraProgramada.Application.Handler;
 
 public class AdministradorHandler
     : IRequestHandler<CriarCestaRecomendadaRequest, Result<CriarCestaRecomendadaResponse>>,
-        IRequestHandler<CestaAtualRequest, Result<CestaRecomendadaResponse>>,
-        IRequestHandler<CestaHistoricoRequest, Result<List<CestaRecomendadaResponse>>>
+        IRequestHandler<CestaAtualRequest, Result<CestaRecomendadaDto>>,
+        IRequestHandler<CestaHistoricoRequest, Result<HistoricoCestasResponse>>
 {
     private readonly ILogger<AdministradorHandler> _logger;
     private readonly ICestaRecomendadaService _cestaService;
@@ -54,13 +54,13 @@ public class AdministradorHandler
         if (!quantidadeUsuariosAtivos.IsSuccess)
             return quantidadeUsuariosAtivos.Exception;
 
-        var (ativosRemovidos, ativosAdicionados) = _cestaService.ObterMudancasDeAtivos(result.Value.CestaAnterior!.Itens, result.Value.CestaAtual.Itens).Value;
+        var (ativosRemovidos, ativosAdicionados) = _cestaService.ObterMudancasDeAtivos(result.Value.CestaAnterior!.Itens, result.Value.CestaAtual.Itens);
 
         var mensagemOperacao = $"Cesta atualizada. Rebalanceamento disparado para {quantidadeUsuariosAtivos.Value} clientes ativos.";
         return MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, result.Value.CestaAnterior, ativosRemovidos, ativosAdicionados) with { Mensagem = mensagemOperacao };
     }
 
-    public async Task<Result<CestaRecomendadaResponse>> Handle(CestaAtualRequest request, CancellationToken cancellationToken)
+    public async Task<Result<CestaRecomendadaDto>> Handle(CestaAtualRequest request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando consulta da cesta atual.");
 
@@ -74,19 +74,21 @@ public class AdministradorHandler
         return _mapper.ToResponse(cesta);
     }
 
-    public async Task<Result<List<CestaRecomendadaResponse>>> Handle(CestaHistoricoRequest request, CancellationToken cancellationToken)
+    public async Task<Result<HistoricoCestasResponse>> Handle(CestaHistoricoRequest request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando processo de consulta de histórico de cestas.");
 
         var cestas = await _cestaService.HistoricoCestasAsync(cancellationToken);
 
         if (cestas.Value is null)
-            return new List<CestaRecomendadaResponse>();
+            return new HistoricoCestasResponse(new());
 
-        return _mapper.ToResponse(cestas.Value);
+        var cestasDto = cestas.Value.Select(x => _mapper.ToResponse(x)).ToList();
+
+        return new HistoricoCestasResponse(cestasDto);
     }
 
-    private CriarCestaRecomendadaResponse MontarResponseCriarAlterarCesta(CestaRecomandadaDto cesta, bool atualizouCesta, CestaRecomandadaDto? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados)
+    private CriarCestaRecomendadaResponse MontarResponseCriarAlterarCesta(CestaRecomendadaDto cesta, bool atualizouCesta, CestaRecomendadaDto? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados)
         => new CriarCestaRecomendadaResponse(
             cesta.Id,
             cesta.Nome,

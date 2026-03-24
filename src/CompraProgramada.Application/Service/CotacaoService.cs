@@ -38,7 +38,7 @@ public class CotacaoService : ICotacaoService
         if (!cestaVigente.IsSuccess)
             throw new ApplicationException(cestaVigente.Exception.Message);
 
-        var cestaVigenteTickers = new HashSet<string>(cestaVigente.Value.Itens.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
+        var cestaVigenteTickers = new HashSet<string>(cestaVigente.Value.ComposicaoCesta.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
 
         var cotacoesCesta = cotacoesB3.Where(cotacao => cestaVigenteTickers.Contains(cotacao.Ticker));
 

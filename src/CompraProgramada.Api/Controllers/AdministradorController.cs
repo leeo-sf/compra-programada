@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Application.Request;
+﻿using CompraProgramada.Application.Dto;
+using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +20,13 @@ public class AdministradorController(IMediator mediator) : BaseController(mediat
     /// Consultar cesta atual
     /// </summary>
     [HttpGet("cesta/atual")]
-    public async Task<ActionResult<CestaRecomendadaResponse>> CestaAtualAsync()
+    public async Task<ActionResult<CestaRecomendadaDto>> CestaAtualAsync()
         => await SendCommand(new CestaAtualRequest());
 
     /// <summary>
     /// Consultar histórico de cestas
     /// </summary>
     [HttpGet("cesta/historico")]
-    public async Task<ActionResult<List<CestaRecomendadaResponse>>> HistoricoAsync()
+    public async Task<ActionResult<HistoricoCestasResponse>> HistoricoAsync()
         => await SendCommand(new CestaHistoricoRequest());
 }

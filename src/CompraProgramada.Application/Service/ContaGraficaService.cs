@@ -27,7 +27,7 @@ public class ContaGraficaService : IContaGraficaService
         if (!cestaVigente.IsSuccess)
             return cestaVigente.Exception;
 
-        var custodiasConta = cestaVigente.Value!.Itens
+        var custodiasConta = cestaVigente.Value!.ComposicaoCesta
             .Select(x => CustodiaFilhote.GerarCustodia(x.Ticker)).ToList();
 
         var conta = ContaGrafica.Gerar(clienteId, custodiasConta);

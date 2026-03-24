@@ -8,14 +8,14 @@ namespace CompraProgramada.Application.Mapper;
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
 public partial class CestaRecomendadaMapper
 {
-    [MapProperty(nameof(CestaRecomendada.ComposicaoCesta), nameof(CestaRecomandadaDto.Itens))]
-    public partial CestaRecomandadaDto ToResponse(CestaRecomendada cesta);
-    public partial List<CestaRecomandadaDto> ToResponse(List<CestaRecomendada> cesta);
+    [MapProperty(nameof(CestaRecomendada.ComposicaoCesta), nameof(CestaRecomendadaDto.Itens))]
+    public partial CestaRecomendadaDto ToResponse(CestaRecomendada cesta);
+    public partial List<CestaRecomendadaDto> ToResponse(List<CestaRecomendada> cesta);
 
 
-    [MapProperty(nameof(CestaRecomandadaDto.Id), nameof(CestaRecomendadaResponse.CestaId))]
-    public partial CestaRecomendadaResponse ToResponse(CestaRecomandadaDto cesta);
-    public partial List<CestaRecomendadaResponse> ToResponse(List<CestaRecomandadaDto> cesta);
+    [MapProperty(nameof(CestaRecomendadaDto.Id), nameof(CestaRecomendadaResponse.CestaId))]
+    public partial CestaRecomendadaResponse ToResponse(CestaRecomendadaDto cesta);
+    public partial List<CestaRecomendadaResponse> ToResponse(List<CestaRecomendadaDto> cesta);
 
     
     public partial ComposicaoCestaRecomendadaDto ToResponse(ComposicaoCesta cesta);

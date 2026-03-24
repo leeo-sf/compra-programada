@@ -39,24 +39,27 @@ public class CestaRecomendadaService : ICestaRecomendadaService
         return new CriarCestaRecomendadaDto(
             cestaAnterior is not null ? true : false,
             _mapper.ToResponse(cestaCriada),
-            cestaAnterior is not null ? cestaAnterior : null);
+            cestaAnterior is not null ? _mapper.ToResponse(cestaAnterior) : null);
     }
 
-    public async Task<Result<CestaRecomandadaDto?>> ObterCestaAtivaAsync(CancellationToken cancellationToken)
+    public async Task<Result<CestaRecomendada?>> ObterCestaAtivaAsync(CancellationToken cancellationToken)
     {
         var cesta = await _cestaRepository.ObterCestaAtivaAsync(cancellationToken);
 
         if (cesta is null)
             return new ApplicationException("Nenhuma Cesta Top Five ativa no momento.");
 
-        return _mapper.ToResponse(cesta);
+        return cesta;
     }
 
-    public async Task<Result<List<CestaRecomandadaDto>>> HistoricoCestasAsync(CancellationToken cancellationToken)
+    public async Task<Result<List<CestaRecomendada>>> HistoricoCestasAsync(CancellationToken cancellationToken)
     {
         var cestas = await _cestaRepository.ObterTodasCestasAsync(cancellationToken);
 
-        return _mapper.ToResponse(cestas);
+        if (cestas is not null)
+            return cestas;
+
+        return Result.Success<List<CestaRecomendada>>([]);
     }
 
     public async Task<Result<List<ValorAtivoConsolidadoDto>>> ValorPorAtivoConsolidado(decimal totalConsolidado, CancellationToken cancellationToken)
@@ -65,34 +68,14 @@ public class CestaRecomendadaService : ICestaRecomendadaService
         if (!cestaVigente.IsSuccess)
             return cestaVigente.Exception;
 
-        var valorPorAtivoConsolidado = cestaVigente.Value.Itens
+        var valorPorAtivoConsolidado = cestaVigente.Value.ComposicaoCesta
             .Select(ativo => new ValorAtivoConsolidadoDto(ativo.Ticker, totalConsolidado * (ativo.Percentual / 100)))
             .ToList();
 
         return valorPorAtivoConsolidado;
     }
 
-    private async Task<CestaRecomandadaDto?> DesativaCestaAtualAsync(CancellationToken cancellationToken)
-    {
-        var cestaAtual = await _cestaRepository.ObterCestaAtivaAsync(cancellationToken);
-
-        if (cestaAtual is not null)
-        {
-            cestaAtual.DesativarCesta();
-
-            await _cestaRepository.AtualizarAsync(cestaAtual, cancellationToken);
-
-            _logger.LogInformation("Cesta atual desativada {Cesta}", cestaAtual);
-
-            return _mapper.ToResponse(cestaAtual);
-        }
-
-        _logger.LogInformation("Nenhuma cesta foi encontrada na base de dados para desatiação");
-
-        return null;
-    }
-
-    public Result<(List<string> ativosRemovidos, List<string> ativosAdicionados)> ObterMudancasDeAtivos(List<ComposicaoCestaRecomendadaDto> composicaoAnterior, List<ComposicaoCestaRecomendadaDto> composicaoAtual)
+    public (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<ComposicaoCestaRecomendadaDto> composicaoAnterior, List<ComposicaoCestaRecomendadaDto> composicaoAtual)
     {
         var tickersAnteriores = composicaoAnterior.Select(c => c.Ticker);
         var tickersAtual = composicaoAtual.Select(c => c.Ticker);
@@ -108,5 +91,25 @@ public class CestaRecomendadaService : ICestaRecomendadaService
         _logger.LogInformation("Mudanças de ativos identificados {Removidos} - {Adicionados}", ativosRemovidos, ativosAdicionados);
 
         return (ativosRemovidos, ativosAdicionados);
+    }
+
+    private async Task<CestaRecomendada?> DesativaCestaAtualAsync(CancellationToken cancellationToken)
+    {
+        var cestaAtual = await _cestaRepository.ObterCestaAtivaAsync(cancellationToken);
+
+        if (cestaAtual is not null)
+        {
+            cestaAtual.DesativarCesta();
+
+            await _cestaRepository.AtualizarAsync(cestaAtual, cancellationToken);
+
+            _logger.LogInformation("Cesta atual desativada {Cesta}", cestaAtual);
+
+            return cestaAtual;
+        }
+
+        _logger.LogInformation("Nenhuma cesta foi encontrada na base de dados para desatiação");
+
+        return null;
     }
 }

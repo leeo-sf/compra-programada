@@ -4,6 +4,8 @@ using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
+using CompraProgramada.Application.Tests.TestUtils;
+using CompraProgramada.Domain.Entity;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -75,7 +77,8 @@ public class AdministradorHandlerTests
     {
         var request = new CestaAtualRequest();
 
-        var response = new CestaRecomandadaDto(1, "", DateTime.Now, null, true, new List<ComposicaoCestaRecomendadaDto> { });
+        var itensCesta = FakerRequest.ComposicaoCestaRecomendada();
+        var response = CestaRecomendada.CriarCesta("Name", itensCesta.Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual)).ToList());
         var result = Result.Success(response);
 
         _cestaRecomendadaServiceMock
@@ -85,7 +88,7 @@ public class AdministradorHandlerTests
         var resultado = await _handler.Handle(request, CancellationToken.None);
 
         resultado.IsSuccess.Should().BeTrue();
-        resultado.Value.Should().BeOfType<CestaRecomendadaResponse>();
+        resultado.Value.Should().BeOfType<CestaRecomendadaDto>();
 
         _cestaRecomendadaServiceMock.Verify(s =>
             s.ObterCestaAtivaAsync(
@@ -99,7 +102,7 @@ public class AdministradorHandlerTests
         var request = new CestaAtualRequest();
 
         var exception = new Exception("Erro na compra");
-        var result = Result.Error<CestaRecomandadaDto>(exception);
+        var result = Result.Error<CestaRecomendada>(exception);
 
         _cestaRecomendadaServiceMock
             .Setup(s => s.ObterCestaAtivaAsync(It.IsAny<CancellationToken>()))!
@@ -116,8 +119,7 @@ public class AdministradorHandlerTests
     {
         var request = new CestaHistoricoRequest();
 
-        var response = new List<CestaRecomandadaDto> { new(1, "", DateTime.Now, null, true, new List<ComposicaoCestaRecomendadaDto> { new(1, 1, "", 1) }) };
-        var result = Result.Success(response);
+        var response = new List<CestaRecomendada> { };
 
         _cestaRecomendadaServiceMock
             .Setup(s => s.HistoricoCestasAsync(It.IsAny<CancellationToken>()))
@@ -126,7 +128,7 @@ public class AdministradorHandlerTests
         var resultado = await _handler.Handle(request, CancellationToken.None);
 
         resultado.IsSuccess.Should().BeTrue();
-        resultado.Value.Should().BeOfType<List<CestaRecomendadaResponse>>();
+        resultado.Value.Should().BeOfType<HistoricoCestasResponse>();
 
         _cestaRecomendadaServiceMock.Verify(s =>
             s.HistoricoCestasAsync(
@@ -140,7 +142,7 @@ public class AdministradorHandlerTests
         var request = new CestaHistoricoRequest();
 
         var exception = new Exception("Erro na compra");
-        var result = Result.Error<List<CestaRecomandadaDto>>(exception);
+        var result = Result.Error<List<CestaRecomendada>>(exception);
 
         _cestaRecomendadaServiceMock
             .Setup(s => s.HistoricoCestasAsync(It.IsAny<CancellationToken>()))!

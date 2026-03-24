@@ -2,5 +2,5 @@
 
 public record CriarCestaRecomendadaDto(
     bool CestaAtualizada,
-    CestaRecomandadaDto CestaAtual,
-    CestaRecomandadaDto? CestaAnterior);
+    CestaRecomendadaDto CestaAtual,
+    CestaRecomendadaDto? CestaAnterior);

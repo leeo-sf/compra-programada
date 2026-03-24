@@ -1,5 +1,4 @@
 ﻿using CompraProgramada.Application.Dto;
-using System.Text.Json.Serialization;
 
 namespace CompraProgramada.Application.Response;
 

@@ -90,21 +90,7 @@ public class AdministradorControllerTests
     [Fact]
     public async Task CestaAtual_DeveRetornarSucesso_QuandoSolicitado()
     {
-        var response = new CestaRecomendadaResponse
-        {
-            CestaId = 1,
-            Nome = "Cesta Top Five",
-            Ativa = true,
-            DataCriacao = DateTime.Now,
-            Itens = new List<ComposicaoCestaDto>
-            {
-                new ComposicaoCestaDto("PETR4", 30),
-                new ComposicaoCestaDto("VALE3", 25),
-                new ComposicaoCestaDto("ITUB4", 20),
-                new ComposicaoCestaDto("BBDC4", 15),
-                new ComposicaoCestaDto("WEGE3", 10)
-            }
-        };
+        var response = new CestaRecomendadaDto(1, "Name", DateTime.Now, null, true, new());
 
         _mediator.Send(new CestaAtualRequest()).Returns(Result.Success(response));
 
@@ -119,7 +105,7 @@ public class AdministradorControllerTests
         var request = new CestaAtualRequest();
         ApplicationException error = new("Nenhuma cesta cadastrada.");
 
-        _mediator.Send(request).Returns(Result.Error<CestaRecomendadaResponse>(error));
+        _mediator.Send(request).Returns(Result.Error<CestaRecomendadaDto>(error));
 
         var result = await _sut.CestaAtualAsync();
 
@@ -135,24 +121,9 @@ public class AdministradorControllerTests
     {
         var request = new CestaHistoricoRequest();
 
-        var response = new List<CestaRecomendadaResponse>
-        {
-            new CestaRecomendadaResponse
-            {
-                CestaId = 1,
-                Nome = "Cesta Top Five",
-                Ativa = true,
-                DataCriacao = DateTime.Now,
-                Itens = new List<ComposicaoCestaDto>
-                {
-                    new ComposicaoCestaDto("PETR4", 30),
-                    new ComposicaoCestaDto("VALE3", 25),
-                    new ComposicaoCestaDto("ITUB4", 20),
-                    new ComposicaoCestaDto("BBDC4", 15),
-                    new ComposicaoCestaDto("WEGE3", 10)
-                }
-            }
-        };
+        var response = new HistoricoCestasResponse(
+            new List<CestaRecomendadaDto> { new CestaRecomendadaDto(1, "Name", DateTime.Now, null, true, new()) }
+        );
 
         _mediator.Send(request).Returns(Result.Success(response));
 
