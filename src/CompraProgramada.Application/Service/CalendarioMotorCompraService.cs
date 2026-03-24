@@ -5,16 +5,25 @@ namespace CompraProgramada.Application.Service;
 
 public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 {
-    private readonly AppConfig _config;
-    private readonly DateTime _dataAtual = DateTime.Now;
+    private readonly MotorCompraConfig _config;
+    private readonly IDateTimeProvaider _dateTimeProvaider;
+    private DateTime _dataAtual => _dateTimeProvaider.Now;
 
-    public CalendarioMotorCompraService(AppConfig config) => _config = config;
+    public CalendarioMotorCompraService(AppConfig config)
+        : this(config, new DateTimeProvaider()) { }
+
+    public CalendarioMotorCompraService(AppConfig config,
+        IDateTimeProvaider dateTimeProvaider)
+    {
+        _config = config.MotorCompraConfig;
+        _dateTimeProvaider = dateTimeProvaider;
+    }
 
     public bool DeveExecutarCompraHoje()
     {
         var ehDiaUtil = EhDiaUtil(_dataAtual);
 
-        if (_config.MotorCompra.DiasDeCompra.Contains(_dataAtual.Day) && ehDiaUtil)
+        if (_config.DiasDeCompra.Contains(_dataAtual.Day) && ehDiaUtil)
             return true;
 
         return false;
@@ -23,7 +32,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
     public DateTime ObterProximaDataCompra()
     {
         DateTime? proximaDataCompra;
-        var diasOrdenadosDeExecucao = _config.MotorCompra.DiasDeCompra.OrderBy(d => d).ToList();
+        var diasOrdenadosDeExecucao = _config.DiasDeCompra.OrderBy(d => d).ToList();
 
         foreach (var dia in diasOrdenadosDeExecucao)
         {
@@ -50,10 +59,10 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 
     public DateTime ObterDataReferenciaExecucao(DateTime dataExecutada)
     {
-        if (_config.MotorCompra.DiasDeCompra.Contains(dataExecutada.Day))
+        if (_config.DiasDeCompra.Contains(dataExecutada.Day))
             return dataExecutada;
 
-        var diasOrdenadosDeExecucao = _config.MotorCompra.DiasDeCompra.OrderBy(d => d).ToList();
+        var diasOrdenadosDeExecucao = _config.DiasDeCompra.OrderBy(d => d).ToList();
 
         foreach (var dia in diasOrdenadosDeExecucao)
         {
@@ -73,12 +82,12 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
         return new DateTime(_dataAtual.Year, _dataAtual.Month, diasOrdenadosDeExecucao[diasOrdenadosDeExecucao.Count - 1]);
     }
 
-    private bool EhDiaUtil(DateTime data)
+    public bool EhDiaUtil(DateTime data)
         => data.DayOfWeek != DayOfWeek.Saturday &&
             data.DayOfWeek != DayOfWeek.Sunday;
 
-    private DateTime ObterProximoDiaUtil(DateTime data)
+    public DateTime ObterProximoDiaUtil(DateTime data)
         => data.DayOfWeek == DayOfWeek.Saturday ?
-            data.AddDays(2) :
-            data.AddDays(1);
+            data.AddDays(2) : data.DayOfWeek == DayOfWeek.Sunday ?
+            data.AddDays(1) : data;
 }

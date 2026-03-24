@@ -2,5 +2,5 @@
 
 public sealed class AppConfig
 {
-    public MotorCompra MotorCompra { get; init; } = default!;
+    public MotorCompraConfig MotorCompraConfig { get; init; } = default!;
 }

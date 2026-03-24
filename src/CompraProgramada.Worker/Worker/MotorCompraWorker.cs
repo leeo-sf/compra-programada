@@ -20,7 +20,7 @@ public class MotorCompraWorker : BackgroundService
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var periodo = TimeSpan.FromHours(_appConfig.MotorCompra?.TempoEmHoraAhCadaExecucao ?? 1);
+        var periodo = TimeSpan.FromHours(_appConfig.MotorCompraConfig?.TempoEmHoraAhCadaExecucao ?? 1);
         var timer = new PeriodicTimer(periodo);
 
         while (await timer.WaitForNextTickAsync(stoppingToken))

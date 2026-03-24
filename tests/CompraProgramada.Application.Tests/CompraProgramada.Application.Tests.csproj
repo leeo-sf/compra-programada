@@ -25,6 +25,15 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Content Include="..\..\src\CompraProgramada.Api\appsettings.Development.json" Link="appsettings.Development.json">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</Content>
+	<Content Include="..\..\src\CompraProgramada.Api\appsettings.json" Link="appsettings.json">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

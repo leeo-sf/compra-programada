@@ -11,7 +11,7 @@ public class FileService : IFileService
 
     public string ObterCaminhoCompletoArquivoCotacoes()
     {
-        string pastaCotacoes = Path.Combine(AppContext.BaseDirectory, _appConfig.MotorCompra.NomePastaArquivosB3);
+        string pastaCotacoes = Path.Combine(AppContext.BaseDirectory, _appConfig.MotorCompraConfig.NomePastaArquivosB3);
 
         if (!ArquivoExiste(pastaCotacoes))
             throw new DirectoryNotFoundException($"A pasta {pastaCotacoes} não foi encontrada.");
