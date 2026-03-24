@@ -9,6 +9,7 @@ namespace CompraProgramada.Application.Mapper;
 public partial class ContaMapper
 {
     public partial ContaGraficaDto ToResponse(ContaGrafica contaGrafica);
+    public partial List<ContaGraficaDto> ToResponse(List<ContaGrafica> contasGrafica);
 
     public partial ContaGraficaResponse ToResponse(ContaGraficaDto contaGrafica);
 

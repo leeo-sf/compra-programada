@@ -4,7 +4,7 @@ namespace CompraProgramada.Domain.Entity;
 
 public class ContaGrafica : BaseConta
 {
-    public int ClienteId { get; set; }
+    public int ClienteId { get; init; }
     public string Tipo { get; } = "FILHOTE";
     public Cliente Cliente { get; init; } = default!;
     public List<Distribuicao> Distribuicoes { get; init; } = new List<Distribuicao>();

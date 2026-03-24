@@ -32,8 +32,6 @@ public class DistribuicaoService : IDistribuicaoService
 
         _logger.LogInformation("Resíduos não distribuídos obtidos para reaproveitamento na distribuição: {Residuos}", residuosNaoDistribuidos.Value);
 
-        List<Distribuicao> distribuicoes = [];
-
         foreach (var ativo in ordensCompra)
         {
             var custodiaMasterAtivo = residuosNaoDistribuidos.Value.FirstOrDefault(r => r.Ticker == ativo.Ticker);
@@ -67,16 +65,18 @@ public class DistribuicaoService : IDistribuicaoService
                     DateOnly.FromDateTime(dataExeucao)));
 
                 contaCliente.AdicionarDistribuicao(distribuicao);
-
-                distribuicoes.Add(distribuicao);
             }
         }
         _logger.LogInformation("Distribuição realizada entre as custodias dos clientes ativos.");
 
         var contasAhSeremAtuailzadas = clientesAtivos.Select(x => x.ContaGrafica).ToList();
-        await _contaGraficaService.AtualizarContasAsync(contasAhSeremAtuailzadas, cancellationToken);
+
+        var contasAtualizadasResult = await _contaGraficaService.AtualizarContasAsync(contasAhSeremAtuailzadas, cancellationToken);
+        if (!contasAtualizadasResult.IsSuccess)
+            throw contasAtualizadasResult.Exception;
+
         _logger.LogInformation("Atualização realizada das nas contas que tiveram a distribuição na base de dados.");
 
-        return distribuicoes;
+        return contasAtualizadasResult.Value.SelectMany(x => x.Distribuicoes).ToList();
     }
 }

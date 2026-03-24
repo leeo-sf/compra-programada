@@ -2,6 +2,7 @@
 using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Response;
+using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Exceptions;
 using Microsoft.Extensions.Logging;
 using OperationResult;
@@ -19,6 +20,7 @@ public class CompraService : ICompraService
     private readonly IOrdemCompraService _ordemCompraService;
     private readonly ICustodiaMasterService _custodiaMasterService;
     private readonly OrdemCompraMapper _mapperOrdemCompra;
+    private readonly DistribuicaoMapper _distribuicaoMapper;
 
     public CompraService(ILogger<CompraService> logger,
         IHistoricoExecucaoMotorService historicoExecucaoService,
@@ -28,7 +30,8 @@ public class CompraService : ICompraService
         IImpostoRendaService impostoRendaService,
         IOrdemCompraService ordemCompraService,
         ICustodiaMasterService custodiaMasterService,
-        OrdemCompraMapper mapperOrdemCompra)
+        OrdemCompraMapper mapperOrdemCompra,
+        DistribuicaoMapper distribuicaoMapper)
     {
         _logger = logger;
         _historicoExecucaoService = historicoExecucaoService;
@@ -39,6 +42,7 @@ public class CompraService : ICompraService
         _ordemCompraService = ordemCompraService;
         _custodiaMasterService = custodiaMasterService;
         _mapperOrdemCompra = mapperOrdemCompra;
+        _distribuicaoMapper = distribuicaoMapper;
     }
 
     public async Task<Result<ExecutarCompraResponse>?> ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
@@ -82,11 +86,13 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("Distribuições para as custodias realizadas.");
 
-        var residuosResult = await _custodiaMasterService.CapturarResiduosNaoDistribuidosAsync(distribuicoesResult.Value, ordensCompraResult.Value, cancellationToken);
+        var distribuicoes = distribuicoesResult.Value;
+
+        var residuosResult = await _custodiaMasterService.CapturarResiduosNaoDistribuidosAsync(distribuicoes, ordensCompraResult.Value, cancellationToken);
         if (!residuosResult.IsSuccess)
             return residuosResult.Exception;
 
-        var qtdIrPublicadoResult = await _impostoRendaService.CalcularIRDedoDuro(distribuicoesResult.Value, cancellationToken);
+        var qtdIrPublicadoResult = await _impostoRendaService.CalcularIRDedoDuro(distribuicoes, cancellationToken);
         if (!qtdIrPublicadoResult.IsSuccess)
             return qtdIrPublicadoResult.Exception;
 
@@ -102,9 +108,32 @@ public class CompraService : ICompraService
             qtdClientesAtivos,
             valorTotalConsolidado,
             _mapperOrdemCompra.ToResponse(ordensCompraResult.Value),
-            new List<DistribuicaoDto>(),
+            GerarDistribuicoesDtoResponse(distribuicoes),
             residuosResult.Value,
             qtdIrPublicadoResult.Value,
             $"Compra programada executada com sucesso para {qtdClientesAtivos} clientes.");
+    }
+
+    private List<DistribuicaoDto> GerarDistribuicoesDtoResponse(List<Distribuicao> distribuicoes)
+    {
+        var distribuicoesDto = _distribuicaoMapper.ToResponse(distribuicoes);
+
+        return distribuicoesDto.GroupBy(grupo => new { grupo.ClienteId, grupo.Nome, grupo.ValorAporte })
+            .Select(g => new DistribuicaoDto
+            {
+                Id = 0,
+                Cpf = string.Empty,
+                OrdemCompraId = 0,
+                ContaGraficaId = 0,
+                Ticker = string.Empty,
+                QuantidadeAlocada = 0,
+                ValorOperacao = 0,
+                ContaGrafica = null!,
+                Data = DateTime.Now,
+                ClienteId = g.Key.ClienteId,
+                Nome = g.Key.Nome,
+                ValorAporte = g.Key.ValorAporte,
+                Ativos = g.SelectMany(x => x.Ativos).ToList()
+            }).ToList();
     }
 }

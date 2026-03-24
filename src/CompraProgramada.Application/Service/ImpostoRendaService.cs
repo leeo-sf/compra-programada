@@ -22,17 +22,17 @@ public class ImpostoRendaService : IImpostoRendaService
 
     public async Task<Result<int>> CalcularIRDedoDuro(List<Distribuicao> distribuicoes, CancellationToken cancellationToken)
     {
-        var detalhesIr = distribuicoes.Select(d =>
+        var detalhesIr = distribuicoes.Select(dist =>
         {
-            var irBruto = d.ValorOperacao * ALIQUOTA;
+            var irBruto = dist.ValorOperacao * ALIQUOTA;
             return new IRDedoDuroDto
             {
-                ClienteId = d.ContaGrafica.Cliente.Id,
-                Cpf = d.ContaGrafica.Cliente.Cpf,
-                Ticker = d.Ticker,
-                ValorOperacao = d.ValorOperacao,
+                ClienteId = dist.ContaGrafica.Cliente.Id,
+                Cpf = dist.ContaGrafica.Cliente.Cpf,
+                Ticker = dist.Ticker,
+                ValorOperacao = dist.ValorOperacao,
                 ValorIR = Math.Truncate(irBruto * 100) / 100,
-                Data = d.OrdemCompra.Data
+                Data = dist.OrdemCompra.Data
             };
         }).ToList();
 
