@@ -59,4 +59,7 @@ public class Cliente
 
     public void Desativar()
         => Ativo = false;
+
+    public void AdicionarConta(ContaGrafica conta)
+        => ContaGrafica = conta;
 }

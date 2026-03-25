@@ -16,4 +16,6 @@ public partial class ContaMapper
     public partial HistoricoCompraDto ToResponse(HistoricoCompra historicoCompra);
 
     public partial CustodiaFilhoteDto ToResponse(CustodiaFilhote custodiaFilhote);
+
+    public partial ContaGraficaResponse ToContaGraficaResponse(ContaGrafica contaGrafica);
 }

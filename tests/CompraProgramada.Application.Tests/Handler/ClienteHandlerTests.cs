@@ -4,11 +4,13 @@ using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Response;
+using CompraProgramada.Application.Tests.TestUtils;
+using CompraProgramada.Domain.Entity;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NSubstitute;
 using OperationResult;
-using System.Xml.Linq;
 
 namespace CompraProgramada.Application.Tests.Handler;
 
@@ -23,7 +25,7 @@ public class ClienteHandlerTests
     {
         _loggerMock = new Mock<ILogger<ClienteHandle>>();
         _clienteServiceMock = new Mock<IClienteService>();
-        _mapperMock = new Mock<ClienteMapper>();
+        _mapperMock = new Mock<ClienteMapper>(Substitute.For<ContaMapper>());
         _handler = new ClienteHandle(_loggerMock.Object, _clienteServiceMock.Object, _mapperMock.Object);
     }
 
@@ -32,7 +34,7 @@ public class ClienteHandlerTests
     {
         var request = new AdesaoRequest("", "", "", 1);
 
-        var response = new ClienteDto(1, "", "", "", 1, 1, true, DateTime.Now, new(1, "", DateTime.Now, 1, "", null, new List<CustodiaFilhoteDto> { }));
+        var response = FakerRequest.ClienteAtivo().Generate();
         var result = Result.Success(response);
 
         _clienteServiceMock
@@ -57,7 +59,7 @@ public class ClienteHandlerTests
         var request = new AdesaoRequest("", "", "", 1);
 
         var exception = new Exception("Erro na compra");
-        var result = Result.Error<ClienteDto>(exception);
+        var result = Result.Error<Cliente>(exception);
 
         _clienteServiceMock
             .Setup(s => s.RealizarAdesaoAsync(It.IsAny<AdesaoRequest>(), It.IsAny<CancellationToken>()))
@@ -74,7 +76,7 @@ public class ClienteHandlerTests
     {
         var request = new SaidaProdutoRequest(1);
 
-        var response = new ClienteDto(1, "", "", "", 1, 1, false, DateTime.Now, new(1, "", DateTime.Now, 1, "", null, new List<CustodiaFilhoteDto> { }));
+        var response = FakerRequest.ClienteAtivo().Generate();
         var result = Result.Success(response);
 
         _clienteServiceMock
@@ -99,7 +101,7 @@ public class ClienteHandlerTests
         var request = new SaidaProdutoRequest(1);
 
         var exception = new Exception("Erro na compra");
-        var result = Result.Error<ClienteDto>(exception);
+        var result = Result.Error<Cliente>(exception);
 
         _clienteServiceMock
             .Setup(s => s.SairDoProdutoAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
@@ -116,7 +118,7 @@ public class ClienteHandlerTests
     {
         var request = new AtualizarValorMensalRequest(1, 100);
 
-        var response = new ClienteDto(1, "", "", "", 1, 100, true, DateTime.Now, new(1, "", DateTime.Now, 1, "", null, new List<CustodiaFilhoteDto> { }));
+        var response = FakerRequest.ClienteAtivo().Generate();
         var result = Result.Success(response);
 
         _clienteServiceMock
@@ -141,7 +143,7 @@ public class ClienteHandlerTests
         var request = new AtualizarValorMensalRequest(1, 100);
 
         var exception = new Exception("Erro na compra");
-        var result = Result.Error<ClienteDto>(exception);
+        var result = Result.Error<Cliente>(exception);
 
         _clienteServiceMock
             .Setup(s => s.AtualizarValorMensalAsync(request, It.IsAny<CancellationToken>()))

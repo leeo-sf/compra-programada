@@ -35,11 +35,11 @@ public class ClienteService : IClienteService
         return clientes;
     }
 
-    public async Task<Result<ClienteDto>> RealizarAdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken)
+    public async Task<Result<Cliente>> RealizarAdesaoAsync(AdesaoRequest request, CancellationToken cancellationToken)
     {
         var clienteExistente = await _clienteRepository.ExisteAsync(request.Cpf, cancellationToken);
         if (clienteExistente)
-            throw new CpfExistenteException();
+            return new CpfExistenteException();
 
         var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
         if (!cestaVigente.IsSuccess)
@@ -53,7 +53,9 @@ public class ClienteService : IClienteService
         if (!contaSalva.IsSuccess)
             return contaSalva.Exception;
 
-        return _mapper.ToResponse(cliente);
+        cliente.AdicionarConta(contaSalva.Value);
+
+        return cliente;
     }
 
     public async Task<Result<int>> QuantidadeClientesAtivosAsync(CancellationToken cancellationToken)
@@ -63,12 +65,12 @@ public class ClienteService : IClienteService
         return quantidade;
     }
 
-    public async Task<Result<ClienteDto>> SairDoProdutoAsync(int clienteId, CancellationToken cancellationToken)
+    public async Task<Result<Cliente>> SairDoProdutoAsync(int clienteId, CancellationToken cancellationToken)
     {
         var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
 
         if (cliente is null)
-            throw new ClienteNaoEncontradoException();
+            return new ClienteNaoEncontradoException();
 
         if (!cliente.Ativo)
             return new ApplicationException("Cliente já está com status inativo");
@@ -77,15 +79,15 @@ public class ClienteService : IClienteService
 
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
 
-        return _mapper.ToResponse(clienteAtualizado);
+        return clienteAtualizado;
     }
 
-    public async Task<Result<ClienteDto>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
+    public async Task<Result<Cliente>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
     {
         var cliente = await _clienteRepository.ObterClienteAsync(request.ClienteId, cancellationToken);
 
         if (cliente is null)
-            throw new ClienteNaoEncontradoException();
+            return new ClienteNaoEncontradoException();
 
         if (!cliente.Ativo)
             return new ApplicationException("Cliente com status inativo");
@@ -94,7 +96,7 @@ public class ClienteService : IClienteService
 
         var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
 
-        return _mapper.ToResponse(clienteAtualizado);
+        return clienteAtualizado;
     }
 
     public async Task<Result<CarteiraCustodiaResponse>> ConsultarCarteiraAsync(int clienteId, CancellationToken cancellationToken)

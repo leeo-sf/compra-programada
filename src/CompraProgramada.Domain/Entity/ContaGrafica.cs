@@ -23,15 +23,14 @@ public class ContaGrafica : BaseConta
         HistoricoCompra = historicoCompras;
     }
 
-    internal ContaGrafica(int clienteId, List<CustodiaFilhote> custodias)
+    internal ContaGrafica(int clienteId)
         : base(0, clienteId)
     {
         ClienteId = clienteId;
-        CustodiaFilhotes = custodias;
     }
 
-    public static ContaGrafica Gerar(int clienteId, List<CustodiaFilhote> custodias)
-        => new ContaGrafica(clienteId, custodias);
+    public static ContaGrafica Gerar(int clienteId)
+        => new ContaGrafica(clienteId);
 
     public void AdicionarDistribuicao(Distribuicao distribuicao)
         => Distribuicoes.Add(distribuicao);

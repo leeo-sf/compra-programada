@@ -78,7 +78,7 @@ public class ClienteHandle
 
         var cliente = atualizaValorMensalResult.Value;
 
-        _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", cliente.ClienteId, cliente.ValorMensal);
+        _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", cliente.Id, cliente.ValorMensal);
 
         return _mapper.ToAtualizarValorMensalResponse(cliente);
     }

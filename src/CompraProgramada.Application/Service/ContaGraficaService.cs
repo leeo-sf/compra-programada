@@ -8,47 +8,23 @@ namespace CompraProgramada.Application.Service;
 
 public class ContaGraficaService : IContaGraficaService
 {
-    private readonly ICestaRecomendadaService _cestaRecomendadaService;
     private readonly IContaGraficaRepository _contaGraficaRepository;
     private readonly ICotacaoService _cotacaoService;
 
-    public ContaGraficaService(ICestaRecomendadaService cestaRecomendadaService,
-        IContaGraficaRepository contaGraficaRepository,
+    public ContaGraficaService(IContaGraficaRepository contaGraficaRepository,
         ICotacaoService cotacaoService)
     {
-        _cestaRecomendadaService = cestaRecomendadaService;
         _contaGraficaRepository = contaGraficaRepository;
         _cotacaoService = cotacaoService;
     }
 
-    public async Task<Result<ContaGraficaDto>> GerarContaGraficaAsync(int clienteId, CancellationToken cancellationToken)
+    public async Task<Result<ContaGrafica>> GerarContaGraficaAsync(int clienteId, CancellationToken cancellationToken)
     {
-        var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
-        if (!cestaVigente.IsSuccess)
-            return cestaVigente.Exception;
-
-        var custodiasConta = cestaVigente.Value!.ComposicaoCesta
-            .Select(x => CustodiaFilhote.GerarCustodia(x.Ticker)).ToList();
-
-        var conta = ContaGrafica.Gerar(clienteId, custodiasConta);
+        var conta = ContaGrafica.Gerar(clienteId);
 
         var contaSalva = await _contaGraficaRepository.CriarAsync(conta, cancellationToken);
 
-        return new ContaGraficaDto(
-            contaSalva.Id,
-            contaSalva.NumeroConta,
-            contaSalva.DataCriacao,
-            contaSalva.ClienteId,
-            contaSalva.Tipo,
-            null,
-            contaSalva.CustodiaFilhotes.Select(cf => new CustodiaFilhoteDto(
-                cf.Id,
-                cf.ContaGraficaId,
-                cf.Ticker,
-                cf.PrecoMedio,
-                cf.Quantidade
-            )).ToList()
-        );
+        return contaSalva;
     }
 
     public async Task<Result<List<ContaGrafica>>> AtualizarContasAsync(List<ContaGrafica> contasAhSeremAtualizadas, CancellationToken cancellationToken)

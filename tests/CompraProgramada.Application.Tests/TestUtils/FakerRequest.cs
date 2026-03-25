@@ -2,6 +2,7 @@
 using Bogus.Extensions.Brazil;
 using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Request;
+using CompraProgramada.Domain.Entity;
 
 namespace CompraProgramada.Application.Tests.TestUtils;
 
@@ -14,6 +15,22 @@ public static class FakerRequest
             Email: f.Person.Email,
             ValorMensal: f.Finance.Amount(100)
         ));
+
+    public static Faker<List<Cliente>> ClientesAtivos() => new Faker<List<Cliente>>()
+        .CustomInstantiator(f => new List<Cliente>
+        {
+            Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(100)),
+            Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(150)),
+            Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(10000))
+        });
+
+    public static Faker<Cliente> ClienteAtivo() => new Faker<Cliente>()
+        .CustomInstantiator(f =>
+        {
+            var cliente = Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(100));
+            cliente.AdicionarConta(ContaGrafica.Gerar(1));
+            return cliente;
+        });
 
     public static Faker<AtualizarValorMensalRequest> AtualizarValorMensalRequest() => new Faker<AtualizarValorMensalRequest>()
         .CustomInstantiator(f => new AtualizarValorMensalRequest(
