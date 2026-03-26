@@ -17,18 +17,6 @@ public class Distribuicao
 
     internal Distribuicao(int id, int ordemCompraId, int contaGraficaId, string ticker, int quantidadeAlocada, decimal valorOperacao, OrdemCompra ordemCompra, ContaGrafica contaGrafica)
     {
-        Id = id;
-        OrdemCompraId = ordemCompraId;
-        ContaGraficaId = contaGraficaId;
-        Ticker = ticker;
-        QuantidadeAlocada = quantidadeAlocada;
-        ValorOperacao = valorOperacao;
-        OrdemCompra = ordemCompra;
-        ContaGrafica = contaGrafica;
-    }
-
-    internal Distribuicao(int id, int ordemCompraId, int contaGraficaId, string ticker, int quantidadeAlocada, decimal valorOperacao)
-    {
         if (string.IsNullOrEmpty(ticker))
             throw new TickerNaoPreenchidoException();
 
@@ -41,8 +29,18 @@ public class Distribuicao
         Ticker = ticker;
         QuantidadeAlocada = quantidadeAlocada;
         ValorOperacao = valorOperacao;
+        OrdemCompra = ordemCompra;
+        ContaGrafica = contaGrafica;
     }
 
-    public static Distribuicao CriarDistribuicao(int ordemCompraId, int contaGraficaId, string ticker, int quantidadeAlocada, decimal valorOperacao)
-        => new Distribuicao(0, ordemCompraId, contaGraficaId, ticker, quantidadeAlocada, valorOperacao);
+    public static Distribuicao CriarDistribuicao(int quantidadeAlocada, ContaGrafica conta, OrdemCompra ordemCompra)
+        => new Distribuicao(
+            0,
+            ordemCompra.Id,
+            conta.Id,
+            ordemCompra.Ticker,
+            quantidadeAlocada,
+            quantidadeAlocada * ordemCompra.PrecoUnitario,
+            ordemCompra,
+            conta);
 }

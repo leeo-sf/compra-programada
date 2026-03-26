@@ -35,6 +35,7 @@ public class ClienteHandlerTests
         var request = new AdesaoRequest("", "", "", 1);
 
         var response = FakerRequest.ClienteAtivo().Generate();
+        response.AdicionarConta(ContaGrafica.Gerar(response));
         var result = Result.Success(response);
 
         _clienteServiceMock

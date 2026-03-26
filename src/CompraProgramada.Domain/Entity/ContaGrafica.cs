@@ -6,7 +6,7 @@ public class ContaGrafica : BaseConta
 {
     public int ClienteId { get; init; }
     public string Tipo { get; } = "FILHOTE";
-    public Cliente Cliente { get; init; } = default!;
+    public Cliente Cliente { get; private set; } = default!;
     public List<Distribuicao> Distribuicoes { get; init; } = new List<Distribuicao>();
     public List<CustodiaFilhote> CustodiaFilhotes { get; init; } = new List<CustodiaFilhote>();
     public List<HistoricoCompra> HistoricoCompra { get; init; } = new List<HistoricoCompra>();
@@ -23,14 +23,15 @@ public class ContaGrafica : BaseConta
         HistoricoCompra = historicoCompras;
     }
 
-    internal ContaGrafica(int clienteId)
-        : base(0, clienteId)
+    internal ContaGrafica(Cliente cliente)
+        : base(0, cliente.Id)
     {
-        ClienteId = clienteId;
+        ClienteId = cliente.Id;
+        Cliente = cliente;
     }
 
-    public static ContaGrafica Gerar(int clienteId)
-        => new ContaGrafica(clienteId);
+    public static ContaGrafica Gerar(Cliente cliente)
+        => new ContaGrafica(cliente);
 
     public void AdicionarDistribuicao(Distribuicao distribuicao)
         => Distribuicoes.Add(distribuicao);

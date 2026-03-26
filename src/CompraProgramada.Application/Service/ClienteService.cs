@@ -49,7 +49,7 @@ public class ClienteService : IClienteService
 
         var clienteSalvo = await _clienteRepository.CriarAsync(cliente, cancellationToken);
 
-        var contaSalva = await _contaService.GerarContaGraficaAsync(clienteSalvo.Id, cancellationToken);
+        var contaSalva = await _contaService.GerarContaGraficaAsync(clienteSalvo, cancellationToken);
         if (!contaSalva.IsSuccess)
             return contaSalva.Exception;
 

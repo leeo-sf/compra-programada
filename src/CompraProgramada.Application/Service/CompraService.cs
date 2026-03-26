@@ -45,7 +45,7 @@ public class CompraService : ICompraService
         _distribuicaoMapper = distribuicaoMapper;
     }
 
-    public async Task<Result<ExecutarCompraResponse>?> ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
+    public async Task<Result<ExecutarCompraResponse?>> ExecutarCompraAsync(DateTime? date, CancellationToken cancellationToken)
     {
         if (date is null)
         {
@@ -54,7 +54,7 @@ public class CompraService : ICompraService
             {
                 var dataProximaExecucao = _calendarioMotorCompraService.ObterProximaDataCompra();
                 _logger.LogInformation("MotorCompra não será executado hoje. Próxima data de compra prevista para {DataProximaExecucao}. Encerrando processo.", dataProximaExecucao);
-                return null;
+                return Result.Success<ExecutarCompraResponse>(null!)!;
             }
         }
 
@@ -72,7 +72,7 @@ public class CompraService : ICompraService
 
         _logger.LogInformation("{QuantidadeClientes} clientes ativos para processamento.", qtdClientesAtivos);
 
-        var valorTotalConsolidado = clientesAtivos.Sum(cliente => cliente.ValorMensal / 3);
+        var valorTotalConsolidado = clientesAtivos.Sum(cliente => cliente.ValorAporte);
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 

@@ -48,12 +48,7 @@ public class DistribuicaoService : IDistribuicaoService
 
                 custodiaCliente!.AdicionarNovaQuantidade(novaQuantidadeDeAtivos);
 
-                var distribuicao = Distribuicao.CriarDistribuicao(
-                    ativo.Id,
-                    contaCliente.Id,
-                    ativo.Ticker,
-                    novaQuantidadeDeAtivos,
-                    novaQuantidadeDeAtivos * ativo.PrecoUnitario);
+                var distribuicao = Distribuicao.CriarDistribuicao(novaQuantidadeDeAtivos, contaCliente, ativo);
 
                 contaCliente.AdicionarCompra(HistoricoCompra.RegistrarHistorico(
                     contaCliente.Id,

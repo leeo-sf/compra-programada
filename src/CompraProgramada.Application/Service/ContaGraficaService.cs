@@ -18,9 +18,9 @@ public class ContaGraficaService : IContaGraficaService
         _cotacaoService = cotacaoService;
     }
 
-    public async Task<Result<ContaGrafica>> GerarContaGraficaAsync(int clienteId, CancellationToken cancellationToken)
+    public async Task<Result<ContaGrafica>> GerarContaGraficaAsync(Cliente cliente, CancellationToken cancellationToken)
     {
-        var conta = ContaGrafica.Gerar(clienteId);
+        var conta = ContaGrafica.Gerar(cliente);
 
         var contaSalva = await _contaGraficaRepository.CriarAsync(conta, cancellationToken);
 

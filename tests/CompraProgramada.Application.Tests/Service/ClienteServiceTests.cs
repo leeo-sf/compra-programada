@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Request;
 using CompraProgramada.Application.Service;
@@ -68,6 +67,7 @@ public class ClienteServiceTests
     public async Task ClienteService_Deve_RealizarAdesaoComSucesso_Quando_NaoOcorrerFalhas()
     {
         // Arrange
+        var cliente = FakerRequest.ClienteAtivo().Generate();
         var command = FakerRequest.AdesaoRequest().Generate();
         var cestaRequest = FakerRequest.CriarCestaRecomendadaRequest();
         var cestaAtiva = CestaRecomendada.CriarCesta(cestaRequest.Nome, cestaRequest.Itens.Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual)).ToList());
@@ -81,8 +81,8 @@ public class ClienteServiceTests
         _clienteRepository.CriarAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
             .Returns(Cliente.Criar(command.Nome, command.Cpf, command.Email, command.ValorMensal));
 
-        _contaGraficaService.GerarContaGraficaAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
-            .Returns(ContaGrafica.Gerar(1));
+        _contaGraficaService.GerarContaGraficaAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
+            .Returns(ContaGrafica.Gerar(cliente));
 
         // Act
         var result = await _sut.RealizarAdesaoAsync(command, CancellationToken.None);
