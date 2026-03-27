@@ -19,9 +19,9 @@ public static class FakerRequest
     public static Faker<List<Cliente>> ClientesAtivos() => new Faker<List<Cliente>>()
         .CustomInstantiator(f => new List<Cliente>
         {
-            Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(100)),
-            Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(150)),
-            Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(10000))
+            new Cliente(1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue, new(1, "FLH-000001", DateTime.MinValue, new(1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
+            new Cliente(2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue, new(2, "FLH-000002", DateTime.MinValue, new(2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
+            new Cliente(3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue, new(3, "FLH-000003", DateTime.MinValue, new(3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue), new() { }, new() { }, new() { })),
         });
 
     public static Faker<Cliente> ClienteAtivo() => new Faker<Cliente>()
@@ -60,9 +60,10 @@ public static class FakerRequest
 
     public static List<Distribuicao> Distribuicoes()
     {
-        var contaA = ContaGrafica.Gerar(ClienteAtivo().Generate());
-        var contaB = ContaGrafica.Gerar(ClienteAtivo().Generate());
-        var contaC = ContaGrafica.Gerar(ClienteAtivo().Generate());
+        var clientes = ClientesAtivos().Generate();
+        var contaA = new ContaGrafica(1, "FLH-000001", DateTime.Now, clientes.First(x => x.Id == 1), new() { }, new() { }, new() { });
+        var contaB = new ContaGrafica(2, "FLH-000002", DateTime.Now, clientes.First(x => x.Id == 2), new() { }, new() { }, new() { });
+        var contaC = new ContaGrafica(3, "FLH-000003", DateTime.Now, clientes.First(x => x.Id == 3), new() { }, new() { }, new() { });
 
         return new List<Distribuicao>
         {

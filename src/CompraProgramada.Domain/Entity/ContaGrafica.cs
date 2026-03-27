@@ -13,10 +13,10 @@ public class ContaGrafica : BaseConta
 
     private ContaGrafica(): base() { }
 
-    internal ContaGrafica(int id, string numeroConta, DateTime dataCriacao, int clienteId, Cliente cliente, List<Distribuicao> distribuicoes, List<CustodiaFilhote> custodiaFilhotes, List<HistoricoCompra> historicoCompras)
+    internal ContaGrafica(int id, string numeroConta, DateTime dataCriacao, Cliente cliente, List<Distribuicao> distribuicoes, List<CustodiaFilhote> custodiaFilhotes, List<HistoricoCompra> historicoCompras)
         : base(id, numeroConta, dataCriacao)
     {
-        ClienteId = clienteId;
+        ClienteId = cliente.Id;
         Cliente = cliente;
         Distribuicoes = distribuicoes;
         CustodiaFilhotes = custodiaFilhotes;
