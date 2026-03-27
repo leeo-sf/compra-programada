@@ -8,15 +8,9 @@ namespace CompraProgramada.Application.Service;
 
 public class CustodiaMasterService : ICustodiaMasterService
 {
-    private readonly IContaMasterRepository _contaRepository;
     private readonly ICustodiaMasterRepository _custodiaRepository;
 
-    public CustodiaMasterService(ICustodiaMasterRepository custodiaRepository,
-        IContaMasterRepository contaRepository)
-    {
-        _custodiaRepository = custodiaRepository;
-        _contaRepository = contaRepository;
-    }
+    public CustodiaMasterService(ICustodiaMasterRepository custodiaRepository) => _custodiaRepository = custodiaRepository;
 
     public async Task<Result<List<CustodiaMaster>?>> ObterResiduosNaoDistribuidos(CancellationToken cancellationToken)
     {
@@ -42,6 +36,13 @@ public class CustodiaMasterService : ICustodiaMasterService
         foreach (var ativo in ordensCompra)
         {
             var custodia = custodias?.FirstOrDefault(x => x.Ticker == ativo.Ticker);
+
+            if (custodia is null)
+            {
+                var novaCustodia = CustodiaMaster.CriarCustodia(1, ativo.Ticker);
+                custodia = novaCustodia;
+                custodias?.Add(custodia);
+            }
 
             var qtdUtilizada = distribuicoes.Where(x => x.Ticker == ativo.Ticker)
                 .Sum(x => x.QuantidadeAlocada);
