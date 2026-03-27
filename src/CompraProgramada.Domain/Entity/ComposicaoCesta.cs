@@ -29,4 +29,7 @@ public class ComposicaoCesta
 
     public static ComposicaoCesta CriaItemNaCesta(string ticker, decimal percentual)
         => new ComposicaoCesta(0, 0, ticker.ToUpper(), percentual);
+
+    public decimal ValorConsolidado(decimal valorTotalConsolidado)
+        => valorTotalConsolidado * (Percentual / 100);
 }

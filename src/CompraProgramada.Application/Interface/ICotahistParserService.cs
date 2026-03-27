@@ -4,5 +4,5 @@ namespace CompraProgramada.Application.Interface;
 
 public interface ICotahistParserService
 {
-    IEnumerable<CotacaoB3Dto> ParseArquivo(string caminhoArquivo);
+    IEnumerable<CotacaoB3Dto> ParseArquivo();
 }

@@ -12,23 +12,30 @@ public class OrdemCompraService : IOrdemCompraService
     private readonly IOrdemCompraRepository _ordemCompraRepository;
     private readonly ICotacaoService _cotacaoService;
     private readonly ICustodiaMasterService _custodiaMasterService;
+    private readonly ICestaRecomendadaService _cestaRecomendadaService;
 
     public OrdemCompraService(ILogger<OrdemCompraService> logger,
         IOrdemCompraRepository ordemCompraRepository,
         ICotacaoService cotacaoService,
-        ICustodiaMasterService custodiaMasterService)
+        ICustodiaMasterService custodiaMasterService,
+        ICestaRecomendadaService cestaRecomendadaService)
     {
         _logger = logger;
         _ordemCompraRepository = ordemCompraRepository;
         _cotacaoService = cotacaoService;
         _custodiaMasterService = custodiaMasterService;
+        _cestaRecomendadaService = cestaRecomendadaService;
     }
 
     public async Task<Result<List<OrdemCompra>>> EmitirOrdensDeCompraAsync(decimal valorTotalConsolidado, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando emissão de ordens de compra...");
 
-        var fechamentosResult = await _cotacaoService.ObterCombinacoesFechamentoECompraAtivoAsync(valorTotalConsolidado, cancellationToken);
+        var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
+        if (!cestaVigente.IsSuccess)
+            throw new ApplicationException(cestaVigente.Exception.Message);
+
+        var fechamentosResult = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cestaVigente.Value, cancellationToken);
         if (!fechamentosResult.IsSuccess)
             throw fechamentosResult.Exception;
 
@@ -42,11 +49,12 @@ public class OrdemCompraService : IOrdemCompraService
 
         var ordensDeCompra = new List<OrdemCompra>();
 
-        foreach (var fechamento in fechamentos)
+        foreach (var fechamento in fechamentos.Itens)
         {
             var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
+            var itemCesta = cestaVigente.Value.ComposicaoCesta.FirstOrDefault(x => x.Ticker == fechamento.Ticker)!;
 
-            var qtdNecessariaParaDistribuicao = (int)Math.Truncate(fechamento.ValorAhCompra / fechamento.PrecoFechamento);
+            var qtdNecessariaParaDistribuicao = (int)Math.Truncate(itemCesta.ValorConsolidado(valorTotalConsolidado) / fechamento.PrecoFechamento);
 
             var quantidadeDeCompraAtivo = custodia?.CalculaNecessidadeLiquidaCompra(qtdNecessariaParaDistribuicao) ?? qtdNecessariaParaDistribuicao;
 

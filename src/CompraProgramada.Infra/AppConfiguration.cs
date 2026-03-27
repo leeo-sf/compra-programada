@@ -88,7 +88,7 @@ public static class AppConfiguration
 
         services.AddSingleton<ICotahistParserService, CotahistParserService>();
         services.AddSingleton<ICalendarioMotorCompraService, CalendarioMotorCompraService>();
-        services.AddSingleton<IFileService, FileService>();
+        services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IImpostoRendaService, ImpostoRendaService>();
         services.AddSingleton<IDateTimeProvaider, DateTimeProvaider>();
     }

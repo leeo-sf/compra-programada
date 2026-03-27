@@ -1,15 +1,28 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Application.Config;
+using CompraProgramada.Application.Dto;
 using CompraProgramada.Application.Interface;
 
 namespace CompraProgramada.Application.Service;
 
 public class CotahistParserService : ICotahistParserService
 {
-    public IEnumerable<CotacaoB3Dto> ParseArquivo(string caminhoArquivo)
+    private readonly AppConfig _appConfig;
+    private readonly IFileSystem _fileSystem;
+
+    public CotahistParserService(AppConfig config,
+        IFileSystem fileSystem)
     {
+        _appConfig = config;
+        _fileSystem = fileSystem;
+    }
+
+    public IEnumerable<CotacaoB3Dto> ParseArquivo()
+    {
+        var caminhoArquivoUltimoPregao = ObterCaminhoCompletoArquivoCotacoes();
+
         var cotacoes = new List<CotacaoB3Dto>();
 
-        foreach (var linha in File.ReadLines(caminhoArquivo))
+        foreach (var linha in _fileSystem.LerLinhas(caminhoArquivoUltimoPregao))
         {
             // Ignorar header (00) e trailer (99)
             if (linha.Length < 245)
@@ -49,31 +62,25 @@ public class CotahistParserService : ICotahistParserService
         return cotacoes;
     }
 
-    public CotacaoB3Dto? ObterCotacaoFechamento(string pastaCotacoes, string ticker)
-    {
-        var arquivos = Directory.GetFiles(pastaCotacoes, "COTAHIST_D*.TXT")
-            .OrderByDescending(f => f)
-            .ToList();
-
-        foreach (var arquivo in arquivos)
-        {
-            var cotacoes = ParseArquivo(arquivo);
-            var cotacao = cotacoes
-                .Where(c => c.Ticker.Equals(ticker, StringComparison.OrdinalIgnoreCase))
-                .Where(c => c.TipoMercado == 10) // Mercado a vista
-                .FirstOrDefault();
-
-            if (cotacao != null)
-                return cotacao;
-        }
-
-        return null;
-    }
-
     private decimal ParsePreco(string valorBruto)
     {
         if (long.TryParse(valorBruto.Trim(), out var valor))
             return valor / 100m;
         return 0m;
+    }
+
+    public string ObterCaminhoCompletoArquivoCotacoes()
+    {
+        string pastaCotacoes = Path.Combine(AppContext.BaseDirectory, _appConfig.MotorCompraConfig.NomePastaArquivosB3);
+
+        if (!_fileSystem.DiretorioExiste(pastaCotacoes))
+            throw new DirectoryNotFoundException($"A pasta {pastaCotacoes} não foi encontrada.");
+
+        var arquivoUltimoPregao = _fileSystem.ObterArquivo(pastaCotacoes, "COTAHIST_D*");
+
+        if (!_fileSystem.ArquivoExiste(arquivoUltimoPregao!.FullName))
+            throw new FileNotFoundException($"Nenhum arquivo com a data pregão mais recente foi encontrado.");
+
+        return arquivoUltimoPregao.FullName;
     }
 }

@@ -39,7 +39,8 @@ public class ContaGraficaService : IContaGraficaService
 
     public async Task<Result<CarteiraDto>> ObterRentabilidadeDaCertira(List<CustodiaFilhoteDto> custodias, CancellationToken cancellationToken)
     {
-        var cotacoesFechamentoCesta = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
+        throw new NotImplementedException();
+        /*var cotacoesFechamentoCesta = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
         if (!cotacoesFechamentoCesta.IsSuccess)
             return new ApplicationException("Falha ao obter cotações do ativo na B3");
 
@@ -66,12 +67,13 @@ public class ContaGraficaService : IContaGraficaService
 
         var detalhesResult = ObterDetalhesDaCerteira(custodias, cotacoesFechamentoCesta.Value, valorTotalAtualCarteira);
 
-        return new CarteiraDto(resumo, detalhesResult);
+        return new CarteiraDto(resumo, detalhesResult);*/
     }
 
     public async Task<Result<RentabilidadeDto>> ObterEvolucaoDaCertira(ContaGraficaDto conta, CancellationToken cancellationToken)
     {
-        if (conta.HistoricoCompra is null || !conta.HistoricoCompra.Any())
+        throw new NotImplementedException();
+        /*if (conta.HistoricoCompra is null || !conta.HistoricoCompra.Any())
             throw new ApplicationException("Cliente ainda não tem compras realizadas.");
 
         var cotacoesFechamentoCesta = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
@@ -102,7 +104,7 @@ public class ContaGraficaService : IContaGraficaService
                 return new EvolucaoCarteiraDto(0, x.Data, valorCarteira, valorInvestido, rentabilidade);
             }).ToList();
 
-        return new RentabilidadeDto(historicoCompra, evolucaoCarteira);
+        return new RentabilidadeDto(historicoCompra, evolucaoCarteira);*/
     }
 
     private List<DetalheAtivoCarteiraDto> ObterDetalhesDaCerteira(List<CustodiaFilhoteDto> custodias, CotacaoDto cotacoesFechamentoCesta, decimal valorTotalCarteira)

@@ -11,34 +11,22 @@ public class CotacaoService : ICotacaoService
 {
     private readonly ILogger<CotacaoService> _logger;
     private readonly ICotacaoRepository _cotacaoRepository;
-    private readonly IFileService _fileService;
     private readonly ICotahistParserService _cotahistParser;
-    private readonly ICestaRecomendadaService _cestaService;
 
     public CotacaoService(ILogger<CotacaoService> logger,
         ICotacaoRepository cotacaoRepository,
-        IFileService fileService,
-        ICotahistParserService cotahistParser,
-        ICestaRecomendadaService cestaService)
+        ICotahistParserService cotahistParser)
     {
         _logger = logger;
         _cotacaoRepository = cotacaoRepository;
-        _fileService = fileService;
         _cotahistParser = cotahistParser;
-        _cestaService = cestaService;
     }
 
-    public async Task<Result<CotacaoDto>> ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(CancellationToken cancellationToken)
+    public async Task<Result<CotacaoDto>> ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(CestaRecomendada cestaVigente, CancellationToken cancellationToken)
     {
-        var caminhoArquivoUltimoPregao = _fileService.ObterCaminhoCompletoArquivoCotacoes();
+        var cotacoesB3 = _cotahistParser.ParseArquivo();
 
-        var cotacoesB3 = _cotahistParser.ParseArquivo(caminhoArquivoUltimoPregao);
-
-        var cestaVigente = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
-        if (!cestaVigente.IsSuccess)
-            throw new ApplicationException(cestaVigente.Exception.Message);
-
-        var cestaVigenteTickers = new HashSet<string>(cestaVigente.Value.ComposicaoCesta.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
+        var cestaVigenteTickers = new HashSet<string>(cestaVigente.ComposicaoCesta.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
 
         var cotacoesCesta = cotacoesB3.Where(cotacao => cestaVigenteTickers.Contains(cotacao.Ticker));
 
@@ -54,33 +42,6 @@ public class CotacaoService : ICotacaoService
             cancellationToken);
 
         return result;
-    }
-
-    public async Task<Result<List<FechamentoAtivoB3Dto>>> ObterCombinacoesFechamentoECompraAtivoAsync(decimal totalConsolidado, CancellationToken cancellationToken)
-    {
-        var valoresPorAtivoConsolidado = await _cestaService.ValorPorAtivoConsolidado(totalConsolidado, cancellationToken);
-        if (!valoresPorAtivoConsolidado.IsSuccess)
-            return valoresPorAtivoConsolidado.Exception;
-
-        _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado.Value);
-
-        var combinacoesFechamento = await ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cancellationToken);
-        if (!combinacoesFechamento.IsSuccess)
-            throw combinacoesFechamento.Exception;
-
-        _logger.LogInformation("Valor por ativo consolidade: {ValorPorAtivo}", valoresPorAtivoConsolidado.Value);
-
-        var combinacoesFechamentoECompra = combinacoesFechamento.Value.Itens.Join(
-            valoresPorAtivoConsolidado.Value!,
-            cotacaoFechamento => cotacaoFechamento.Ticker,
-            valorPorAtivoConsolidado => valorPorAtivoConsolidado.Ticker,
-            (cotacaoFechamento, valorPorAtivoConsolidado) => new FechamentoAtivoB3Dto(
-                cotacaoFechamento.Ticker,
-                cotacaoFechamento.PrecoFechamento,
-                valorPorAtivoConsolidado.ValorDeCompraAtivo
-            )).ToList();
-
-        return combinacoesFechamentoECompra;
     }
 
     public async Task<Result<CotacaoDto>> SalvarCotacaoAsync(CotacaoDto cotacao, CancellationToken cancellationToken)
