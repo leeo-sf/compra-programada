@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Dto;
+using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using Microsoft.Extensions.Logging;
@@ -33,11 +34,11 @@ public class OrdemCompraService : IOrdemCompraService
 
         var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
         if (!cestaVigente.IsSuccess)
-            throw new ApplicationException(cestaVigente.Exception.Message);
+            return new ApplicationException(cestaVigente.Exception.Message);
 
         var fechamentosResult = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cestaVigente.Value, cancellationToken);
         if (!fechamentosResult.IsSuccess)
-            throw fechamentosResult.Exception;
+            return fechamentosResult.Exception;
 
         var fechamentos = fechamentosResult.Value;
 
@@ -45,24 +46,9 @@ public class OrdemCompraService : IOrdemCompraService
 
         var residuosNaoDistribuidos = await _custodiaMasterService.ObterResiduosNaoDistribuidos(cancellationToken);
         if (!residuosNaoDistribuidos.IsSuccess)
-            throw residuosNaoDistribuidos.Exception;
+            return residuosNaoDistribuidos.Exception;
 
-        var ordensDeCompra = new List<OrdemCompra>();
-
-        foreach (var fechamento in fechamentos.Itens)
-        {
-            var custodia = residuosNaoDistribuidos.Value.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
-            var itemCesta = cestaVigente.Value.ComposicaoCesta.FirstOrDefault(x => x.Ticker == fechamento.Ticker)!;
-
-            var qtdNecessariaParaDistribuicao = (int)Math.Truncate(itemCesta.ValorConsolidado(valorTotalConsolidado) / fechamento.PrecoFechamento);
-
-            var quantidadeDeCompraAtivo = custodia?.CalculaNecessidadeLiquidaCompra(qtdNecessariaParaDistribuicao) ?? qtdNecessariaParaDistribuicao;
-
-            ordensDeCompra.Add(OrdemCompra.GerarOrdemCompra(
-                fechamento.Ticker,
-                quantidadeDeCompraAtivo,
-                fechamento.PrecoFechamento));
-        }
+        var ordensDeCompra = EmitirOrdensCompra(fechamentos, residuosNaoDistribuidos.Value, cestaVigente.Value, valorTotalConsolidado);
 
         var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensDeCompra(ordensDeCompra, cancellationToken);
 
@@ -70,4 +56,20 @@ public class OrdemCompraService : IOrdemCompraService
 
         return ordensCompraEmitidas;
     }
+
+    public List<OrdemCompra> EmitirOrdensCompra(CotacaoDto fechamento, List<CustodiaMaster> residuos, CestaRecomendada cestaVigente, decimal valorTotalConsolidado)
+        => fechamento.Itens.Select(fechamento =>
+        {
+            var custodia = residuos.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
+            var itemCesta = cestaVigente.ComposicaoCesta.FirstOrDefault(x => x.Ticker == fechamento.Ticker)!;
+
+            var qtdNecessariaParaDistribuicao = (int)Math.Truncate(itemCesta.ValorConsolidado(valorTotalConsolidado) / fechamento.PrecoFechamento);
+
+            var quantidadeDeCompraAtivo = custodia?.CalculaNecessidadeLiquidaCompra(qtdNecessariaParaDistribuicao) ?? qtdNecessariaParaDistribuicao;
+
+            return OrdemCompra.GerarOrdemCompra(
+                fechamento.Ticker,
+                quantidadeDeCompraAtivo,
+                fechamento.PrecoFechamento);
+        }).ToList();
 }

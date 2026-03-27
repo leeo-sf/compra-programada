@@ -2,9 +2,9 @@
 
 namespace CompraProgramada.Application.Tests.TestUtils;
 
-public class DateTimeProvaiderFaker : IDateTimeProvaider
+public class DateTimeProvaiderHelper : IDateTimeProvaider
 {
     public DateTime Now { get; }
 
-    public DateTimeProvaiderFaker(DateTime date) => Now = date;
+    public DateTimeProvaiderHelper(DateTime date) => Now = date;
 }

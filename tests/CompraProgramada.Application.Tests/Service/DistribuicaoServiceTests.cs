@@ -1,9 +1,7 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Interface;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

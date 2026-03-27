@@ -92,7 +92,7 @@ public class CompraService : ICompraService
         if (!residuosResult.IsSuccess)
             return residuosResult.Exception;
 
-        var qtdIrPublicadoResult = await _impostoRendaService.CalcularIRDedoDuro(distribuicoes, cancellationToken);
+        var qtdIrPublicadoResult = await _impostoRendaService.PublicarIR(distribuicoes, cancellationToken);
         if (!qtdIrPublicadoResult.IsSuccess)
             return qtdIrPublicadoResult.Exception;
 

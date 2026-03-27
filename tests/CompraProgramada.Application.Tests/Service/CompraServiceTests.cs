@@ -61,7 +61,7 @@ public class CompraServiceTests
         _custodiaMasterService.CapturarResiduosNaoDistribuidosAsync(Arg.Any<List<Distribuicao>>(), Arg.Any<List<OrdemCompra>>(), Arg.Any<CancellationToken>())
             .Returns(residuos);
 
-        _impostoRendaService.CalcularIRDedoDuro(Arg.Any<List<Distribuicao>>(), Arg.Any<CancellationToken>())
+        _impostoRendaService.PublicarIR(Arg.Any<List<Distribuicao>>(), Arg.Any<CancellationToken>())
             .Returns(10);
 
         _calendarioMotorCompraService.ObterDataReferenciaExecucao(Arg.Any<DateTime>())

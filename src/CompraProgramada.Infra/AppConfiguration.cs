@@ -112,7 +112,6 @@ public static class AppConfiguration
         };
 
         services.AddSingleton(producerConfig);
-        services.AddSingleton(opt => configuration.GetSection("Service:Kafka").Get<KafkaConfig>()!);
         services.AddSingleton<IKafkaProducer, KafkaProducer>();
     }
 

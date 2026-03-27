@@ -5,5 +5,5 @@ namespace CompraProgramada.Application.Interface;
 
 public interface IImpostoRendaService
 {
-    Task<Result<int>> CalcularIRDedoDuro(List<Distribuicao> distribuicoes, CancellationToken cancellationToken);
+    Task<Result<int>> PublicarIR(List<Distribuicao> distribuicoes, CancellationToken cancellationToken);
 }

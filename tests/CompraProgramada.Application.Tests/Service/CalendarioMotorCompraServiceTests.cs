@@ -20,7 +20,7 @@ public class CalendarioMotorCompraServiceTests
     public void Deve_Retornar_SeEhDiaDeCompra_Quando_DeveExecutarCompraHoje_Solicitado(string dataAtual, bool deveExecutarCompraResult)
     {
         // Arrange
-        var dateTimeProvaiderFaker = new DateTimeProvaiderFaker(DateTime.Parse(dataAtual));
+        var dateTimeProvaiderFaker = new DateTimeProvaiderHelper(DateTime.Parse(dataAtual));
         var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker);
 
         // Act
@@ -40,7 +40,7 @@ public class CalendarioMotorCompraServiceTests
     public void Deve_Retornar_ProximaDataCompra_Quando_Solicitado(string dataAtual, string proximaDataCompra)
     {
         // Arrange
-        var dateTimeProvaiderFaker = new DateTimeProvaiderFaker(DateTime.Parse(dataAtual));
+        var dateTimeProvaiderFaker = new DateTimeProvaiderHelper(DateTime.Parse(dataAtual));
         var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker);
 
         // Act
@@ -58,7 +58,7 @@ public class CalendarioMotorCompraServiceTests
     public void Deve_Retornar_DataReferenciaExecucao_Quando_Solicitado(string dataAtual, string dataExecutada, string dataReferencia)
     {
         // Arrange
-        var dateTimeProvaiderFaker = new DateTimeProvaiderFaker(DateTime.Parse(dataAtual));
+        var dateTimeProvaiderFaker = new DateTimeProvaiderHelper(DateTime.Parse(dataAtual));
         var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker);
 
         // Act
