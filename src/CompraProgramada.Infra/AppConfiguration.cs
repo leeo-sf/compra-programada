@@ -72,7 +72,6 @@ public static class AppConfiguration
         services.AddScoped<ICotacaoRepository, CotacaoRepository>();
         services.AddScoped<ICustodiaFilhoteRepository, CustodiaFilhoteRepository>();
         services.AddScoped<ICustodiaMasterRepository, CustodiaMasterRepository>();
-        services.AddScoped<IDistribuicaoRepository, DistribuicaoRepository>();
         services.AddScoped<IHistoricoExecucaoMotorRepository, HistoricoExecucaoMotorRepository>();
         services.AddScoped<IOrdemCompraRepository, OrdemCompraRepository>();
 

@@ -36,7 +36,7 @@ public class CustodiaMasterServiceTests
         result.Exception.Should().BeNull();
         result.Value.Should().NotBeNull();
         result.Value.Should().NotBeEmpty();
-        result.Value.Count.Should().Be(2);
+        result.Value.Should().HaveCount(2);
     }
 
     [Fact]

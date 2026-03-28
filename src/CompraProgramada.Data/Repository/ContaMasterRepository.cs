@@ -12,7 +12,7 @@ public class ContaMasterRepository : IContaMasterRepository
 
     public async Task<ContaMaster> CriarAsync(ContaMaster conta, CancellationToken cancellationToken)
     {
-        _context.ContaMaster.Add(conta!);
+        _context.ContaMaster.Add(conta);
         await _context.SaveChangesAsync(cancellationToken);
         return conta;
     }

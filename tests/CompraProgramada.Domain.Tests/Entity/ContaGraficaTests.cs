@@ -30,7 +30,7 @@ public class ContaGraficaTests
         conta.AdicionarCompra(HistoricoCompra.RegistrarHistorico(1, "PETR4", 10, 10, 10, 50, DateOnly.FromDateTime(DateTime.Now)));
 
         conta.HistoricoCompra.Should().NotBeNull();
-        conta.HistoricoCompra.Count.Should().Be(1);
+        conta.HistoricoCompra.Should().HaveCount(1);
     }
 
     [Fact]
@@ -43,6 +43,6 @@ public class ContaGraficaTests
         conta.AdicionarDistribuicao(Distribuicao.CriarDistribuicao(10, conta, ordemCompra));
 
         conta.Distribuicoes.Should().NotBeNull();
-        conta.Distribuicoes.Count.Should().Be(1);
+        conta.Distribuicoes.Should().HaveCount(1);
     }
 }

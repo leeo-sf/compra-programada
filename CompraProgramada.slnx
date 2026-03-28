@@ -10,6 +10,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/CompraProgramada.Api.Tests/CompraProgramada.Api.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Application.Tests/CompraProgramada.Application.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.Data.Tests/CompraProgramada.Data.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Domain.Tests/CompraProgramada.Domain.Tests.csproj" />
   </Folder>
 </Solution>

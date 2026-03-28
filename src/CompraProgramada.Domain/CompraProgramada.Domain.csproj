@@ -8,6 +8,7 @@
 	
   <ItemGroup>
 	<InternalsVisibleTo Include="CompraProgramada.Application.Tests" />
+	<InternalsVisibleTo Include="CompraProgramada.Data.Tests" />
   </ItemGroup>
 
 </Project>

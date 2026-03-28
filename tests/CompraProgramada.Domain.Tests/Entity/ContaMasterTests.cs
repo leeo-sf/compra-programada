@@ -15,6 +15,6 @@ public class ContaMasterTests
         conta.NumeroConta.Should().Be("MST-000001");
         conta.DataCriacao.Should().NotBeAfter(DateTime.Now);
         conta.Tipo.Should().Be("MASTER");
-        conta.CustodiaMasters.Count.Should().Be(1);
+        conta.CustodiaMasters.Should().HaveCount(1);
     }
 }

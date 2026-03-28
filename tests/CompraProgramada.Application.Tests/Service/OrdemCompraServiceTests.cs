@@ -112,7 +112,7 @@ public class OrdemCompraServiceTests
         result.IsSuccess.Should().BeTrue();
         result.Exception.Should().BeNull();
         result.Value.Should().NotBeNullOrEmpty();
-        result.Value.Count.Should().Be(1);
+        result.Value.Should().HaveCount(1);
     }
 
     [Theory]
