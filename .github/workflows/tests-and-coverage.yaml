@@ -1,0 +1,81 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  MIN_COVERAGE: ${{ vars.MIN_COVERAGE }}  
+
+jobs:
+
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Rodar testes com cobertura
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults
+
+      - name: Upload artefatos de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-results
+          path: ./TestResults
+
+  run-coverage:
+    name: Evalulate coverage test
+    runs-on: ubuntu-latest
+    needs: run-tests
+
+    steps:
+      - name: Download artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-results
+          path: ./TestResults
+
+      - name: Instalar reportgenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Gerar relatório
+        run: |
+          reportgenerator \
+            -reports:./TestResults/**/coverage.cobertura.xml \
+            -targetdir:coverage-report \
+            -reporttypes:TextSummary
+
+      - name: Validar cobertura mínima
+        run: |
+          COVERAGE=$(grep -oP 'Line coverage:\s+\K[0-9.]+' coverage-report/Summary.txt)
+          echo "Cobertura: $COVERAGE%"
+          echo "Cobertura mínima: $MIN_COVERAGE%"
+
+          COVERAGE_INT=${COVERAGE%.*}
+
+          if [ "$COVERAGE_INT" -lt "$MIN_COVERAGE" ]; then
+            echo "❌ Cobertura abaixo do mínimo"
+            exit 1
+          else
+            echo "✅ Cobertura OK"
+          fi
