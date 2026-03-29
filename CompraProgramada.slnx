@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/.github/workflows/">
+    <File Path="tests-and-coverage.yaml" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/CompraProgramada.Api/CompraProgramada.Api.csproj" />
     <Project Path="src/CompraProgramada.Application/CompraProgramada.Application.csproj" />
