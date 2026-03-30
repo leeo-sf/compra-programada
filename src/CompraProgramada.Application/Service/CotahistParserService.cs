@@ -76,10 +76,8 @@ public class CotahistParserService : ICotahistParserService
         if (!_fileSystem.DiretorioExiste(pastaCotacoes))
             throw new DirectoryNotFoundException($"A pasta {pastaCotacoes} não foi encontrada.");
 
-        var arquivoUltimoPregao = _fileSystem.ObterArquivo(pastaCotacoes, "COTAHIST_D*");
-
-        if (!_fileSystem.ArquivoExiste(arquivoUltimoPregao!.FullName))
-            throw new FileNotFoundException($"Nenhum arquivo com a data pregão mais recente foi encontrado.");
+        var arquivoUltimoPregao = _fileSystem.ObterArquivo(pastaCotacoes, "COTAHIST_D*")
+            ?? throw new FileNotFoundException($"Nenhum arquivo encontrado na pasta {pastaCotacoes}");
 
         return arquivoUltimoPregao.FullName;
     }
