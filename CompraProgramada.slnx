@@ -17,5 +17,6 @@
     <Project Path="tests/CompraProgramada.Data.Tests/CompraProgramada.Data.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Domain.Tests/CompraProgramada.Domain.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Infra.Tests/CompraProgramada.Infra.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.Worker.Tests/CompraProgramada.Worker.Tests.csproj" />
   </Folder>
 </Solution>
