@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Interface;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
@@ -74,7 +73,7 @@ public class OrdemCompraServiceTests
             .Returns(CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) }));
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
-            .Returns(new CotacaoDto { DataPregao = DateTime.Now, Itens = new() { } });
+            .Returns(Cotacao.CriarRegistro(DateTime.Now, new() { }));
 
         _custodiaMasterService.ObterResiduosNaoDistribuidos(Arg.Any<CancellationToken>())
             .Returns(new ApplicationException("Message"));
@@ -97,7 +96,7 @@ public class OrdemCompraServiceTests
             .Returns(CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) }));
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
-            .Returns(new CotacaoDto { DataPregao = DateTime.Now, Itens = new() { new("PETR4", 35), new("VALE3", 62), new("ITUB4", 30), new("BBDC4", 15), new("WEGE3", 40) } });
+            .Returns(Cotacao.CriarRegistro(DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 35), ComposicaoCotacao.CriarItem("VALE3", 62), ComposicaoCotacao.CriarItem("ITUB4", 30), ComposicaoCotacao.CriarItem("BBDC4", 15), ComposicaoCotacao.CriarItem("WEGE3", 40) }));
 
         _custodiaMasterService.ObterResiduosNaoDistribuidos(Arg.Any<CancellationToken>())
             .Returns(new List<CustodiaMaster>());
@@ -122,7 +121,7 @@ public class OrdemCompraServiceTests
         // Arrange
         var totalConsolidado = 3500;
         var cestaVigente = CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) });
-        var fechamento = new CotacaoDto { DataPregao = DateTime.Now, Itens = new() { new("PETR4", 35), new("VALE3", 62), new("ITUB4", 30), new("BBDC4", 15), new("WEGE3", 40) } };
+        var fechamento = Cotacao.CriarRegistro(DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 35), ComposicaoCotacao.CriarItem("VALE3", 62), ComposicaoCotacao.CriarItem("ITUB4", 30), ComposicaoCotacao.CriarItem("BBDC4", 15), ComposicaoCotacao.CriarItem("WEGE3", 40) });
 
         // Act
         var result = _sut.EmitirOrdensCompra(fechamento, residuos, cestaVigente, totalConsolidado);

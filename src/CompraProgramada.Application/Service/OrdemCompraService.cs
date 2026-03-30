@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Interface;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using Microsoft.Extensions.Logging;
@@ -57,8 +56,8 @@ public class OrdemCompraService : IOrdemCompraService
         return ordensCompraEmitidas;
     }
 
-    public List<OrdemCompra> EmitirOrdensCompra(CotacaoDto fechamento, List<CustodiaMaster> residuos, CestaRecomendada cestaVigente, decimal valorTotalConsolidado)
-        => fechamento.Itens.Select(fechamento =>
+    public List<OrdemCompra> EmitirOrdensCompra(Cotacao fechamento, List<CustodiaMaster> residuos, CestaRecomendada cestaVigente, decimal valorTotalConsolidado)
+        => fechamento.ComposicaoCotacao.Select(fechamento =>
         {
             var custodia = residuos.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
             var itemCesta = cestaVigente.ComposicaoCesta.FirstOrDefault(x => x.Ticker == fechamento.Ticker)!;

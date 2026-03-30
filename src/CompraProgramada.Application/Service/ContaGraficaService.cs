@@ -107,12 +107,12 @@ public class ContaGraficaService : IContaGraficaService
         return new RentabilidadeDto(historicoCompra, evolucaoCarteira);*/
     }
 
-    private List<DetalheAtivoCarteiraDto> ObterDetalhesDaCerteira(List<CustodiaFilhoteDto> custodias, CotacaoDto cotacoesFechamentoCesta, decimal valorTotalCarteira)
+    private List<DetalheAtivoCarteiraDto> ObterDetalhesDaCerteira(List<CustodiaFilhoteDto> custodias, Cotacao cotacoesFechamentoCesta, decimal valorTotalCarteira)
     {
         var detalhesAtivos = custodias
             .Select(custodia =>
             {
-                var fechamentoAtivo = cotacoesFechamentoCesta.Itens.FirstOrDefault(x => x.Ticker == custodia.Ticker)!;
+                var fechamentoAtivo = cotacoesFechamentoCesta.ComposicaoCotacao.FirstOrDefault(x => x.Ticker == custodia.Ticker)!;
 
                 var valorInvestido = custodia.Quantidade * custodia.PrecoMedio;
                 var valorAtual = custodia.Quantidade * fechamentoAtivo.PrecoFechamento;
