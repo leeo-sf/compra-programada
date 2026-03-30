@@ -177,7 +177,6 @@ public class CotacaoServiceTests
 
         // Assert
         result.Should().BeEmpty();
-        result.Should().HaveCount(0);
     }
 
     public static IEnumerable<CotacaoB3Dto> CotcaoesB3()
