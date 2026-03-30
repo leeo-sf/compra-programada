@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<InternalsVisibleTo Include="CompraProgramada.Infra.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CompraProgramada.Application\CompraProgramada.Application.csproj" />
     <ProjectReference Include="..\CompraProgramada.Data\CompraProgramada.Data.csproj" />
     <ProjectReference Include="..\CompraProgramada.Domain\CompraProgramada.Domain.csproj" />
