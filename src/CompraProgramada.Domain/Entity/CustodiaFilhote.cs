@@ -38,6 +38,10 @@ public class CustodiaFilhote
     public static CustodiaFilhote GerarCustodia(string ticker)
         => new CustodiaFilhote(0, 0, ticker, 0, 0);
 
+    /// <summary>
+    /// Atribuí nova quantidade de ativos (soma quantidade anterior + nova quantidade)
+    /// </summary>
+    /// <param name="novaQuantidade">Nova quantidade a ser atribuída</param>
     public void AdicionarNovaQuantidade(int novaQuantidade)
     {
         if (novaQuantidade < 0)
