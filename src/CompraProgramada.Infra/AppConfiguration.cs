@@ -18,7 +18,7 @@ namespace CompraProgramada.Infra;
 
 public static class AppConfiguration
 {
-    public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion = null)
     {
         services.AddControllers()
             .AddJsonOptions(options =>
@@ -29,27 +29,30 @@ public static class AppConfiguration
         services.ConfigurarExceptionHandler();
         services.ConfigurarMediatR();
         services.ConfigurarFluentValidation();
-        services.ConfigurarBancoDeDados(configuration);
+        services.ConfigurarBancoDeDados(configuration, serverVersion);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
         services.ConfigurarKafka(configuration);
         services.ConfigurarMappers();
     }
 
-    public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion = null)
     {
-        services.ConfigurarBancoDeDados(configuration);
+        services.ConfigurarBancoDeDados(configuration, serverVersion);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
         services.ConfigurarKafka(configuration);
     }
 
-    private static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration)
+    internal static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion)
     {
         var connectionString = configuration.GetSection("Service:DataBase:ConnectionString").Get<string>();
+
+        serverVersion ??= ServerVersion.AutoDetect(connectionString);
+
         services.AddDbContextPool<AppDbContext>(options =>
             options.UseMySql(connectionString,
-            ServerVersion.AutoDetect(connectionString),
+            serverVersion,
                 opt =>
                 {
                     opt.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
@@ -60,10 +63,10 @@ public static class AppConfiguration
                 }));
     }
 
-    private static void ConfigurarMediatR(this IServiceCollection services)
+    internal static void ConfigurarMediatR(this IServiceCollection services)
         => services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AppConfig).Assembly));
 
-    private static void AdicionaServicosERepositorios(this IServiceCollection services)
+    internal static void AdicionaServicosERepositorios(this IServiceCollection services)
     {
         services.AddScoped<ICestaRecomendadaRepository, CestaRecomendadaRepository>();
         services.AddScoped<IClienteRepository, ClienteRepository>();
@@ -92,16 +95,16 @@ public static class AppConfiguration
         services.AddSingleton<IDateTimeProvaider, DateTimeProvaider>();
     }
 
-    private static void ConfigurarFluentValidation(this IServiceCollection services)
+    internal static void ConfigurarFluentValidation(this IServiceCollection services)
     {
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(typeof(AppConfig).Assembly, includeInternalTypes: true);
     }
 
-    private static void ConfigurarRegrasDaAplicacao(this IServiceCollection services, IConfiguration configuration)
+    internal static void ConfigurarRegrasDaAplicacao(this IServiceCollection services, IConfiguration configuration)
         => services.AddSingleton(opt => configuration.GetSection("ApplicationConfig").Get<AppConfig>()!);
 
-    private static void ConfigurarKafka(this IServiceCollection services, IConfiguration configuration)
+    internal static void ConfigurarKafka(this IServiceCollection services, IConfiguration configuration)
     {
         var producerConfig = new ProducerConfig
         {
@@ -114,7 +117,7 @@ public static class AppConfiguration
         services.AddSingleton<IKafkaProducer, KafkaProducer>();
     }
 
-    private static void ConfigurarExceptionHandler(this IServiceCollection services)
+    internal static void ConfigurarExceptionHandler(this IServiceCollection services)
     {
         services.AddExceptionHandler<DomainExceptionHandler>();
         services.AddProblemDetails();

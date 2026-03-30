@@ -59,4 +59,17 @@ public class ContaGraficaServiceTests
         result.Value.Should().NotBeNull();
         result.Value.Should().NotBeEmpty();
     }
+
+    [Fact]
+    public async Task ContaGrafica_Deve_Falhar_Ao_AtualizarContas_Quando_ContasVaziaEnviadas()
+    {
+        // Arrange & Act
+        var result = await _sut.AtualizarContasAsync(new() { }, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().NotBeNull();
+        result.Exception.Message.Should().Be("Nenhuma conta gráfica informada para atualização.");
+        result.Value.Should().BeNull();
+    }
 }

@@ -112,4 +112,116 @@ public class CompraServiceTests
         result.Exception.Message.Should().Be("Nenhum cliente ativo cadastrado");
         result.Value.Should().BeNull();
     }
+
+    [Fact]
+    public async Task ExecutarCompra_Deve_Falhar_Quando_EmitirOrdensCompra_Falhar()
+    {
+        // Arrange
+        var clientesAtivos = FakerRequest.ClientesAtivos().Generate();
+
+        _clienteService.ObtemClientesAtivoAsync(Arg.Any<CancellationToken>())
+            .Returns(clientesAtivos);
+
+        _ordemCompraService.EmitirOrdensDeCompraAsync(Arg.Any<decimal>(), Arg.Any<CancellationToken>())
+            .Returns(new Exception("Error"));
+
+        // Act
+        var result = await _sut.ExecutarCompraAsync(DateTime.Now, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().BeOfType<Exception>();
+        result.Exception.Message.Should().Be("Error");
+        result.Value.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ExecutarCompra_Deve_Falhar_Quando_DistribuirParaCustodias_Falhar()
+    {
+        // Arrange
+        var clientesAtivos = FakerRequest.ClientesAtivos().Generate();
+        var ordensCompra = FakerRequest.OrdensCompraEmitidas();
+
+        _clienteService.ObtemClientesAtivoAsync(Arg.Any<CancellationToken>())
+            .Returns(clientesAtivos);
+
+        _ordemCompraService.EmitirOrdensDeCompraAsync(Arg.Any<decimal>(), Arg.Any<CancellationToken>())
+            .Returns(ordensCompra);
+
+        _distribuicaoService.DistribuirParaCustodiasAsync(Arg.Any<List<Cliente>>(), Arg.Any<List<OrdemCompra>>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(new Exception("Error"));
+
+        // Act
+        var result = await _sut.ExecutarCompraAsync(DateTime.Now, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().BeOfType<Exception>();
+        result.Exception.Message.Should().Be("Error");
+        result.Value.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ExecutarCompra_Deve_Falhar_Quando_CapturarResiduos_Falhar()
+    {
+        // Arrange
+        var clientesAtivos = FakerRequest.ClientesAtivos().Generate();
+        var ordensCompra = FakerRequest.OrdensCompraEmitidas();
+        var distribuicoes = FakerRequest.Distribuicoes();
+
+        _clienteService.ObtemClientesAtivoAsync(Arg.Any<CancellationToken>())
+            .Returns(clientesAtivos);
+
+        _ordemCompraService.EmitirOrdensDeCompraAsync(Arg.Any<decimal>(), Arg.Any<CancellationToken>())
+            .Returns(ordensCompra);
+
+        _distribuicaoService.DistribuirParaCustodiasAsync(Arg.Any<List<Cliente>>(), Arg.Any<List<OrdemCompra>>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(distribuicoes);
+
+        _custodiaMasterService.CapturarResiduosNaoDistribuidosAsync(Arg.Any<List<Distribuicao>>(), Arg.Any<List<OrdemCompra>>(), Arg.Any<CancellationToken>())
+            .Returns(new Exception("Error"));
+
+        // Act
+        var result = await _sut.ExecutarCompraAsync(DateTime.Now, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().BeOfType<Exception>();
+        result.Exception.Message.Should().Be("Error");
+        result.Value.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ExecutarCompra_Deve_Falhar_Quando_PublicarIR_Falhar()
+    {
+        // Arrange
+        var clientesAtivos = FakerRequest.ClientesAtivos().Generate();
+        var ordensCompra = FakerRequest.OrdensCompraEmitidas();
+        var distribuicoes = FakerRequest.Distribuicoes();
+        var residuos = FakerRequest.ResiduosNaoDistribuidos();
+
+        _clienteService.ObtemClientesAtivoAsync(Arg.Any<CancellationToken>())
+            .Returns(clientesAtivos);
+
+        _ordemCompraService.EmitirOrdensDeCompraAsync(Arg.Any<decimal>(), Arg.Any<CancellationToken>())
+            .Returns(ordensCompra);
+
+        _distribuicaoService.DistribuirParaCustodiasAsync(Arg.Any<List<Cliente>>(), Arg.Any<List<OrdemCompra>>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(distribuicoes);
+
+        _custodiaMasterService.CapturarResiduosNaoDistribuidosAsync(Arg.Any<List<Distribuicao>>(), Arg.Any<List<OrdemCompra>>(), Arg.Any<CancellationToken>())
+            .Returns(residuos);
+
+        _impostoRendaService.PublicarIR(Arg.Any<List<Distribuicao>>(), Arg.Any<CancellationToken>())
+            .Returns(new Exception("Error"));
+
+        // Act
+        var result = await _sut.ExecutarCompraAsync(DateTime.Now, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().BeOfType<Exception>();
+        result.Exception.Message.Should().Be("Error");
+        result.Value.Should().BeNull();
+    }
 }

@@ -46,6 +46,47 @@ public class DistribuicaoServiceTests
         result.Value.Should().BeEquivalentTo(new List<ContaGrafica>());
     }
 
+    [Fact]
+    public async Task DistribuirParaCustodias_Deve_Falhar_Quando_OcorrerErro_Ao_ObterResiduos()
+    {
+        // Arrange
+        var clientes = FakerRequest.ClientesAtivos().Generate();
+        var ordensCompra = FakerRequest.OrdensCompraEmitidas();
+
+        _custodiaMasterService.ObterResiduosNaoDistribuidos(Arg.Any<CancellationToken>())
+            .Returns(new Exception("Error"));
+
+        // Act
+        var result = await _sut.DistribuirParaCustodiasAsync(clientes, ordensCompra, DateTime.Now, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().NotBeNull();
+        result.Value.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task DistribuirParaCustodias_Deve_Falhar_Quando_OcorrerErro_Ao_AtualizarContas()
+    {
+        // Arrange
+        var clientes = FakerRequest.ClientesAtivos().Generate();
+        var ordensCompra = FakerRequest.OrdensCompraEmitidas();
+
+        _custodiaMasterService.ObterResiduosNaoDistribuidos(Arg.Any<CancellationToken>())
+            .Returns(new List<CustodiaMaster>());
+
+        _contaGraficaService.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
+            .Returns(new Exception(""));
+
+        // Act
+        var result = await _sut.DistribuirParaCustodiasAsync(clientes, ordensCompra, DateTime.Now, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().NotBeNull();
+        result.Value.Should().BeNull();
+    }
+
     [Theory]
     [MemberData(nameof(CalcularDistribuicao))]
     public void DistribuicaoService_Deve_CalcularDistribuicao_Quando_Solicitado(List<Cliente> clientesAtivos, List<OrdemCompra> ordensCompra, List<CustodiaMaster> residuosAtuais, List<Distribuicao> distribuicoes)

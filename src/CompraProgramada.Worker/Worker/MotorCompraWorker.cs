@@ -27,15 +27,7 @@ public class MotorCompraWorker : BackgroundService
         {
             try
             {
-                _logger.LogInformation("Iniciando o motor de compra...");
-
-                using var scope = _serviceScopeFactory.CreateScope();
-
-                var motorCompraService = scope.ServiceProvider.GetRequiredService<ICompraService>();
-
-                await motorCompraService.ExecutarCompraAsync(null, stoppingToken);
-
-                _logger.LogInformation("Motor de compra finalizado com sucesso.");
+                await ExecutarMotorDeCompra(stoppingToken);
             }
             catch (Exception ex)
             {
@@ -43,5 +35,18 @@ public class MotorCompraWorker : BackgroundService
                 throw;
             }
         }
+    }
+
+    internal async Task ExecutarMotorDeCompra(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Iniciando o motor de compra...");
+
+        using var scope = _serviceScopeFactory.CreateScope();
+
+        var motorCompraService = scope.ServiceProvider.GetRequiredService<ICompraService>();
+
+        await motorCompraService.ExecutarCompraAsync(null, cancellationToken);
+
+        _logger.LogInformation("Motor de compra finalizado com sucesso.");
     }
 }
