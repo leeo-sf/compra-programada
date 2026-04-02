@@ -66,7 +66,7 @@ jobs:
       - name: Gerar relatório
         run: |
           reportgenerator \
-            -reports:"extracted-coverage/**/*.xml" \
+            -reports:"./TestResults/**/coverage.cobertura.xml" \
             -targetdir:coverage-report \
             -reporttypes:TextSummary
 
