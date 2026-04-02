@@ -31,7 +31,8 @@ jobs:
 
       - name: Rodar testes com cobertura
         run: |
-          dotnet test --no-build --configuration Release --verbosity normal \
+          mkdir -p TestResults
+          dotnet test --no-build --configuration Release \
           /p:CollectCoverage=true \
           /p:CoverletOutputFormat=cobertura \
           /p:CoverletOutput=../TestResults/ \
@@ -41,7 +42,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-results
-          path: ./TestResults
+          path: TestResults/
+          if-no-files-found: error
 
   run-coverage:
     name: evalulate-coverage-test
@@ -64,7 +66,7 @@ jobs:
       - name: Gerar relatório
         run: |
           reportgenerator \
-            -reports:"./TestResults/**/*.xml" \
+            -reports:"extracted-coverage/**/*.xml" \
             -targetdir:coverage-report \
             -reporttypes:TextSummary
 
