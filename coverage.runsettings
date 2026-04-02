@@ -6,8 +6,12 @@
 				<Configuration>
 
 					<ExcludeByFile>
-						**/Migrations/*.cs
-						**/*Designer.cs
+						**/Migrations/**/*.cs
+						**/*.Designer.cs
+						**/*Snapshot.cs
+						**/*.g.cs
+						**/obj/**
+						**/Program.cs
 					</ExcludeByFile>
 
 				</Configuration>
