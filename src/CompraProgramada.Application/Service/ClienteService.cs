@@ -1,33 +1,26 @@
-﻿using CompraProgramada.Application.Mapper;
+﻿using CompraProgramada.Application.Contract.Service;
+using CompraProgramada.Domain.Entity;
+using CompraProgramada.Domain.Interface;
+using CompraProgramada.Shared.Exceptions;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
-using CompraProgramada.Domain.Entity;
-using CompraProgramada.Shared.Exceptions;
-using CompraProgramada.Domain.Interface;
 using OperationResult;
-using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Service;
 
 public class ClienteService : IClienteService
 {
     private readonly IClienteRepository _clienteRepository;
-    private readonly IContaGraficaService _contaService;
     private readonly ICestaRecomendadaService _cestaRecomendadaService;
     private readonly ICotacaoService _cotacaoService;
-    private readonly ClienteMapper _mapper;
 
     public ClienteService(IClienteRepository clienteRepository,
-        IContaGraficaService contaService,
         ICestaRecomendadaService cestaRecomendadaService,
-        ICotacaoService cotacaoService,
-        ClienteMapper mapper)
+        ICotacaoService cotacaoService)
     {
         _clienteRepository = clienteRepository;
-        _contaService = contaService;
         _cestaRecomendadaService = cestaRecomendadaService;
         _cotacaoService = cotacaoService;
-        _mapper = mapper;
     }
 
     public async Task<Result<List<Cliente>>> ObtemClientesAtivoAsync(CancellationToken cancellationToken)
@@ -47,11 +40,11 @@ public class ClienteService : IClienteService
 
         var clienteSalvo = await _clienteRepository.CriarAsync(cliente, cancellationToken);
 
-        var contaSalva = await _contaService.GerarContaGraficaAsync(clienteSalvo, cancellationToken);
-        if (!contaSalva.IsSuccess)
-            return contaSalva.Exception;
+        var conta = ContaGrafica.Gerar(clienteSalvo);
 
-        cliente.AdicionarConta(contaSalva.Value);
+        var contaSalva = await _clienteRepository.CriarContaAsync(conta, cancellationToken);
+
+        cliente.AdicionarConta(contaSalva);
 
         return cliente;
     }
@@ -135,5 +128,15 @@ public class ClienteService : IClienteService
         var evolucaoCarteira = cliente.ContaGrafica.CalcularEvolucaoCarteira(fechamento.Value);
 
         return new RentabilidadeResponse(cliente.Id, cliente.Nome, DateTime.Now, resumoRentabilidade, historicoAportes, evolucaoCarteira);
+    }
+
+    public async Task<Result<List<ContaGrafica>>> AtualizarContasAsync(List<ContaGrafica> contasAhSeremAtualizadas, CancellationToken cancellationToken)
+    {
+        if (!contasAhSeremAtualizadas.Any())
+            return new ApplicationException("Nenhuma conta gráfica informada para atualização.");
+
+        var contasSalvas = await _clienteRepository.AtualizarContasAsync(contasAhSeremAtualizadas, cancellationToken);
+
+        return contasSalvas;
     }
 }

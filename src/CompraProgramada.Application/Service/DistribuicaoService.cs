@@ -9,15 +9,15 @@ public class DistribuicaoService : IDistribuicaoService
 {
     private readonly ILogger<DistribuicaoService> _logger;
     private readonly ICustodiaMasterService _custodiaMasterService;
-    private readonly IContaGraficaService _contaGraficaService;
+    private readonly IClienteService _clienteService;
 
     public DistribuicaoService(ILogger<DistribuicaoService> logger,
         ICustodiaMasterService custodiaMasterService,
-        IContaGraficaService contaGraficaService)
+        IClienteService clienteService)
     {
         _logger = logger;
         _custodiaMasterService = custodiaMasterService;
-        _contaGraficaService = contaGraficaService;
+        _clienteService = clienteService;
     }
 
     public async Task<Result<List<Distribuicao>>> DistribuirParaCustodiasAsync(List<Cliente> clientesAtivos, List<OrdemCompra> ordensCompra, DateTime dataExecucao, CancellationToken cancellationToken)
@@ -32,7 +32,7 @@ public class DistribuicaoService : IDistribuicaoService
 
         var contasAhSeremAtuailzadas = CalcularDistribuicao(clientesAtivos, ordensCompra, residuosAtuaisResult.Value, dataExecucao);
 
-        var contasAtualizadasResult = await _contaGraficaService.AtualizarContasAsync(contasAhSeremAtuailzadas, cancellationToken);
+        var contasAtualizadasResult = await _clienteService.AtualizarContasAsync(contasAhSeremAtuailzadas, cancellationToken);
         if (!contasAtualizadasResult.IsSuccess)
             return contasAtualizadasResult.Exception;
 

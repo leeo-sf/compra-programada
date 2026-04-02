@@ -17,20 +17,16 @@ namespace CompraProgramada.Application.Tests.Service;
 public class ClienteServiceTests
 {
     private readonly IClienteRepository _clienteRepository;
-    private readonly IContaGraficaService _contaGraficaService;
     private readonly ICestaRecomendadaService _cestaRecomendadaService;
     private readonly ICotacaoService _cotacaoService;
-    private readonly ClienteMapper _mapper;
     private readonly ClienteService _sut;
 
     public ClienteServiceTests()
     {
         _clienteRepository = Substitute.For<IClienteRepository>();
-        _contaGraficaService = Substitute.For<IContaGraficaService>();
         _cestaRecomendadaService = Substitute.For<ICestaRecomendadaService>();
         _cotacaoService = Substitute.For<ICotacaoService>();
-        _mapper = Substitute.For<ClienteMapper>(Substitute.For<ContaMapper>());
-        _sut = new(_clienteRepository, _contaGraficaService, _cestaRecomendadaService, _cotacaoService, _mapper);
+        _sut = new(_clienteRepository, _cestaRecomendadaService, _cotacaoService);
     }
 
     [Fact]
@@ -85,7 +81,7 @@ public class ClienteServiceTests
         _clienteRepository.CriarAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
             .Returns(Cliente.Criar(new(command.Nome, command.Cpf, command.Email, command.ValorMensal)));
 
-        _contaGraficaService.GerarContaGraficaAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
+        _clienteRepository.CriarContaAsync(Arg.Any<ContaGrafica>(), Arg.Any<CancellationToken>())
             .Returns(ContaGrafica.Gerar(cliente));
 
         // Act
@@ -142,33 +138,6 @@ public class ClienteServiceTests
         result.IsSuccess.Should().BeFalse();
         result.Exception.Should().BeOfType<ApplicationException>();
         result.Exception.Message.Should().Be("Nenhuma cesta ativa");
-        result.Value.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task ClienteService_Deve_Falhar_AoAdesao_Quando_GerarContaFalhar()
-    {
-        // Arrange
-        var command = FakerRequest.AdesaoRequest().Generate();
-        var cestaRequest = FakerRequest.CriarCestaRecomendadaRequest();
-        var cestaAtiva = CestaRecomendada.CriarCesta(cestaRequest.Nome, cestaRequest.Itens.Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual)).ToList());
-
-        _clienteRepository.ExisteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(false);
-
-        _cestaRecomendadaService.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
-            .Returns(cestaAtiva);
-
-        _contaGraficaService.GerarContaGraficaAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())!
-            .Returns(Result.Error<ContaGrafica>(new ApplicationException("Falha ao gerar conta gráfica")));
-
-        // Act
-        var result = await _sut.RealizarAdesaoAsync(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Exception.Should().BeOfType<ApplicationException>();
-        result.Exception.Message.Should().Be("Falha ao gerar conta gráfica");
         result.Value.Should().BeNull();
     }
 
@@ -542,5 +511,38 @@ public class ClienteServiceTests
             options.Using<DateTime>(ctx =>
                 ctx.Subject.Date.Should().Be(ctx.Expectation.Date)
             ).WhenTypeIs<DateTime>());
+    }
+
+    [Fact]
+    public async Task ContaGrafica_Deve_AtualizarContas_Quando_NaoHouverErro()
+    {
+        // Arrange
+        var cliente = FakerRequest.ClienteAtivo().Generate();
+        var contas = new List<ContaGrafica> { ContaGrafica.Gerar(cliente) };
+
+        _clienteRepository.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
+            .Returns(contas);
+
+        // Act
+        var result = await _sut.AtualizarContasAsync(contas, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Exception.Should().BeNull();
+        result.Value.Should().NotBeNull();
+        result.Value.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task ContaGrafica_Deve_Falhar_Ao_AtualizarContas_Quando_ContasVaziaEnviadas()
+    {
+        // Arrange & Act
+        var result = await _sut.AtualizarContasAsync(new() { }, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().NotBeNull();
+        result.Exception.Message.Should().Be("Nenhuma conta gráfica informada para atualização.");
+        result.Value.Should().BeNull();
     }
 }

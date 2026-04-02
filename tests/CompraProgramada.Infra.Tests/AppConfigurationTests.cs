@@ -144,7 +144,6 @@ public class AppConfigurationTests
         // Act
         var cestaDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICestaRecomendadaRepository));
         var clienteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IClienteRepository));
-        var contaGraficaDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IContaGraficaRepository));
         var contaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IContaMasterRepository));
         var cotacaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICotacaoRepository));
         var custodiaFilhoteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaFilhoteRepository));
@@ -157,8 +156,6 @@ public class AppConfigurationTests
         Assert.Equal(ServiceLifetime.Scoped, cestaDescriptor?.Lifetime);
         Assert.NotNull(clienteDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, clienteDescriptor?.Lifetime);
-        Assert.NotNull(contaGraficaDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, contaGraficaDescriptor?.Lifetime);
         Assert.NotNull(contaMasterDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, contaMasterDescriptor?.Lifetime);
         Assert.NotNull(cotacaoDescriptor);
@@ -182,7 +179,6 @@ public class AppConfigurationTests
         // Act
         var cestaDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICestaRecomendadaService));
         var clienteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IClienteService));
-        var contaGraficaDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IContaGraficaService));
         var cotacaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICotacaoService));
         var custodiaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaMasterService));
         var distribuicaoMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IDistribuicaoService));
@@ -195,8 +191,6 @@ public class AppConfigurationTests
         Assert.Equal(ServiceLifetime.Scoped, cestaDescriptor?.Lifetime);
         Assert.NotNull(clienteDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, clienteDescriptor?.Lifetime);
-        Assert.NotNull(contaGraficaDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, contaGraficaDescriptor?.Lifetime);
         Assert.NotNull(cotacaoDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, cotacaoDescriptor?.Lifetime);
         Assert.NotNull(custodiaMasterDescriptor);

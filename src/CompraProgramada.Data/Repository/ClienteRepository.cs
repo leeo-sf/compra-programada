@@ -47,4 +47,18 @@ public class ClienteRepository : IClienteRepository
         await _context.SaveChangesAsync(cancellationToken);
         return cliente;
     }
+
+    public async Task<ContaGrafica> CriarContaAsync(ContaGrafica conta, CancellationToken cancellationToken)
+    {
+        _context.ContaGrafica.Add(conta);
+        await _context.SaveChangesAsync();
+        return conta;
+    }
+
+    public async Task<List<ContaGrafica>> AtualizarContasAsync(List<ContaGrafica> contas, CancellationToken cancellationToken)
+    {
+        _context.ContaGrafica.UpdateRange(contas);
+        await _context.SaveChangesAsync(cancellationToken);
+        return contas;
+    }
 }
