@@ -68,7 +68,7 @@ public class CompraService : ICompraService
         var qtdClientesAtivos = clientesAtivos.Count;
 
         if (qtdClientesAtivos < 1)
-            return new CompraException("Nenhum cliente ativo cadastrado", "QTD_CLIENTES_ATIVOS");
+            throw new CompraException("Nenhum cliente ativo cadastrado", "QTD_CLIENTES_ATIVOS");
 
         _logger.LogInformation("{QuantidadeClientes} clientes ativos para processamento.", qtdClientesAtivos);
 

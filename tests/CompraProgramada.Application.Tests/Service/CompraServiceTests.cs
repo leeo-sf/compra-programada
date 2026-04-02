@@ -123,13 +123,10 @@ public class CompraServiceTests
             .Returns(new List<Cliente>());
 
         // Act
-        var result = await _sut.ExecutarCompraAsync(null, CancellationToken.None);
+        Task result() => _sut.ExecutarCompraAsync(null, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Exception.Should().BeOfType<CompraException>();
-        result.Exception.Message.Should().Be("Nenhum cliente ativo cadastrado");
-        result.Value.Should().BeNull();
+        await Assert.ThrowsAsync<CompraException>(result);
     }
 
     [Fact]
