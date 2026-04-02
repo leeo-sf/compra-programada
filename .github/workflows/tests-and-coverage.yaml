@@ -34,8 +34,9 @@ jobs:
           dotnet test CompraProgramada.slnx \
             --no-build \
             --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./TestResults \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:CoverletOutput=./TestResults \
             /p:ExcludeByFile="**/Migrations/*.cs"
 
 
@@ -59,6 +60,9 @@ jobs:
 
       - name: Instalar reportgenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Ver arquivos de cobertura
+        run: find ./TestResults -name "*.xml"
 
       - name: Gerar relatório
         run: |
