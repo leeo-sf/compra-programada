@@ -31,12 +31,12 @@ jobs:
 
       - name: Rodar testes com cobertura
         run: |
-          mkdir -p TestResults
-          dotnet test --no-build --configuration Release \
-          /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=cobertura \
-          /p:CoverletOutput=../TestResults/ \
-          /p:Exclude="[*Migrations*]*"
+          dotnet test CompraProgramada.slnx \
+            --no-build \
+            --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --settings coverage.runsettings \
+            --results-directory ./TestResults
 
       - name: Upload artefatos de cobertura
         uses: actions/upload-artifact@v4
