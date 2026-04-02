@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Domain.Exceptions;
+﻿using CompraProgramada.Shared.Exceptions;
+using CompraProgramada.Shared.Request;
 
 namespace CompraProgramada.Domain.Entity;
 
@@ -46,19 +47,18 @@ public class Cliente
         DataAdesao = dataAdesao;
     }
 
-    public static Cliente Criar(string nome, string cpf, string email, decimal valorMensal)
-        => new Cliente(0, nome, cpf, email, valorMensal, valorMensal, true, DateTime.Now);
+    public static Cliente Criar(AdesaoRequest request)
+        => new Cliente(0, request.Nome, request.Cpf, request.Email, request.ValorMensal, request.ValorMensal, true, DateTime.Now);
 
-    public void AtualizarValorMensal(decimal novoValorMensal)
+    public void AtualizarValorMensal(AtualizarValorMensalRequest request)
     {
-        if (novoValorMensal < VALOR_MINIMO_ADESAO)
+        if (request.NovoValorMensal < VALOR_MINIMO_ADESAO)
             throw new ValorMensalException(VALOR_MINIMO_ADESAO);
 
-        ValorMensal = novoValorMensal;
+        ValorMensal = request.NovoValorMensal;
     }
 
-    public void Desativar()
-        => Ativo = false;
+    public void Desativar() => Ativo = false;
 
     public void AdicionarConta(ContaGrafica conta)
         => ContaGrafica = conta;

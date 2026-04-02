@@ -1,5 +1,5 @@
 ﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Data;
@@ -70,7 +70,6 @@ public static class AppConfiguration
     {
         services.AddScoped<ICestaRecomendadaRepository, CestaRecomendadaRepository>();
         services.AddScoped<IClienteRepository, ClienteRepository>();
-        services.AddScoped<IContaGraficaRepository, ContaGraficaRepository>();
         services.AddScoped<IContaMasterRepository, ContaMasterRepository>();
         services.AddScoped<ICotacaoRepository, CotacaoRepository>();
         services.AddScoped<ICustodiaFilhoteRepository, CustodiaFilhoteRepository>();
@@ -80,7 +79,6 @@ public static class AppConfiguration
 
         services.AddScoped<ICestaRecomendadaService, CestaRecomendadaService>();
         services.AddScoped<IClienteService, ClienteService>();
-        services.AddScoped<IContaGraficaService, ContaGraficaService>();
         services.AddScoped<ICotacaoService, CotacaoService>();
         services.AddScoped<ICustodiaMasterService, CustodiaMasterService>();
         services.AddScoped<IDistribuicaoService, DistribuicaoService>();

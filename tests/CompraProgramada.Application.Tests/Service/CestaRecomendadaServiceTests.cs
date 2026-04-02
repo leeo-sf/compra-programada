@@ -1,12 +1,14 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using CompraProgramada.Shared.Dto;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using OperationResult;
 
 namespace CompraProgramada.Application.Tests.Service;
 
@@ -57,7 +59,7 @@ public class CestaRecomendadaServiceTests
         var request = FakerRequest.CriarCestaRecomendadaRequest();
         var cestaCriada = CestaRecomendada.CriarCesta(request.Nome, request.Itens.Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual)).ToList());
 
-        var itensCestaAnterior = new List<ComposicaoCestaDto> { new("AAPL4", 30), new("VALE3", 25), new("ITUB4", 20), new("TEST5", 10), new("WEGE3", 15) };
+        var itensCestaAnterior = new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "AAPL4", Percentual = 30 }, new ComposicaoCestaDto { Ticker = "VALE3", Percentual = 25 }, new ComposicaoCestaDto { Ticker = "ITUB4", Percentual = 20 }, new ComposicaoCestaDto { Ticker = "TEST5", Percentual = 10 }, new ComposicaoCestaDto { Ticker = "WEGE3", Percentual = 15 } };
         var cestaAnterior = CestaRecomendada.CriarCesta("Cesta Top Five Fast", itensCestaAnterior.Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual)).ToList());
 
         _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
@@ -157,9 +159,28 @@ public class CestaRecomendadaServiceTests
         result.Value.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task ValorPorAtivoConsolidado_Deve_RetornarException_Quando_CestaVigenteFalhar()
+    {
+        // Arrange
+        var exception = new ApplicationException("Nenhuma Cesta Top Five ativa no momento.");
+
+        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+            .Returns((CestaRecomendada)null!);
+
+        // Act
+        var result = await _sut.ValorPorAtivoConsolidado(100, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().BeOfType<ApplicationException>();
+        result.Exception.Message.Should().Be("Nenhuma Cesta Top Five ativa no momento.");
+        result.Value.Should().BeNull();
+    }
+
     [Theory]
     [MemberData(nameof(ValorPorAtivoConsolidadoRequest))]
-    public async Task CestaRecomendadaService_Deve_RetornarValorPorAtivoConsolidado_Quando_TiverCestaAtual(CestaRecomendada cestaAtual, decimal totalAtivoConsolidado, List<ValorAtivoConsolidadoDto> resultadoEsperado)
+    public async Task ValorPorAtivoConsolidado_Deve_RetornarValorPorAtivoConsolidado_Quando_TiverCestaAtual(CestaRecomendada cestaAtual, decimal totalAtivoConsolidado, List<ValorAtivoConsolidadoDto> resultadoEsperado)
     {
         // Arrange
         _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
@@ -172,12 +193,12 @@ public class CestaRecomendadaServiceTests
         valorPorAtivoConsolidadoResult.IsSuccess.Should().BeTrue();
         valorPorAtivoConsolidadoResult.Exception.Should().BeNull();
         valorPorAtivoConsolidadoResult.Value.Should().NotBeNull();
-        valorPorAtivoConsolidadoResult.Value.Should().BeEqualTo(resultadoEsperado);
+        valorPorAtivoConsolidadoResult.Value.Should().BeEquivalentTo(resultadoEsperado);
     }
 
     [Theory]
     [MemberData(nameof(MudancaAtivosRequest))]
-    public void CestaRecomendadaService_Deve_RetornarAtivosAdicionados_E_Removidos_Quando_HouverAlteracao(List<ComposicaoCestaRecomendadaDto> composicaoAnterior, List<string> ativosRemovidos, List<ComposicaoCestaRecomendadaDto> composicaoAtual, List<string> ativosAdicionados)
+    public void MudancaAtivos_Deve_RetornarAtivosAdicionados_E_Removidos_Quando_HouverAlteracao(List<ComposicaoCestaDto> composicaoAnterior, List<string> ativosRemovidos, List<ComposicaoCestaDto> composicaoAtual, List<string> ativosAdicionados)
     {
         // Arrange & Act
         var (ativosRemovidosResult, ativosAdicionadosResult) = _sut.ObterMudancasDeAtivos(composicaoAnterior, composicaoAtual);
@@ -196,30 +217,30 @@ public class CestaRecomendadaServiceTests
             {
                 CestaRecomendada.CriarCesta("Cesta", FakerRequest.ComposicaoCestaRecomendada().Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual)).ToList()),
                 3500,
-                new List<ValorAtivoConsolidadoDto> { new("PETR4", 1050), new("VALE3", 875), new("ITUB4", 700), new("BBDC4", 525), new("WEGE3", 350) }
+                new List<ValorAtivoConsolidadoDto> { new ValorAtivoConsolidadoDto { Ticker = "PETR4", ValorDeCompraAtivo = 1050.0m }, new ValorAtivoConsolidadoDto { Ticker = "VALE3", ValorDeCompraAtivo = 875.00m }, new ValorAtivoConsolidadoDto { Ticker = "ITUB4", ValorDeCompraAtivo = 700.0m }, new ValorAtivoConsolidadoDto { Ticker = "BBDC4", ValorDeCompraAtivo = 525.00m }, new ValorAtivoConsolidadoDto { Ticker = "WEGE3", ValorDeCompraAtivo = 350.0m } }
             },
             {
                 CestaRecomendada.CriarCesta("Cesta", new List<ComposicaoCesta> { ComposicaoCesta.CriaItemNaCesta("PETR4", 21), ComposicaoCesta.CriaItemNaCesta("VALE3", 12), ComposicaoCesta.CriaItemNaCesta("AAPL4", 47), ComposicaoCesta.CriaItemNaCesta("BBDC4", 6), ComposicaoCesta.CriaItemNaCesta("WEGE3", 14) }),
                 22987.90m,
-                new List<ValorAtivoConsolidadoDto> { new("PETR4", 4827.4590m), new("VALE3", 2758.548m), new("AAPL4", 10804.313m), new("BBDC4", 1379.274m), new("WEGE3", 3218.306m) }
+                new List<ValorAtivoConsolidadoDto> { new ValorAtivoConsolidadoDto { Ticker = "PETR4", ValorDeCompraAtivo = 4827.4590m }, new ValorAtivoConsolidadoDto { Ticker = "VALE3", ValorDeCompraAtivo = 2758.548m }, new ValorAtivoConsolidadoDto { Ticker = "AAPL4", ValorDeCompraAtivo = 10804.313m }, new ValorAtivoConsolidadoDto { Ticker = "BBDC4", ValorDeCompraAtivo = 1379.274m }, new ValorAtivoConsolidadoDto { Ticker = "WEGE3", ValorDeCompraAtivo = 3218.306m } }
             }
         };
     }
 
-    public static TheoryData<List<ComposicaoCestaRecomendadaDto>, List<string>, List<ComposicaoCestaRecomendadaDto>, List<string>> MudancaAtivosRequest()
+    public static TheoryData<List<ComposicaoCestaDto>, List<string>, List<ComposicaoCestaDto>, List<string>> MudancaAtivosRequest()
     {
         return new()
         {
             {
-                new List<ComposicaoCestaRecomendadaDto> { new(0, 1, "PETR4", 30), new(0, 1, "AAPL4", 15), new(0, 1, "ITUB4", 25) },
+                new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "PETR4", Percentual = 30 }, new ComposicaoCestaDto { Ticker = "AAPL4", Percentual = 15 }, new ComposicaoCestaDto { Ticker = "ITUB4", Percentual = 25 } },
                 new List<string> { "AAPL4", "ITUB4" },
-                new List<ComposicaoCestaRecomendadaDto> { new(0, 1, "PETR4", 30), new(0, 1, "TEST5", 15), new(0, 1, "WEGE3", 25) },
+                new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "PETR4", Percentual = 30 }, new ComposicaoCestaDto { Ticker = "TEST5", Percentual = 15 }, new ComposicaoCestaDto { Ticker = "WEGE3", Percentual = 25 } },
                 new List<string> { "TEST5", "WEGE3" }
             },
             {
-                new List<ComposicaoCestaRecomendadaDto> { new(0, 1, "PETR4", 30), new(0, 1, "VALE3", 15), new(0, 1, "RENT3", 25) },
+                new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "PETR4", Percentual = 30 }, new ComposicaoCestaDto { Ticker = "VALE3", Percentual = 15 }, new ComposicaoCestaDto { Ticker = "RENT3", Percentual = 25 } },
                 new List<string> { "VALE3" },
-                new List<ComposicaoCestaRecomendadaDto> { new(0, 1, "PETR4", 35), new(0, 1, "ABEV3", 17), new(0, 1, "RENT3", 10) },
+                new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "PETR4", Percentual = 35 }, new ComposicaoCestaDto { Ticker = "ABEV3", Percentual = 17 }, new ComposicaoCestaDto { Ticker = "RENT3", Percentual = 10 } },
                 new List<string> { "ABEV3" }
             }
         };

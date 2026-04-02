@@ -10,4 +10,6 @@ public interface IClienteRepository
     Task<bool> ExisteAsync(string cpf, CancellationToken cancellationToken);
     Task<Cliente> CriarAsync(Cliente cliente, CancellationToken cancellationToken);
     Task<Cliente> AtualizarClienteAsync(Cliente cliente, CancellationToken cancellationToken);
+    Task<ContaGrafica> CriarContaAsync(ContaGrafica conta, CancellationToken cancellationToken);
+    Task<List<ContaGrafica>> AtualizarContasAsync(List<ContaGrafica> contas, CancellationToken cancellationToken);
 }

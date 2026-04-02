@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Tests.TestUtils;
 

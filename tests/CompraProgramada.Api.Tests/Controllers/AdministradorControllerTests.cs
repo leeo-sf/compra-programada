@@ -1,11 +1,11 @@
 using CompraProgramada.Api.Controllers;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
 using MediatR;
-using CompraProgramada.Application.Dto;
+using CompraProgramada.Shared.Dto;
 using OperationResult;
 using NSubstitute;
-using CompraProgramada.Domain.Exceptions;
+using CompraProgramada.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -25,10 +25,10 @@ public class AdministradorControllerTests
             "Cesta Top Five",
             new List<ComposicaoCestaDto>
             {
-                new ComposicaoCestaDto("PETR4", 30),
-                new ComposicaoCestaDto("VALE3", 25),
-                new ComposicaoCestaDto("ITUB4", 20),
-                new ComposicaoCestaDto("BBDC4", 15)
+                new ComposicaoCestaDto { Ticker = "PETR4", Percentual = 30 },
+                new ComposicaoCestaDto { Ticker = "VALE3", Percentual = 25 },
+                new ComposicaoCestaDto{ Ticker = "ITUB4", Percentual = 20 },
+                new ComposicaoCestaDto{ Ticker = "BBDC4", Percentual = 15 }
             }
         );
 
@@ -46,8 +46,8 @@ public class AdministradorControllerTests
             "Cesta Top Five",
             new List<ComposicaoCestaDto>
             {
-                new ComposicaoCestaDto("PETR4", 30),
-                new ComposicaoCestaDto("VALE3", 25)
+                new ComposicaoCestaDto{ Ticker = "PETR4", Percentual = 30 },
+                new ComposicaoCestaDto{ Ticker = "VALE3", Percentual = 25 }
             }
         );
         QuantidadeItensCestaException error = new(3);
@@ -70,8 +70,8 @@ public class AdministradorControllerTests
             "Cesta Top Five",
             new List<ComposicaoCestaDto>
             {
-                new ComposicaoCestaDto("PETR4", 30),
-                new ComposicaoCestaDto("VALE3", 25)
+                new ComposicaoCestaDto{ Ticker = "PETR4", Percentual = 30 },
+                new ComposicaoCestaDto{ Ticker = "VALE3", Percentual = 25 }
             }
         );
         PercentualCestaException error = new(98);
@@ -90,7 +90,7 @@ public class AdministradorControllerTests
     [Fact]
     public async Task CestaAtual_DeveRetornarSucesso_QuandoSolicitado()
     {
-        var response = new CestaRecomendadaDto(1, "Name", DateTime.Now, null, true, new());
+        var response = new CestaRecomendadaDto { CestaId = 1, Nome = "Name", DataCriacao = DateTime.Now, DataDesativacao = null, Ativa = true, Itens = new() };
 
         _mediator.Send(new CestaAtualRequest()).Returns(Result.Success(response));
 
@@ -122,7 +122,7 @@ public class AdministradorControllerTests
         var request = new CestaHistoricoRequest();
 
         var response = new HistoricoCestasResponse(
-            new List<CestaRecomendadaDto> { new CestaRecomendadaDto(1, "Name", DateTime.Now, null, true, new()) }
+            new List<CestaRecomendadaDto> { new CestaRecomendadaDto { CestaId = 1, Nome = "Name", DataCriacao = DateTime.Now, DataDesativacao = null, Ativa = true, Itens = new() } }
         );
 
         _mediator.Send(request).Returns(Result.Success(response));

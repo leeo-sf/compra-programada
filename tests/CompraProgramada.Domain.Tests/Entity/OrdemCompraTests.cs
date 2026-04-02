@@ -1,5 +1,5 @@
 ﻿using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Enum;
+using CompraProgramada.Shared.Enum;
 using FluentAssertions;
 
 namespace CompraProgramada.Domain.Tests.Entity;

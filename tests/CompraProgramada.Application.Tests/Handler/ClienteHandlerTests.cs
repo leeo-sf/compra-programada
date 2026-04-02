@@ -1,16 +1,16 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Handler;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Handler;
 using CompraProgramada.Application.Mapper;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
+using CompraProgramada.Shared.Dto;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NSubstitute;
 using OperationResult;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Tests.Handler;
 
@@ -161,7 +161,7 @@ public class ClienteHandlerTests
     {
         var request = new CarteiraCustodiaRequest(1);
 
-        var response = new CarteiraCustodiaResponse(1, "", "", DateTime.Now, new(1, 1, 1, 1), new List<DetalheAtivoCarteiraDto> { });
+        var response = new CarteiraCustodiaResponse(1, "", "", DateTime.Now, new ResumoCarteiraDto { ValorTotalInvestido = 100, ValorAtualCarteira = 80, PlTotal = 8.4m, RentabilidadePercentual = 0.90m }, new List<DetalheCarteiraDto> { });
         var result = Result.Success(response);
 
         _clienteServiceMock
@@ -203,7 +203,7 @@ public class ClienteHandlerTests
     {
         var request = new RentabilidadeRequest(1);
 
-        var response = new RentabilidadeResponse(1, "", DateTime.Now, new(1, 1, 1, 1), new List<HistoricoAporteDto> { }, new List<EvolucaoCarteiraDto> { });
+        var response = new RentabilidadeResponse(1, "", DateTime.Now, new ResumoCarteiraDto { ValorTotalInvestido = 100, ValorAtualCarteira = 80, PlTotal = 8.4m, RentabilidadePercentual = 0.90m }, new List<HistoricoAporteDto> { }, new List<EvolucaoCarteiraDto> { });
         var result = Result.Success(response);
 
         _clienteServiceMock

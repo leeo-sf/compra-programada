@@ -1,9 +1,9 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using Microsoft.Extensions.Logging;
 using OperationResult;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Service;
 

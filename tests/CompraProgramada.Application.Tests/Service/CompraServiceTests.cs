@@ -1,13 +1,13 @@
-﻿using CompraProgramada.Application.Interface;
-using CompraProgramada.Application.Mapper;
-using CompraProgramada.Application.Response;
+﻿using CompraProgramada.Application.Mapper;
+using CompraProgramada.Shared.Response;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Exceptions;
+using CompraProgramada.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Tests.Service;
 
@@ -90,6 +90,25 @@ public class CompraServiceTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Exception.Should().BeNull();
+        result.Value.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ExecutarCompra_Deve_NaoExecutarCompra_Quando_ObterClientesAtivos_Falhar()
+    {
+        // Arrange
+        _historicoExecucaoService.ExecutarCompraHojeAsync(Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        _clienteService.ObtemClientesAtivoAsync(Arg.Any<CancellationToken>())
+            .Returns(new ApplicationException("Error"));
+
+        // Act
+        var result = await _sut.ExecutarCompraAsync(DateTime.Now, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Exception.Should().NotBeNull();
         result.Value.Should().BeNull();
     }
 

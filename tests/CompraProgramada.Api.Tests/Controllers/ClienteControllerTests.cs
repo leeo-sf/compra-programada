@@ -1,8 +1,9 @@
 using CompraProgramada.Api.Controllers;
-using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
-using CompraProgramada.Domain.Exceptions;
+using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
+using CompraProgramada.Shared.Exceptions;
+using CompraProgramada.Shared.Dto;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -156,8 +157,8 @@ public class ClienteControllerTests
             "Nome",
             "conta",
             DateTime.Now,
-            new ResumoCarteiraDto(100, 80, 8.4m, 0.90m),
-            new List<DetalheAtivoCarteiraDto> { new DetalheAtivoCarteiraDto("Ticker", 10, 49, 52, 10, 10, 10, 10) });
+            new ResumoCarteiraDto { ValorTotalInvestido = 100, ValorAtualCarteira = 80, PlTotal = 8.4m, RentabilidadePercentual = 0.90m },
+            new List<DetalheCarteiraDto> { new DetalheCarteiraDto { Ticker = "Ticker", Quantidade = 10, PrecoMedio = 49, CotacaoAtual = 52, ValorAtual = 10, Pl = 10, PlPercentual = 10, ComposicaoCarteira = 10 } });
 
         _mediator.Send(request).Returns(Result.Success(response));
 
@@ -174,9 +175,9 @@ public class ClienteControllerTests
             1,
             "Nome",
             DateTime.Now,
-            new(1000, 1000, 10, 10),
-            new List<HistoricoAporteDto> { new HistoricoAporteDto(1, DateOnly.FromDateTime(DateTime.Now), 1000, "1/3") },
-            new List<EvolucaoCarteiraDto> { new EvolucaoCarteiraDto(1, DateOnly.FromDateTime(DateTime.Now), 1000, 1000, 100) });
+            new ResumoCarteiraDto { ValorTotalInvestido = 100, ValorAtualCarteira = 80, PlTotal = 8.4m, RentabilidadePercentual = 0.90m },
+            new List<HistoricoAporteDto> { new HistoricoAporteDto { Valor = 1000, Data = DateOnly.FromDateTime(DateTime.Now), Parcela = "1/3" } },
+            new List<EvolucaoCarteiraDto> { new EvolucaoCarteiraDto { Data = DateOnly.FromDateTime(DateTime.Now), Rentabilidade = 1000, ValorCarteira = 1000, ValorInvestido = 100 } });
 
         _mediator.Send(request).Returns(Result.Success(response));
 

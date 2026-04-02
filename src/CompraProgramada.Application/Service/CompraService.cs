@@ -1,11 +1,11 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Application.Mapper;
-using CompraProgramada.Application.Response;
+using CompraProgramada.Shared.Response;
 using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Exceptions;
+using CompraProgramada.Shared.Exceptions;
 using Microsoft.Extensions.Logging;
 using OperationResult;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Service;
 

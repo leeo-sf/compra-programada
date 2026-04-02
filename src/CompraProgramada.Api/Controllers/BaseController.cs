@@ -1,10 +1,12 @@
-﻿using CompraProgramada.Domain.Exceptions.Base;
+﻿using CompraProgramada.Shared.Exceptions.Base;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OperationResult;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CompraProgramada.Api.Controllers;
 
+[ExcludeFromCodeCoverage]
 [ApiController]
 public abstract class BaseController(IMediator mediator) : ControllerBase
 {

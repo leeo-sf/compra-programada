@@ -10,15 +10,6 @@ public class ComposicaoCesta
 
     private ComposicaoCesta() { }
 
-    internal ComposicaoCesta(int id, int cestaId, string ticker, decimal percentual, CestaRecomendada cesta)
-    {
-        Id = id;
-        CestaId = cestaId;
-        Ticker = ticker;
-        Percentual = percentual;
-        Cesta = cesta;
-    }
-
     private ComposicaoCesta(int id, int cestaId, string ticker, decimal percentual)
     {
         Id = id;

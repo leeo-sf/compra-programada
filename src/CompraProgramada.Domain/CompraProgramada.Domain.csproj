@@ -9,6 +9,11 @@
   <ItemGroup>
 	<InternalsVisibleTo Include="CompraProgramada.Application.Tests" />
 	<InternalsVisibleTo Include="CompraProgramada.Data.Tests" />
+	  <InternalsVisibleTo Include="CompraProgramada.Domain.Tests" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\CompraProgramada.Shared\CompraProgramada.Shared.csproj" />
   </ItemGroup>
 
 </Project>

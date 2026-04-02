@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Shared.Dto;
 using FluentValidation;
 
 namespace CompraProgramada.Application.Validator;

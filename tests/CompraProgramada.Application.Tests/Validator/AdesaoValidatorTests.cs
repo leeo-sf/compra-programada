@@ -1,5 +1,5 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Request;
+﻿using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Request;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Application.Validator;
 using FluentValidation.TestHelper;

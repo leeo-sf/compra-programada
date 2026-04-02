@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;

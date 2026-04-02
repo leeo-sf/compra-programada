@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
@@ -12,15 +12,15 @@ public class DistribuicaoServiceTests
 {
     private readonly ILogger<DistribuicaoService> _logger;
     private readonly ICustodiaMasterService _custodiaMasterService;
-    private readonly IContaGraficaService _contaGraficaService;
+    private readonly IClienteService _clienteService;
     private readonly DistribuicaoService _sut;
 
     public DistribuicaoServiceTests()
     {
         _logger = Substitute.For<ILogger<DistribuicaoService>>();
         _custodiaMasterService = Substitute.For<ICustodiaMasterService>();
-        _contaGraficaService = Substitute.For<IContaGraficaService>();
-        _sut = new(_logger, _custodiaMasterService, _contaGraficaService);
+        _clienteService = Substitute.For<IClienteService>();
+        _sut = new(_logger, _custodiaMasterService, _clienteService);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class DistribuicaoServiceTests
         _custodiaMasterService.ObterResiduosNaoDistribuidos(Arg.Any<CancellationToken>())
             .Returns(new List<CustodiaMaster>());
 
-        _contaGraficaService.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
+        _clienteService.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
             .Returns(new List<ContaGrafica>());
 
         // Act
@@ -75,7 +75,7 @@ public class DistribuicaoServiceTests
         _custodiaMasterService.ObterResiduosNaoDistribuidos(Arg.Any<CancellationToken>())
             .Returns(new List<CustodiaMaster>());
 
-        _contaGraficaService.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
+        _clienteService.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
             .Returns(new Exception(""));
 
         // Act

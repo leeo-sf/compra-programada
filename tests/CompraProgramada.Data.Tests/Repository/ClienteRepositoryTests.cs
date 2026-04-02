@@ -15,7 +15,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task CriarAsync_Deve_Persistir_Cliente()
     {
         // Arrange
-        var cliente = Cliente.Criar("Name", "11111111111", "email@teste.com", 150);
+        var cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150));
 
         // Act
         var result = await _repo.CriarAsync(cliente, CancellationToken.None);
@@ -29,12 +29,12 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task CriarAsync_Deve_Fahar_Quando_CpfExistir()
     {
         // Arrange
-        var cliente = Cliente.Criar("Name", "11111111111", "email@teste.com", 150);
+        var cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150));
 
         _context.Cliente.Add(cliente);
         await _context.SaveChangesAsync();
 
-        var clienteB = Cliente.Criar("Name B", "11111111111", "email_b@teste.com", 500);
+        var clienteB = Cliente.Criar(new("Name B", "11111111111", "email_b@teste.com", 500));
 
         // Act
         var act = () => _repo.CriarAsync(clienteB, CancellationToken.None);
@@ -50,7 +50,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task ExisteAsync_Deve_Retornar_True_Quando_CpfExistir(string cpf, bool deveExistir)
     {
         // Arrange
-        var cliente = Cliente.Criar("Name", "11111111111", "email@teste.com", 150);
+        var cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150));
 
         _context.Cliente.Add(cliente);
         await _context.SaveChangesAsync();
@@ -67,12 +67,12 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task AtualizarClienteAsync_Deve_Atualizar_Cliente()
     {
         // Arrange
-        var cliente = Cliente.Criar("Name", "11111111111", "email@teste.com", 150);
+        var cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150));
 
         _context.Cliente.Add(cliente);
         await _context.SaveChangesAsync();
 
-        cliente.AtualizarValorMensal(200);
+        cliente.AtualizarValorMensal(new(0, 200));
 
         // Act
         var result = await _repo.AtualizarClienteAsync(cliente, CancellationToken.None);
@@ -149,5 +149,39 @@ public class ClienteRepositoryTests : SqliteTestBase
         // Assert
         _context.Cliente.Should().HaveCount(0);
         result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task CriarAsync_Deve_Persistir_ContaGrafica()
+    {
+        // Arrange
+        var cliente = new Cliente(1, "Name", "11111111111", "email@mail.com", 100, 100, true, DateTime.MinValue);
+        var conta = new ContaGrafica(cliente);
+
+        // Act
+        var result = await _repo.CriarContaAsync(conta, CancellationToken.None);
+
+        // Assert
+        _context.ContaGrafica.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task AtualizarContasAsync_Deve_Atualizar_ContasGrafica()
+    {
+        // Arrange
+        var cliente = new Cliente(1, "Name", "11111111111", "email@mail.com", 100, 100, true, DateTime.MinValue);
+        var conta = new ContaGrafica(cliente);
+
+        _context.ContaGrafica.Add(conta);
+        await _context.SaveChangesAsync();
+
+        conta.AdicionarDistribuicao(Distribuicao.CriarDistribuicao(10, conta, OrdemCompra.GerarOrdemCompra("PETR4", 100, 42)));
+
+        // Act
+        var result = await _repo.AtualizarContasAsync([conta], CancellationToken.None);
+
+        // Assert
+        _context.ContaGrafica.Should().HaveCount(1);
+        result.Should().HaveCount(1);
     }
 }

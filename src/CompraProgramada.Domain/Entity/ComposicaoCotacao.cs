@@ -10,15 +10,6 @@ public class ComposicaoCotacao
 
     private ComposicaoCotacao() { }
 
-    internal ComposicaoCotacao(int id, int cotacaoId, string ticker, decimal precoFechamento, Cotacao cotacao)
-    {
-        Id = id;
-        CotacaoId = cotacaoId;
-        Ticker = ticker;
-        PrecoFechamento = precoFechamento;
-        Cotacao = cotacao;
-    }
-
     internal ComposicaoCotacao(int id, int cotacaoId, string ticker, decimal precoFechamento)
     {
         Id = id;

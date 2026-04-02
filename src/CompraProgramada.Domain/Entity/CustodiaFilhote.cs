@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Domain.Exceptions;
+﻿using CompraProgramada.Shared.Exceptions;
 
 namespace CompraProgramada.Domain.Entity;
 
@@ -12,16 +12,6 @@ public class CustodiaFilhote
     public ContaGrafica ContaGrafica { get; init; } = default!;
 
     private CustodiaFilhote() { }
-
-    internal CustodiaFilhote(int id, int contaGraficaId, string ticker, decimal precoMedio, int quantidade, ContaGrafica contaGrafica)
-    {
-        Id = id;
-        ContaGraficaId = contaGraficaId;
-        Ticker = ticker;
-        PrecoMedio = precoMedio;
-        Quantidade = quantidade;
-        ContaGrafica = contaGrafica;
-    }
 
     internal CustodiaFilhote(int id, int contaGraficaId, string ticker, decimal precoMedio, int quantidade)
     {
@@ -51,14 +41,14 @@ public class CustodiaFilhote
     }
 
     /// <summary>
-    /// Calcula e atualiza o valor do preço médio
+    /// Calcula e atualiza preço médio ponderado de compra do ativo
     /// </summary>
     /// <param name="precoFechamentoAtivo">Valor do fechamento do ativo</param>
     /// <param name="novaQuantidadeDeAtivos">Nova quantidade de ativos que serão atribuídos a conta do cliente</param>
     /// <returns>Valor do preço médio</returns>
     public decimal CalcularPrecoMedio(decimal precoFechamentoAtivo, int novaQuantidadeDeAtivos)
     {
-        if (novaQuantidadeDeAtivos == 0)
+        if (novaQuantidadeDeAtivos < 1)
             return 0;
 
         var valorCompraAnterior = Quantidade * PrecoMedio;
@@ -71,5 +61,37 @@ public class CustodiaFilhote
 
         PrecoMedio = precoMedio;
         return precoMedio;
+    }
+
+    /// <summary>
+    /// Calcula o valor investido na carteira
+    /// </summary>
+    /// <returns>Valor investido</returns>
+    internal decimal CalcularValorInvestido()
+        => Quantidade * PrecoMedio;
+
+    /// <summary>
+    /// Calcula valor de PL (Lucro/Prejuízo) por ativo
+    /// </summary>
+    /// <param name="precoFechamento">Valor de fechamento do ativo</param>
+    /// <returns>Valor da PL</returns>
+    internal decimal CalcularPl(decimal precoFechamento)
+    {
+        if (Quantidade < 1)
+            throw new QuantidadeCustodiaException();
+
+        return (precoFechamento - PrecoMedio) * Quantidade;
+    }
+
+    /// <summary>
+    /// Calcula valor atual da carteira
+    /// </summary>
+    /// <param name="precoFechamento">Valor de fechamento do ativo</param>
+    /// <returns>Valor atual da carteira</returns>
+    internal decimal CalcularValorAtualCarteira(decimal precoFechamento)
+    {
+        var valorAtual = Quantidade * precoFechamento;
+
+        return Math.Round(valorAtual, 2);
     }
 }

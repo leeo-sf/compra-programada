@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using Bogus.Extensions.Brazil;
-using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Request;
+using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Request;
 using CompraProgramada.Domain.Entity;
 
 namespace CompraProgramada.Application.Tests.TestUtils;
@@ -25,7 +25,7 @@ public static class FakerRequest
         });
 
     public static Faker<Cliente> ClienteAtivo() => new Faker<Cliente>()
-        .CustomInstantiator(f => Cliente.Criar(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(100)));
+        .CustomInstantiator(f => Cliente.Criar(new(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, f.Finance.Amount(100))));
 
     public static Faker<AtualizarValorMensalRequest> AtualizarValorMensalRequest() => new Faker<AtualizarValorMensalRequest>()
         .CustomInstantiator(f => new AtualizarValorMensalRequest(
@@ -41,11 +41,11 @@ public static class FakerRequest
     public static List<ComposicaoCestaDto> ComposicaoCestaRecomendada()
         => new List<ComposicaoCestaDto>
         {
-            new("PETR4", 30),
-            new("VALE3", 25),
-            new("ITUB4", 20),
-            new("BBDC4", 15),
-            new("WEGE3", 10)
+            new ComposicaoCestaDto { Ticker = "PETR4", Percentual = 30 },
+            new ComposicaoCestaDto { Ticker = "VALE3", Percentual = 25 },
+            new ComposicaoCestaDto { Ticker = "ITUB4", Percentual = 20 },
+            new ComposicaoCestaDto { Ticker = "BBDC4", Percentual = 15 },
+            new ComposicaoCestaDto { Ticker = "WEGE3", Percentual = 10 }
         };
 
     public static List<OrdemCompra> OrdensCompraEmitidas()
@@ -85,13 +85,13 @@ public static class FakerRequest
         };
     }
 
-    public static List<AtivoDto> ResiduosNaoDistribuidos()
-        => new List<AtivoDto>
+    public static List<AtivoQuantidadeDto> ResiduosNaoDistribuidos()
+        => new List<AtivoQuantidadeDto>
         {
-            new AtivoDto("PETR4", 1),
-            new AtivoDto("VALE3", 0),
-            new AtivoDto("ITUB4", 1),
-            new AtivoDto("BBDC4", 0),
-            new AtivoDto("WEGE3", 1),
+            new AtivoQuantidadeDto { Ticker = "PETR4", Quantidade = 1 },
+            new AtivoQuantidadeDto { Ticker = "VALE3", Quantidade = 0 },
+            new AtivoQuantidadeDto { Ticker = "ITUB4", Quantidade = 1 },
+            new AtivoQuantidadeDto { Ticker = "BBDC4", Quantidade = 0 },
+            new AtivoQuantidadeDto { Ticker = "WEGE3", Quantidade = 1 },
         };
 }

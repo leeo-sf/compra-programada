@@ -1,11 +1,11 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Application.Mapper;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using OperationResult;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Handler;
 
@@ -69,6 +69,8 @@ public class AdministradorHandler
         if (!result.IsSuccess)
             return result.Exception;
 
+        // Obter fechamento atual para retornar
+
         var cesta = result.Value!;
 
         return _mapper.ToResponse(cesta);
@@ -90,12 +92,12 @@ public class AdministradorHandler
 
     private CriarCestaRecomendadaResponse MontarResponseCriarAlterarCesta(CestaRecomendadaDto cesta, bool atualizouCesta, CestaRecomendadaDto? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados)
         => new CriarCestaRecomendadaResponse(
-            cesta.Id,
+            cesta.CestaId,
             cesta.Nome,
             cesta.Ativa,
             cesta.DataCriacao,
-            cesta.Itens.Select(cc => new ComposicaoCestaDto(cc.Ticker, cc.Percentual)).ToList(),
-            cestaAnterior is null ? default : new CestaDesativadaDto(cestaAnterior!.Id, cestaAnterior.Nome, cestaAnterior.DataDesativacao!.Value),
+            cesta.Itens.Select(cc => new ComposicaoCestaDto { Ticker = cc.Ticker, Percentual = cc.Percentual }).ToList(),
+            cestaAnterior is null ? default : new CestaDesativadaDto { CestaId = cestaAnterior!.CestaId, Nome = cestaAnterior.Nome, DataDesativacao = cestaAnterior.DataDesativacao!.Value },
             ativosRemovidos is not null ? ativosRemovidos : default,
             ativosAdicionados is not null ? ativosAdicionados : default,
             !atualizouCesta ? false : default

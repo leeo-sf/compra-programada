@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Domain.Enum;
+﻿using CompraProgramada.Shared.Enum;
 
 namespace CompraProgramada.Domain.Entity;
 
@@ -12,16 +12,6 @@ public class OrdemCompraDetalhe
     public OrdemCompra OrdemCompra { get; protected set; } = default!;
 
     private OrdemCompraDetalhe() { }
-
-    internal OrdemCompraDetalhe(int id, OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId, OrdemCompra ordemCompra)
-    {
-        Id = id;
-        Ticker = ticker;
-        Tipo = tipo;
-        Quantidade = quantidade;
-        OrdemCompraId = ordemCompraId;
-        OrdemCompra = ordemCompra;
-    }
 
     internal OrdemCompraDetalhe(int id, OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId)
     {

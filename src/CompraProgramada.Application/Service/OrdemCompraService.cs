@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using Microsoft.Extensions.Logging;

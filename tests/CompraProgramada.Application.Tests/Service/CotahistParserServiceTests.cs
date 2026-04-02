@@ -1,10 +1,10 @@
 ﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+using CompraProgramada.Shared.Dto;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using FluentAssertions;
 using NSubstitute;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Tests.Service;
 

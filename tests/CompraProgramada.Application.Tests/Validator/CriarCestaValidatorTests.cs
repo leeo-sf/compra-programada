@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Application.Validator;
 using FluentValidation.TestHelper;
@@ -48,7 +48,7 @@ public class CriarCestaValidatorTests
     {
         var request = FakerRequest.CriarCestaRecomendadaRequest();
 
-        var result = _validator.TestValidate(request with { Itens = new List<ComposicaoCestaDto> { new("", 30) } });
+        var result = _validator.TestValidate(request with { Itens = new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "", Percentual = 30 } } });
 
         result.ShouldHaveValidationErrorFor("Itens[0].Ticker")
             .WithErrorMessage("Nome do ativo deve ser preenchido.");
@@ -62,7 +62,7 @@ public class CriarCestaValidatorTests
     {
         var request = FakerRequest.CriarCestaRecomendadaRequest();
 
-        var result = _validator.TestValidate(request with { Itens = new List<ComposicaoCestaDto> { new("TEST4", percentual) } });
+        var result = _validator.TestValidate(request with { Itens = new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "TEST4", Percentual = percentual } } });
 
         result.ShouldHaveValidationErrorFor("Itens[0].Percentual")
             .WithErrorMessage("O percentual do ativo deve ser superior há zero.");

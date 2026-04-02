@@ -1,9 +1,9 @@
-﻿using CompraProgramada.Domain.Exceptions;
-using CompraProgramada.Domain.Exceptions.Base;
+﻿using CompraProgramada.Shared.Exceptions;
 using CompraProgramada.Infra.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Net;
+using CompraProgramada.Shared.Exceptions.Base;
 
 namespace CompraProgramada.Infra.Tests.ExceptionHandler;
 
@@ -58,6 +58,7 @@ public class DomainExceptionHandlerTests
             new QuantidadeItensCestaException(2),
             new QuantidadeNegativaException(),
             new TickerNaoPreenchidoException(),
-            new ValorMensalException(10)
+            new ValorMensalException(10),
+            new QuantidadeCustodiaException()
         };
 }
