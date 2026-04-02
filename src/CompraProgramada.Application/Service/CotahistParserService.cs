@@ -1,6 +1,6 @@
 ﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+using CompraProgramada.Shared.Dto;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Service;
 

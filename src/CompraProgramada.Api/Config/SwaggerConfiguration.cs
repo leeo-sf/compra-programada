@@ -1,7 +1,9 @@
 ﻿using Microsoft.OpenApi;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CompraProgramada.Api.Config;
 
+[ExcludeFromCodeCoverage]
 internal static class SwaggerConfiguration
 {
     public static void AddSwaggerConfiguration(this IServiceCollection services)

@@ -1,5 +1,0 @@
-﻿namespace CompraProgramada.Application.Dto;
-
-public record AtivoDto(
-    string Ticker,
-    int Quantidade);

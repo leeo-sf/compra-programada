@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Domain.Exceptions;
+﻿using CompraProgramada.Shared.Exceptions;
 
 namespace CompraProgramada.Domain.Entity;
 

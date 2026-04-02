@@ -1,6 +1,6 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
+﻿using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

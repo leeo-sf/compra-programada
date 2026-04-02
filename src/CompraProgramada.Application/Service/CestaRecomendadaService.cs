@@ -1,11 +1,11 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Application.Mapper;
-using CompraProgramada.Application.Request;
+using CompraProgramada.Shared.Request;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using Microsoft.Extensions.Logging;
 using OperationResult;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Service;
 
@@ -36,10 +36,12 @@ public class CestaRecomendadaService : ICestaRecomendadaService
 
         _logger.LogInformation("Cesta registrada na base de dados {Cesta}", cestaCriada);
 
-        return new CriarCestaRecomendadaDto(
-            cestaAnterior is not null ? true : false,
-            _mapper.ToResponse(cestaCriada),
-            cestaAnterior is not null ? _mapper.ToResponse(cestaAnterior) : null);
+        return new CriarCestaRecomendadaDto
+        {
+            CestaAtualizada = cestaAnterior is not null ? true : false,
+            CestaAtual = _mapper.ToResponse(cestaCriada),
+            CestaAnterior = cestaAnterior is not null ? _mapper.ToResponse(cestaAnterior) : null
+        };
     }
 
     public async Task<Result<CestaRecomendada?>> ObterCestaAtivaAsync(CancellationToken cancellationToken)
@@ -69,13 +71,13 @@ public class CestaRecomendadaService : ICestaRecomendadaService
             return cestaVigente.Exception;
 
         var valorPorAtivoConsolidado = cestaVigente.Value.ComposicaoCesta
-            .Select(ativo => new ValorAtivoConsolidadoDto(ativo.Ticker, totalConsolidado * (ativo.Percentual / 100)))
+            .Select(ativo => new ValorAtivoConsolidadoDto { Ticker = ativo.Ticker, ValorDeCompraAtivo = totalConsolidado * (ativo.Percentual / 100) })
             .ToList();
 
         return valorPorAtivoConsolidado;
     }
 
-    public (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<ComposicaoCestaRecomendadaDto> composicaoAnterior, List<ComposicaoCestaRecomendadaDto> composicaoAtual)
+    public (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<ComposicaoCestaDto> composicaoAnterior, List<ComposicaoCestaDto> composicaoAtual)
     {
         var tickersAnteriores = composicaoAnterior.Select(c => c.Ticker);
         var tickersAtual = composicaoAtual.Select(c => c.Ticker);

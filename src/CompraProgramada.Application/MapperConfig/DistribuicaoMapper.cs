@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Domain.Entity;
 using Riok.Mapperly.Abstractions;
 
@@ -38,9 +38,9 @@ public partial class DistribuicaoMapper
     public CustodiaFilhoteDto ToResponse(CustodiaFilhote custodia) => _custodiaFilhoteMapper.ToResponse(custodia);
     public List<CustodiaFilhoteDto> ToResponse(List<CustodiaFilhote> custodias) => _custodiaFilhoteMapper.ToResponse(custodias);
 
-    private List<AtivoDto> MapAtivos(Distribuicao distribuicao)
-        => new List<AtivoDto>
+    private List<AtivoQuantidadeDto> MapAtivos(Distribuicao distribuicao)
+        => new List<AtivoQuantidadeDto>
         {
-            new(distribuicao.Ticker, distribuicao.QuantidadeAlocada)
+            new AtivoQuantidadeDto { Ticker = distribuicao.Ticker, Quantidade = distribuicao.QuantidadeAlocada }
         };
 }

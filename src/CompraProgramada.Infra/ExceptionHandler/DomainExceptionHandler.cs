@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Domain.Exceptions.Base;
+﻿using CompraProgramada.Shared.Exceptions.Base;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;

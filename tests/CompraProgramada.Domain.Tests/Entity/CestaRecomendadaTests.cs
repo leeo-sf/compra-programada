@@ -1,5 +1,5 @@
 ﻿using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Exceptions;
+using CompraProgramada.Shared.Exceptions;
 using CompraProgramada.Domain.Tests.TestsUtils;
 using FluentAssertions;
 using System.Net;

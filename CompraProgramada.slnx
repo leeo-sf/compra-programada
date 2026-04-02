@@ -9,6 +9,7 @@
     <Project Path="src/CompraProgramada.Data/CompraProgramada.Data.csproj" />
     <Project Path="src/CompraProgramada.Domain/CompraProgramada.Domain.csproj" />
     <Project Path="src/CompraProgramada.Infra/CompraProgramada.Infra.csproj" />
+    <Project Path="src/CompraProgramada.Shared/CompraProgramada.Shared.csproj" />
     <Project Path="src/CompraProgramada.Worker/CompraProgramada.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">

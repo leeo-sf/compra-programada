@@ -1,5 +1,5 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Response;
+﻿using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Response;
 using CompraProgramada.Domain.Entity;
 using Riok.Mapperly.Abstractions;
 

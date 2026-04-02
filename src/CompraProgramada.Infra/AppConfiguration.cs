@@ -1,5 +1,5 @@
 ﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Interface;
+using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Application.Mapper;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Data;

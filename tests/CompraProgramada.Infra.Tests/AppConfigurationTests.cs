@@ -1,10 +1,8 @@
 ﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
-using CompraProgramada.Application.Request;
+using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Request;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Data;
-using CompraProgramada.Domain.Exceptions.Base;
 using CompraProgramada.Domain.Interface;
 using Confluent.Kafka;
 using FluentValidation;
@@ -14,6 +12,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using CompraProgramada.Shared.Exceptions.Base;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Infra.Tests;
 

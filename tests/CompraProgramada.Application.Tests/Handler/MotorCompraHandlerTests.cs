@@ -1,12 +1,12 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Application.Handler;
-using CompraProgramada.Application.Interface;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using OperationResult;
+using CompraProgramada.Application.Contract.Service;
 
 namespace CompraProgramada.Application.Tests.Handler;
 
@@ -30,14 +30,14 @@ public class MotorCompraHandlerTests
         var request = new ExecutarCompraRequest(DateTime.Now, dataReferencia);
 
         var response = new ExecutarCompraResponse(DateTime.Now, 1, 1,
-            new List<OrdemCompraDto> { new(1, "", 1, new List<OrdemCompraDetalheDto> { new("", "", 1) }, 1) },
+            new List<OrdemCompraDto> { new OrdemCompraDto { Ticker = "", QuantidadeTotal = 1, Detalhes = new List<OrdemCompraDetalheDto> { new OrdemCompraDetalheDto { Ticker = "", Tipo = "", Quantidade = 1 } }, PrecoUnitario = 1 } },
             new List<DistribuicaoDto> (),
-            new List<AtivoDto> { new AtivoDto("", 1) },
+            new List<AtivoQuantidadeDto> { new AtivoQuantidadeDto { Ticker = "", Quantidade = 1 } },
             1, "");
         var result = Result.Success(response);
 
         _compraServiceMock
-            .Setup(s => s.ExecutarCompraAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.ExecutarCompraAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))!
             .ReturnsAsync(result);
 
         var resultado = await _handler.Handle(request, CancellationToken.None);
@@ -62,7 +62,7 @@ public class MotorCompraHandlerTests
         var result = Result.Error<ExecutarCompraResponse>(exception);
 
         _compraServiceMock
-            .Setup(s => s.ExecutarCompraAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.ExecutarCompraAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))!
             .ReturnsAsync(result);
 
         var resultado = await _handler.Handle(request, CancellationToken.None);

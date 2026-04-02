@@ -1,8 +1,8 @@
 using CompraProgramada.Api.Controllers;
-using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
-using CompraProgramada.Domain.Exceptions.Base;
+using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Exceptions.Base;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -31,7 +31,7 @@ public class MotorControllerTests
             100m,
             new List<OrdemCompraDto>(),
             new List<DistribuicaoDto>(),
-            new List<AtivoDto>(),
+            new List<AtivoQuantidadeDto>(),
             0,
             "ok"
         );

@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Request;
+﻿using CompraProgramada.Shared.Request;
 using FluentValidation;
 
 namespace CompraProgramada.Application.Validator;

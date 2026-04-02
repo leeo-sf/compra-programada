@@ -1,6 +1,5 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Application.Service;
-using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
 using FluentAssertions;
@@ -67,5 +66,29 @@ public class HistoricoExecucaoMotorServiceTests
 
         // Assert
         result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SalvarExecucao_Deve_Salvar_Quando_NaoOcorrerFalhas()
+    {
+        // Arrange
+        var dataExecucao = DateTime.Now;
+        var dataReferencia = DateTime.Now;
+
+        var historico = HistoricoExecucaoMotor.CriarRegistroHistorico(dataReferencia, dataExecucao);
+
+        _historicoExecucaoRepository.ObtemExecucaoRealizadaAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(historico);
+
+        // Act
+        await _sut.SalvarExecucaoAsync(dataReferencia, dataExecucao, CancellationToken.None);
+
+        // Assert
+        await _historicoExecucaoRepository.Received(1).CriarHistoricoExecucaoAsync(
+            Arg.Is<HistoricoExecucaoMotor>(h =>
+                h.DataReferencia == dataReferencia &&
+                h.DataExecucao == dataExecucao
+            ),
+            CancellationToken.None);
     }
 }

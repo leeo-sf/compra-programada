@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
@@ -90,7 +90,7 @@ public class CustodiaMasterServiceTests
 
     [Theory]
     [MemberData(nameof(CapturarResiduos))]
-    public async Task CustodiaMaster_Deve_CapturarResiduos_Quando_AtivosNaoDistribuidos(List<CustodiaMaster> residuosAtuais, List<Distribuicao> distribuicoes, List<OrdemCompra> ordensCompra, List<AtivoDto> residuos)
+    public async Task CustodiaMaster_Deve_CapturarResiduos_Quando_AtivosNaoDistribuidos(List<CustodiaMaster> residuosAtuais, List<Distribuicao> distribuicoes, List<OrdemCompra> ordensCompra, List<AtivoQuantidadeDto> residuos)
     {
         // Arrange
         _custodiaMasterRepository.ObterResiduosAsync(Arg.Any<CancellationToken>())
@@ -102,17 +102,17 @@ public class CustodiaMasterServiceTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Exception.Should().BeNull();
-        result.Value.Should().BeEqualTo(residuos);
+        result.Value.Should().BeEquivalentTo(residuos);
     }
 
-    public static TheoryData<List<CustodiaMaster>, List<Distribuicao>, List<OrdemCompra>, List<AtivoDto>> CapturarResiduos()
+    public static TheoryData<List<CustodiaMaster>, List<Distribuicao>, List<OrdemCompra>, List<AtivoQuantidadeDto>> CapturarResiduos()
         => new()
         {
             {
                 new() { },
                 FakerRequest.Distribuicoes(),
                 FakerRequest.OrdensCompraEmitidas(),
-                new() { new("PETR4", 1), new("VALE3", 0), new("ITUB4", 1), new("BBDC4", 0), new("WEGE3", 1) }
+                new() { new AtivoQuantidadeDto { Ticker = "PETR4", Quantidade = 1 }, new AtivoQuantidadeDto { Ticker = "VALE3", Quantidade = 0 }, new AtivoQuantidadeDto { Ticker = "ITUB4", Quantidade = 1 }, new AtivoQuantidadeDto { Ticker = "BBDC4", Quantidade = 0 }, new AtivoQuantidadeDto { Ticker = "WEGE3", Quantidade = 1 } }
             },
             {
                 new() { new CustodiaMaster(0, 0, "PETR4", 6, new(0, new())), new CustodiaMaster(0, 0, "VALE3", 4, new(0, new())), new CustodiaMaster(0, 0, "ITUB4", 1, new(0, new())), new CustodiaMaster(0, 0, "BBDC4", 8, new(0, new())) },
@@ -138,7 +138,7 @@ public class CustodiaMasterServiceTests
                     OrdemCompra.GerarOrdemCompra("ITUB4", 23, 30),
                     OrdemCompra.GerarOrdemCompra("BBDC4", 35, 15)
                 },
-                new() { new("PETR4", 3), new("VALE3", 5), new("ITUB4", 8), new("BBDC4", 11) }
+                new() { new AtivoQuantidadeDto { Ticker = "PETR4", Quantidade = 3 }, new AtivoQuantidadeDto { Ticker = "VALE3", Quantidade = 5 }, new AtivoQuantidadeDto { Ticker = "ITUB4", Quantidade = 8 }, new AtivoQuantidadeDto { Ticker = "BBDC4", Quantidade = 11 } }
             }
         };
 }

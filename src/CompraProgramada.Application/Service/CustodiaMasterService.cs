@@ -1,7 +1,7 @@
-﻿using CompraProgramada.Application.Dto;
-using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
+using CompraProgramada.Shared.Dto;
 using OperationResult;
 
 namespace CompraProgramada.Application.Service;
@@ -29,7 +29,7 @@ public class CustodiaMasterService : ICustodiaMasterService
         return Result.Success();
     }
 
-    public async Task<Result<List<AtivoDto>>> CapturarResiduosNaoDistribuidosAsync(List<Distribuicao> distribuicoes, List<OrdemCompra> ordensCompra, CancellationToken cancellationToken)
+    public async Task<Result<List<AtivoQuantidadeDto>>> CapturarResiduosNaoDistribuidosAsync(List<Distribuicao> distribuicoes, List<OrdemCompra> ordensCompra, CancellationToken cancellationToken)
     {
         var custodias = await _custodiaRepository.ObterResiduosAsync(cancellationToken);
 
@@ -52,6 +52,6 @@ public class CustodiaMasterService : ICustodiaMasterService
 
         await AtualizarResiduosAsync(custodias!, cancellationToken);
 
-        return custodias!.Select(x => new AtivoDto(x.Ticker, x.QuantidadeResiduo)).ToList();
+        return custodias!.Select(x => new AtivoQuantidadeDto { Ticker = x.Ticker, Quantidade = x.QuantidadeResiduo }).ToList();
     }
 }

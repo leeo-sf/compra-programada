@@ -1,5 +1,5 @@
 ﻿using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Exceptions;
+using CompraProgramada.Shared.Exceptions;
 using FluentAssertions;
 using System.Net;
 
@@ -10,7 +10,7 @@ public class DistribuicaoTests
     [Fact]
     public async Task CriarDistribuicao_DeveRetornarDistribuicaoComSucesso_Quando_DadosValidosInformados()
     {
-        var cliente = Cliente.Criar("Name", "11111111111", "email@test.com", 150);
+        var cliente = Cliente.Criar(new("Name", "11111111111", "email@test.com", 150));
         var conta = ContaGrafica.Gerar(cliente);
         var ordemCompra = OrdemCompra.GerarOrdemCompra("PETR4", 100, 47.98m);
 
@@ -27,7 +27,7 @@ public class DistribuicaoTests
     [Fact]
     public async Task CriarDistribuicao_DeveRetornarTickerNaoPreenchidoException_Quando_EnviarTickerVazio()
     {
-        var cliente = Cliente.Criar("Name", "11111111111", "email@test.com", 150);
+        var cliente = Cliente.Criar(new("Name", "11111111111", "email@test.com", 150));
         var conta = ContaGrafica.Gerar(cliente);
         var ordemCompra = OrdemCompra.GerarOrdemCompra("", 100, 42);
         ;
@@ -42,7 +42,7 @@ public class DistribuicaoTests
     [Fact]
     public async Task CriarDistribuicao_DeveRetornarQuantidadeNegativaException_Quando_EnviarQuantidadeNegativa()
     {
-        var cliente = Cliente.Criar("Name", "11111111111", "email@test.com", 150);
+        var cliente = Cliente.Criar(new("Name", "11111111111", "email@test.com", 150));
         var conta = ContaGrafica.Gerar(cliente);
         var ordemCompra = OrdemCompra.GerarOrdemCompra("PETR4", 100, 42);
 

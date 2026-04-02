@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Dto;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Domain.Entity;
 using Riok.Mapperly.Abstractions;
 

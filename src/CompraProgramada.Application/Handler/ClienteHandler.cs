@@ -1,7 +1,7 @@
-﻿using CompraProgramada.Application.Interface;
+﻿using CompraProgramada.Application.Contract.Service;
 using CompraProgramada.Application.Mapper;
-using CompraProgramada.Application.Request;
-using CompraProgramada.Application.Response;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using OperationResult;

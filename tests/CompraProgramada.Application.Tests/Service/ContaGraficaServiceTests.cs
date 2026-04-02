@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Application.Interface;
-using CompraProgramada.Application.Service;
+﻿using CompraProgramada.Application.Service;
 using CompraProgramada.Application.Tests.TestUtils;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Interface;
@@ -11,14 +10,12 @@ namespace CompraProgramada.Application.Tests.Service;
 public class ContaGraficaServiceTests
 {
     private readonly IContaGraficaRepository _contaGraficaRepository;
-    private readonly ICotacaoService _cotacaoService;
     private readonly ContaGraficaService _sut;
 
     public ContaGraficaServiceTests()
     {
         _contaGraficaRepository = Substitute.For<IContaGraficaRepository>();
-        _cotacaoService = Substitute.For<ICotacaoService>();
-        _sut = new(_contaGraficaRepository, _cotacaoService);
+        _sut = new(_contaGraficaRepository);
     }
 
     [Fact]

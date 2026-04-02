@@ -1,6 +1,6 @@
 ﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Interface;
-using CompraProgramada.Application.Response;
+using CompraProgramada.Application.Contract.Service;
+using CompraProgramada.Shared.Response;
 using CompraProgramada.Worker.Tests.TestUtils;
 using CompraProgramada.Worker.Worker;
 using Microsoft.Extensions.DependencyInjection;

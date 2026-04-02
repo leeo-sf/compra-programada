@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Domain.Enum;
+﻿using CompraProgramada.Shared.Enum;
 
 namespace CompraProgramada.Domain.Entity;
 

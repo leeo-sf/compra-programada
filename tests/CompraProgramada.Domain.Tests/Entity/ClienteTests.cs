@@ -1,5 +1,5 @@
 ﻿using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Exceptions;
+using CompraProgramada.Shared.Exceptions;
 using FluentAssertions;
 using System.Net;
 
@@ -15,7 +15,7 @@ public class ClienteTests
     public async Task Criar_DeveRetornarClienteComSucesso_Quando_DadosValidosInformados()
     {
         decimal valorMensal = 100;
-        var cliente = Cliente.Criar(NOME, CPF, EMAIL, valorMensal);
+        var cliente = Cliente.Criar(new(NOME, CPF, EMAIL, valorMensal));
 
         cliente.Id.Should().Be(0);
         cliente.Nome.Should().Be(NOME);
@@ -34,7 +34,7 @@ public class ClienteTests
     [InlineData(99.99)]
     public async Task Criar_DeveLancarValorMensalException_Quando_ValorMensal_MenorQueMinimoPermitido(decimal valorMensal)
     {
-        var act = () => Cliente.Criar(NOME, CPF, EMAIL, valorMensal);
+        var act = () => Cliente.Criar(new(NOME, CPF, EMAIL, valorMensal));
         var exception = act.Should().Throw<ValorMensalException>().Which;
 
         exception.Message.Should().Be("O valor mensal minimo e de R$ 100,00");
@@ -48,9 +48,9 @@ public class ClienteTests
     public async Task AtualizarValorMensal_DeveAtualizaComSucesso_Quando_ValorMaiorQuePermitido(decimal novoValor)
     {
         var valorMensalAnterior = 200;
-        var cliente = Cliente.Criar(NOME, CPF, EMAIL, valorMensalAnterior);
+        var cliente = Cliente.Criar(new(NOME, CPF, EMAIL, valorMensalAnterior));
 
-        cliente.AtualizarValorMensal(novoValor);
+        cliente.AtualizarValorMensal(new(0, novoValor));
 
         cliente.ValorMensal.Should().Be(novoValor);
         cliente.ValorAnterior.Should().Be(valorMensalAnterior);
@@ -64,9 +64,9 @@ public class ClienteTests
     [InlineData(99.99)]
     public async Task AtualizarValorMensal_DeveLancarValorMensalException_Quando_ValorMensal_MenorQueMinimoPermitido(decimal valorMensal)
     {
-        var cliente = Cliente.Criar(NOME, CPF, EMAIL, 100);
+        var cliente = Cliente.Criar(new(NOME, CPF, EMAIL, 100));
 
-        var act = () => cliente.AtualizarValorMensal(valorMensal);
+        var act = () => cliente.AtualizarValorMensal(new(0, valorMensal));
         var exception = act.Should().Throw<ValorMensalException>().Which;
 
         exception.Message.Should().Be("O valor mensal minimo e de R$ 100,00");
@@ -77,7 +77,7 @@ public class ClienteTests
     [Fact]
     public async Task Desativar_DeveDesativarComSucesso_Quando_ClienteAtivo()
     {
-        var cliente = Cliente.Criar(NOME, CPF, EMAIL, 100);
+        var cliente = Cliente.Criar(new(NOME, CPF, EMAIL, 100));
 
         cliente.Desativar();
 
