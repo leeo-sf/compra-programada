@@ -108,13 +108,10 @@ public class ClienteServiceTests
             .Returns(true);
 
         // Act
-        var result = await _sut.RealizarAdesaoAsync(command, CancellationToken.None);
+        Task result() => _sut.RealizarAdesaoAsync(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Exception.Should().BeOfType<CpfExistenteException>();
-        result.Exception.Message.Should().Be("CPF ja cadastrado no sistema.");
-        result.Value.Should().BeNull();
+        await Assert.ThrowsAsync<CpfExistenteException>(result);
     }
 
     [Fact]
@@ -191,13 +188,10 @@ public class ClienteServiceTests
             .Returns((Cliente)null!);
 
         // Act
-        var result = await _sut.SairDoProdutoAsync(cliente.Id, CancellationToken.None);
+        Task result() => _sut.SairDoProdutoAsync(cliente.Id, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Exception.Should().BeOfType<ClienteNaoEncontradoException>();
-        result.Exception.Message.Should().Be("Cliente nao encontrado.");
-        result.Value.Should().BeNull();
+        await Assert.ThrowsAsync<ClienteNaoEncontradoException>(result);
     }
 
     [Fact]
@@ -255,13 +249,10 @@ public class ClienteServiceTests
             .Returns((Cliente)null!);
 
         // Act
-        var result = await _sut.AtualizarValorMensalAsync(request, CancellationToken.None);
+        Task result() => _sut.AtualizarValorMensalAsync(request, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Exception.Should().BeOfType<ClienteNaoEncontradoException>();
-        result.Exception.Message.Should().Be("Cliente nao encontrado.");
-        result.Value.Should().BeNull();
+        await Assert.ThrowsAsync<ClienteNaoEncontradoException>(result);
     }
 
     [Fact]

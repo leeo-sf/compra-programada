@@ -30,7 +30,7 @@ public class ClienteService : IClienteService
     {
         var clienteExistente = await _clienteRepository.ExisteAsync(request.Cpf, cancellationToken);
         if (clienteExistente)
-            return new CpfExistenteException();
+            throw new CpfExistenteException();
 
         var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
         if (!cestaVigente.IsSuccess)
@@ -54,10 +54,7 @@ public class ClienteService : IClienteService
 
     public async Task<Result<Cliente>> SairDoProdutoAsync(int clienteId, CancellationToken cancellationToken)
     {
-        var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
-
-        if (cliente is null)
-            return new ClienteNaoEncontradoException();
+        var cliente = await IdentificarCliente(clienteId, cancellationToken);
 
         if (!cliente.Ativo)
             return new ApplicationException("Cliente já está com status inativo");
@@ -71,10 +68,7 @@ public class ClienteService : IClienteService
 
     public async Task<Result<Cliente>> AtualizarValorMensalAsync(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
     {
-        var cliente = await _clienteRepository.ObterClienteAsync(request.ClienteId, cancellationToken);
-
-        if (cliente is null)
-            return new ClienteNaoEncontradoException();
+        var cliente = await IdentificarCliente(request.ClienteId, cancellationToken);
 
         if (!cliente.Ativo)
             return new ApplicationException("Cliente com status inativo");
@@ -88,9 +82,7 @@ public class ClienteService : IClienteService
 
     public async Task<Result<CarteiraCustodiaResponse>> ConsultarCarteiraAsync(int clienteId, CancellationToken cancellationToken)
     {
-        var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
-        if (cliente is null)
-            throw new ClienteNaoEncontradoException();
+        var cliente = await IdentificarCliente(clienteId, cancellationToken);
 
         var cestaVigenteResult = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
         if (!cestaVigenteResult.IsSuccess)
@@ -109,9 +101,7 @@ public class ClienteService : IClienteService
 
     public async Task<Result<RentabilidadeResponse>> ConsultarRentabilidadeAsync(int clienteId, CancellationToken cancellationToken)
     {
-        var cliente = await _clienteRepository.ObterClienteAsync(clienteId, cancellationToken);
-        if (cliente is null)
-            throw new ClienteNaoEncontradoException();
+        var cliente = await IdentificarCliente(clienteId, cancellationToken);
 
         var cestaVigente = await _cestaRecomendadaService.ObterCestaAtivaAsync(cancellationToken);
         if (!cestaVigente.IsSuccess)
@@ -138,5 +128,15 @@ public class ClienteService : IClienteService
         var contasSalvas = await _clienteRepository.AtualizarContasAsync(contasAhSeremAtualizadas, cancellationToken);
 
         return contasSalvas;
+    }
+
+    private async Task<Cliente> IdentificarCliente(int id, CancellationToken cancellationToken)
+    {
+        var cliente = await _clienteRepository.ObterClienteAsync(id, cancellationToken);
+
+        if (cliente is not null)
+            return cliente;
+
+        throw new ClienteNaoEncontradoException();
     }
 }
