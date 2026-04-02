@@ -31,14 +31,11 @@ jobs:
 
       - name: Rodar testes com cobertura
         run: |
-          dotnet test CompraProgramada.slnx \
-            --no-build \
-            --configuration Release \
-            /p:CollectCoverage=true \
-            /p:CoverletOutput=./TestResults/coverage \
-            /p:CoverletOutputFormat=cobertura \
-            /p:ExcludeByFile="**/Migrations/*.cs"
-
+          dotnet test --no-build --configuration Release --verbosity normal \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=cobertura \
+          /p:CoverletOutput=../TestResults/ \
+          /p:Exclude="[*Migrations*]*"
 
       - name: Upload artefatos de cobertura
         uses: actions/upload-artifact@v4
@@ -67,13 +64,14 @@ jobs:
       - name: Gerar relatório
         run: |
           reportgenerator \
-            -reports:./TestResults/**/coverage.cobertura.xml \
+            -reports:"./TestResults/**/*.xml" \
             -targetdir:coverage-report \
             -reporttypes:TextSummary
 
       - name: Validar cobertura mínima
         run: |
           COVERAGE=$(grep -oP 'Line coverage:\s+\K[0-9.]+' coverage-report/Summary.txt)
+          
           echo "Cobertura: $COVERAGE%"
           echo "Cobertura mínima: $MIN_COVERAGE%"
 
