@@ -31,7 +31,7 @@ jobs:
 
       - name: Rodar testes com cobertura
         run: |
-          dotnet test CompraProgramada.sln \
+          dotnet test CompraProgramada.slnx \
             --no-build \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
