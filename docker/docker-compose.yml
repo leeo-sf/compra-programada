@@ -1,18 +1,19 @@
 version: '3.8'
 
+name: compra-programada-app
+
 services:
   apply-dotnet-migrations:
     image: mcr.microsoft.com/dotnet/sdk:10.0
     container_name: migration-runner
     working_dir: /app
     volumes:
-      - ./:/app
+      - ../:/app
     depends_on:
       compra-programada-db:
         condition: service_healthy
     environment:
       - Service__DataBase__ConnectionString=Server=compra-programada-db;Port=3306;Database=compraprogramada;User=root;Password=rootpassword;AllowPublicKeyRetrieval=True;SSLMode=None;
-      - DOTNET_CLI_HOME=/tmp/dotnet_home
     command:
       - /bin/sh
       - -c
@@ -20,19 +21,17 @@ services:
         echo 'Aguardando banco...'
         sleep 10
 
+        echo "Listando arquivos em /app"
+        ls -la
+
+        echo "Restaurando projeto..."
+        /usr/bin/dotnet restore
+
         echo 'Instalando dotnet-ef...'
-        /usr/bin/dotnet tool install --global dotnet-ef --version 10.*
-
-        export PATH="$PATH:/tmp/dotnet_home/.dotnet/tools"
-
-        echo 'Listando DbContexts'
-        dotnet ef dbcontext list --project CompraProgramada.Data/CompraProgramada.Data.csproj --startup-project CompraProgramada.Api/CompraProgramada.Api.csproj
-
-        echo 'Listando migrations...'
-        dotnet ef migrations list --project CompraProgramada.Data/CompraProgramada.Data.csproj --startup-project CompraProgramada.Api/CompraProgramada.Api.csproj
+        /usr/bin/dotnet tool install --tool-path /tools dotnet-ef --version 10.*
 
         echo 'Aplicando migrations...'
-        dotnet ef database update --project CompraProgramada.Data/CompraProgramada.Data.csproj --startup-project CompraProgramada.Api/CompraProgramada.Api.csproj"
+        /tools/dotnet-ef database update --project src/CompraProgramada.Data/CompraProgramada.Data.csproj --startup-project src/CompraProgramada.Api/CompraProgramada.Api.csproj
 
         echo 'Finalizado'
     networks:
@@ -40,7 +39,7 @@ services:
 
   compra-programada-db:
     image: mysql:8.4
-    container_name: compra-programada-db
+    container_name: database
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=rootpassword
@@ -59,7 +58,7 @@ services:
       - compraprogramada-network
 
   compra-programada-api:
-    container_name: compra-programada-api
+    container_name: api
     image: leoof/compra-programada-api:v1
     environment:
       - ApplicationConfig__MotorCompraConfig__DiasDeCompra__0=5
