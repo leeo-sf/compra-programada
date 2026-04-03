@@ -1,5 +1,6 @@
 using CompraProgramada.Api.Config;
 using CompraProgramada.Infra;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,8 @@ builder.Services.ConfigurarServicosApi(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseHttpMetrics();
+
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
@@ -18,5 +21,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
+
+app.MapMetrics();
 
 app.Run();
