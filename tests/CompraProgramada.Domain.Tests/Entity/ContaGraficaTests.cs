@@ -246,7 +246,7 @@ public class ContaGraficaTests
                 },
                 new List<EvolucaoCarteiraDto>
                 {
-                    new EvolucaoCarteiraDto { Data = DateOnly.FromDateTime(new DateTime(2026, 03, 05)), Rentabilidade = -100, ValorCarteira = 0, ValorInvestido = 5000 }
+                    new EvolucaoCarteiraDto { Data = DateOnly.FromDateTime(new DateTime(2026, 03, 05)), Rentabilidade = 0, ValorCarteira = 0, ValorInvestido = 5000 }
                 }
             },
             {

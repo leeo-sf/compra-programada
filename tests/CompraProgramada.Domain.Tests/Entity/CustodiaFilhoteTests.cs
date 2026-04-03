@@ -91,9 +91,9 @@ public class CustodiaFilhoteTests
     }
 
     [Fact]
-    public async Task CalcularPL_DeveRetornarQuantidadeCustodiaException_Quando_QuantidadeInferior_A_1()
+    public async Task CalcularPL_DeveRetornarQuantidadeCustodiaException_Quando_QuantidadeInferior_A_Zero()
     {
-        var custodia = CustodiaFilhote.GerarCustodia("PETR4");
+        var custodia = new CustodiaFilhote(1, 1, "PETR4", 10, -1);
 
         var act = () => custodia.CalcularPl(35);
         var exception = act.Should().Throw<QuantidadeCustodiaException>().Which;
