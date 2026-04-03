@@ -48,7 +48,7 @@ public static class AppConfiguration
     {
         var connectionString = configuration.GetSection("Service:DataBase:ConnectionString").Get<string>();
 
-        serverVersion ??= ServerVersion.AutoDetect(connectionString);
+        serverVersion ??= new MySqlServerVersion(new Version(8, 4, 0));
 
         services.AddDbContextPool<AppDbContext>(options =>
             options.UseMySql(connectionString,

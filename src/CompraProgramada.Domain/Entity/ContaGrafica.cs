@@ -13,7 +13,7 @@ public class ContaGrafica : BaseConta
     public List<HistoricoCompra> HistoricoCompra { get; init; } = new List<HistoricoCompra>();
     private const int NUMERO_PARCELA_MAXIMO_COMPRA = 3;
 
-    private ContaGrafica(): base() { }
+    private ContaGrafica() : base() { }
 
     internal ContaGrafica(int id, string numeroConta, DateTime dataCriacao, Cliente cliente, List<Distribuicao> distribuicoes, List<CustodiaFilhote> custodiaFilhotes, List<HistoricoCompra> historicoCompras)
         : base(id, numeroConta, dataCriacao)
@@ -204,6 +204,9 @@ public class ContaGrafica : BaseConta
     /// <returns>Valor da rentabilidade</returns>
     private decimal CalcularRentabilidade(decimal valorAtualTotalCarteira, decimal valorTotalInvestido)
     {
+        if (valorAtualTotalCarteira < 1 || valorTotalInvestido < 1)
+            return 0;
+
         var rentabilidade = ((valorAtualTotalCarteira / valorTotalInvestido) - 1) * 100;
 
         return Math.Round(rentabilidade, 2);

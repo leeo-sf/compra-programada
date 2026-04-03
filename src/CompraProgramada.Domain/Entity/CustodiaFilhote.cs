@@ -77,7 +77,7 @@ public class CustodiaFilhote
     /// <returns>Valor da PL</returns>
     internal decimal CalcularPl(decimal precoFechamento)
     {
-        if (Quantidade < 1)
+        if (Quantidade < 0)
             throw new QuantidadeCustodiaException();
 
         return (precoFechamento - PrecoMedio) * Quantidade;

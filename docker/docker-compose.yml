@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  apply-dotnet-migrations:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    container_name: migration-runner
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      compra-programada-db:
+        condition: service_healthy
+    environment:
+      - Service__DataBase__ConnectionString=Server=compra-programada-db;Port=3306;Database=compraprogramada;User=root;Password=rootpassword;AllowPublicKeyRetrieval=True;SSLMode=None;
+      - DOTNET_CLI_HOME=/tmp/dotnet_home
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo 'Aguardando banco...'
+        sleep 10
+
+        echo 'Instalando dotnet-ef...'
+        /usr/bin/dotnet tool install --global dotnet-ef --version 10.*
+
+        export PATH="$PATH:/tmp/dotnet_home/.dotnet/tools"
+
+        echo 'Listando DbContexts'
+        dotnet ef dbcontext list --project CompraProgramada.Data/CompraProgramada.Data.csproj --startup-project CompraProgramada.Api/CompraProgramada.Api.csproj
+
+        echo 'Listando migrations...'
+        dotnet ef migrations list --project CompraProgramada.Data/CompraProgramada.Data.csproj --startup-project CompraProgramada.Api/CompraProgramada.Api.csproj
+
+        echo 'Aplicando migrations...'
+        dotnet ef database update --project CompraProgramada.Data/CompraProgramada.Data.csproj --startup-project CompraProgramada.Api/CompraProgramada.Api.csproj"
+
+        echo 'Finalizado'
+    networks:
+      - compraprogramada-network
+
+  compra-programada-db:
+    image: mysql:8.4
+    container_name: compra-programada-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=compraprogramada
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWOR"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - compraprogramada-network
+
+  compra-programada-api:
+    container_name: compra-programada-api
+    image: leoof/compra-programada-api:v1
+    environment:
+      - ApplicationConfig__MotorCompraConfig__DiasDeCompra__0=5
+      - ApplicationConfig__MotorCompraConfig__DiasDeCompra__1=15
+      - ApplicationConfig__MotorCompraConfig__DiasDeCompra__2=25
+      - ApplicationConfig__MotorCompraConfig__TempoEmHoraAhCadaExecucao=10
+      - ApplicationConfig__MotorCompraConfig__NomePastaArquivosB3=cotacoes
+      - Service__DataBase__ConnectionString=Server=compra-programada-db;Port=3306;Database=compraprogramada;User=root;Password=rootpassword;AllowPublicKeyRetrieval=True;SSLMode=None;
+      - Service__Kafka__Server=kafka
+      - Service__Kafka__SendMaxRetries=5
+    depends_on:
+      compra-programada-db:
+        condition: service_healthy
+      apply-dotnet-migrations:
+        condition: service_completed_successfully
+      kafka:
+        condition: service_started
+    ports:
+      - "5000:8080"
+    networks:
+      - compraprogramada-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - compraprogramada-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+volumes:
+  mysql_data:
+  prometheus_data:
+
+networks:
+  compraprogramada-network:
+    driver: bridge
