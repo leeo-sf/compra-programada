@@ -10,7 +10,7 @@ on:
 
 env:
   MIN_COVERAGE: ${{ vars.MIN_COVERAGE }}
-  IMAGE_NAME: compra-programada-api
+  DOCKER_IMAGE_NAME: compra-programada-api
 
 jobs:
 
@@ -111,4 +111,4 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          tags: ${{ vars.DOCKER_USERNAME }}/$IMAGE_NAME":latest
+          tags: ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
