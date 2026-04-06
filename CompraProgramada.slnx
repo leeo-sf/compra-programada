@@ -2,6 +2,7 @@
   <Folder Name="/.github/" />
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/tests-and-coverage.yaml" />
+    <File Path=".github/workflows/deploy.yaml" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/CompraProgramada.Api/CompraProgramada.Api.csproj" />
