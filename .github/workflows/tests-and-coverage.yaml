@@ -7,7 +7,6 @@ on:
 
 env:
   MIN_COVERAGE: ${{ vars.MIN_COVERAGE }}
-  DOCKER_IMAGE_NAME: compra-programada-api
 
 jobs:
 

@@ -12,5 +12,5 @@ public record CriarCestaRecomendadaResponse(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CestaDesativadaDto? CestaAnteriorDesativada,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] List<string>? AtivosRemovidos,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] List<string>? AtivosAdicionados,
-    bool RebalanceamentoDisparado = false,
-    string Mensagem = "Primeira cesta cadastrada com sucesso.");
+    bool RebalanceamentoDisparado,
+    string Mensagem);

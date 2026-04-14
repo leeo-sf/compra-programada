@@ -26,7 +26,7 @@ public abstract class BaseController(IMediator mediator) : ControllerBase
         return response.IsSuccess ? StatusCode(statusCode) : HandleError(response.Exception!);
     }
 
-    protected ActionResult HandleError(Exception error)
+    private ActionResult HandleError(Exception error)
         => error switch
         {
             DomainException e => StatusCode((int)e.StatusCode, new { Mensagem = e.Message, e.Codigo }),

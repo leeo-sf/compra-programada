@@ -110,7 +110,7 @@ public class CestaRecomendadaService : ICestaRecomendadaService
             return cestaAtual;
         }
 
-        _logger.LogInformation("Nenhuma cesta foi encontrada na base de dados para desatiação");
+        _logger.LogInformation("Nenhuma cesta foi encontrada na base de dados para desativação");
 
         return null;
     }

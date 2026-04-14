@@ -28,4 +28,10 @@ public class ContaMasterRepository : IContaMasterRepository
         await _context.SaveChangesAsync(cancellationToken);
         return conta;
     }
+
+    public async Task<ContaMaster?> ObterContaMasterAtivaAsync(CancellationToken cancellationToken)
+        => await _context.ContaMaster
+            .AsNoTracking()
+            .Include(cm => cm.CustodiaMasters)
+            .FirstOrDefaultAsync(cancellationToken);
 }

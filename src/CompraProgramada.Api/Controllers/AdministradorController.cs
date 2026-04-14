@@ -29,4 +29,11 @@ public class AdministradorController(IMediator mediator) : BaseController(mediat
     [HttpGet("cesta/historico")]
     public async Task<ActionResult<HistoricoCestasResponse>> HistoricoAsync()
         => await SendCommand(new CestaHistoricoRequest());
+
+    /// <summary>
+    /// Consultar conta master e resíduos de ativos
+    /// </summary>
+    [HttpGet("conta-master/custodia")]
+    public async Task<ActionResult<ContaMasterCustodiaResponse>> ContaMasterCustodiaAsync()
+        => await SendCommand(new ContaMasterCustodiaRequest());
 }

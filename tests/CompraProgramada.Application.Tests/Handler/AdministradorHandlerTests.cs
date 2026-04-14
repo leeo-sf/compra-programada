@@ -17,7 +17,6 @@ public class AdministradorHandlerTests
 {
     private readonly Mock<ILogger<AdministradorHandler>> _loggerMock;
     private readonly Mock<ICestaRecomendadaService> _cestaRecomendadaServiceMock;
-    private readonly Mock<IClienteService> _clienteServiceMock;
     private readonly Mock<CestaRecomendadaMapper> _mapperMock;
     private readonly AdministradorHandler _handler;
 
@@ -25,110 +24,8 @@ public class AdministradorHandlerTests
     {
         _loggerMock = new Mock<ILogger<AdministradorHandler>>();
         _cestaRecomendadaServiceMock = new Mock<ICestaRecomendadaService>();
-        _clienteServiceMock = new Mock<IClienteService>();
         _mapperMock = new Mock<CestaRecomendadaMapper>();
-        _handler = new AdministradorHandler(_loggerMock.Object, _clienteServiceMock.Object, _cestaRecomendadaServiceMock.Object, _mapperMock.Object);
-    }
-
-    [Fact]
-    public async Task Handle_DeveRetornarSucesso_Quando_CriarCestaRealizada()
-    {
-        var request = new CriarCestaRecomendadaRequest("", new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "", Percentual = 10 } });
-
-        var response = new CriarCestaRecomendadaDto { CestaAtualizada = false, CestaAtual = new CestaRecomendadaDto { CestaId = 1, Nome = "", DataCriacao = DateTime.Now, DataDesativacao = null, Ativa = true, Itens = new List<ComposicaoCestaDto> { } }, CestaAnterior = null };
-        var result = Result.Success(response);
-
-        _cestaRecomendadaServiceMock
-            .Setup(s => s.CriarCestaAsync(It.IsAny<CriarCestaRecomendadaRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(result);
-
-        var resultado = await _handler.Handle(request, CancellationToken.None);
-
-        resultado.IsSuccess.Should().BeTrue();
-        resultado.Value.Should().BeOfType<CriarCestaRecomendadaResponse>();
-        resultado.Value.CestaAnteriorDesativada.Should().BeNull();
-
-        _cestaRecomendadaServiceMock.Verify(s =>
-            s.CriarCestaAsync(
-                request,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_DeveRetornarSucesso_Quando_CriarCestaAtualizada()
-    {
-        var request = new CriarCestaRecomendadaRequest("", new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "", Percentual = 10 } });
-
-        var response = new CriarCestaRecomendadaDto { CestaAtualizada = true, CestaAtual = new CestaRecomendadaDto { CestaId = 2, Nome = "Cesta Test 2", DataCriacao = DateTime.Now, DataDesativacao = null, Ativa = true, Itens = new List<ComposicaoCestaDto> { } }, CestaAnterior = new CestaRecomendadaDto { CestaId = 1, Nome = "Cesta Test", DataCriacao = DateTime.MinValue, DataDesativacao = DateTime.Now, Ativa = false, Itens = new List<ComposicaoCestaDto> { } } };
-        var result = Result.Success(response);
-
-        _cestaRecomendadaServiceMock
-            .Setup(s => s.CriarCestaAsync(It.IsAny<CriarCestaRecomendadaRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(result);
-
-        _clienteServiceMock
-            .Setup(x => x.QuantidadeClientesAtivosAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(0);
-
-        var resultado = await _handler.Handle(request, CancellationToken.None);
-
-        resultado.IsSuccess.Should().BeTrue();
-        resultado.Value.Should().BeOfType<CriarCestaRecomendadaResponse>();
-        resultado.Value.CestaAnteriorDesativada.Should().NotBeNull();
-
-        _cestaRecomendadaServiceMock.Verify(s =>
-            s.CriarCestaAsync(
-                request,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_DeveRetornarErro_Quando_CriarCestaFalhar()
-    {
-        var request = new CriarCestaRecomendadaRequest("", new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "", Percentual = 10 } });
-
-        var exception = new Exception("Erro na compra");
-        var result = Result.Error<CriarCestaRecomendadaDto>(exception);
-
-        _cestaRecomendadaServiceMock
-            .Setup(s => s.CriarCestaAsync(It.IsAny<CriarCestaRecomendadaRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(result);
-
-        var resultado = await _handler.Handle(request, CancellationToken.None);
-        
-        resultado.IsSuccess.Should().BeFalse();
-        resultado.Exception.Should().Be(exception);
-    }
-
-    [Fact]
-    public async Task Handle_DeveRetornarErro_Quando_QuantidadeClientesAtivos_Falhar()
-    {
-        var request = new CriarCestaRecomendadaRequest("", new List<ComposicaoCestaDto> { new ComposicaoCestaDto { Ticker = "", Percentual = 10 } });
-
-        var response = new CriarCestaRecomendadaDto { CestaAtualizada = true, CestaAtual = new CestaRecomendadaDto { CestaId = 2, Nome = "Cesta Test 2", DataCriacao = DateTime.Now, DataDesativacao = null, Ativa = true, Itens = new List<ComposicaoCestaDto> { } }, CestaAnterior = new CestaRecomendadaDto { CestaId = 1, Nome = "Cesta Test", DataCriacao = DateTime.MinValue, DataDesativacao = DateTime.Now, Ativa = false, Itens = new List<ComposicaoCestaDto> { } } };
-        var result = Result.Success(response);
-
-        _cestaRecomendadaServiceMock
-            .Setup(s => s.CriarCestaAsync(It.IsAny<CriarCestaRecomendadaRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(result);
-
-        _clienteServiceMock
-            .Setup(x => x.QuantidadeClientesAtivosAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Exception("Error"));
-
-        var resultado = await _handler.Handle(request, CancellationToken.None);
-
-        resultado.IsSuccess.Should().BeFalse();
-        resultado.Exception.Should().BeOfType<Exception>();
-        resultado.Value.Should().BeNull();
-
-        _cestaRecomendadaServiceMock.Verify(s =>
-            s.CriarCestaAsync(
-                request,
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+        _handler = new AdministradorHandler(_loggerMock.Object, _cestaRecomendadaServiceMock.Object, _mapperMock.Object);
     }
 
     [Fact]
