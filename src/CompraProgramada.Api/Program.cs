@@ -1,3 +1,4 @@
+using CompraProgramada.Api;
 using CompraProgramada.Api.Config;
 using CompraProgramada.Infra;
 using Prometheus;
@@ -10,6 +11,8 @@ builder.Services.AddSwaggerConfiguration();
 builder.Services.ConfigurarServicosApi(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseMiddleware<RequestIdMiddleware>();
 
 app.UseHttpMetrics();
 
