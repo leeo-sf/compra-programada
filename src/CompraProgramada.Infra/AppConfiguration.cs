@@ -6,7 +6,6 @@ using CompraProgramada.Data;
 using CompraProgramada.Data.Repository;
 using CompraProgramada.Domain.Interface;
 using CompraProgramada.Infra.Converter;
-using CompraProgramada.Infra.Middleware;
 using Confluent.Kafka;
 using FluentValidation;
 using FluentValidation.AspNetCore;

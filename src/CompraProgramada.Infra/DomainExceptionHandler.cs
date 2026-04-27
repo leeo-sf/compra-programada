@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace CompraProgramada.Infra.Middleware;
+namespace CompraProgramada.Infra;
 
 internal class DomainExceptionHandler : IExceptionHandler
 {

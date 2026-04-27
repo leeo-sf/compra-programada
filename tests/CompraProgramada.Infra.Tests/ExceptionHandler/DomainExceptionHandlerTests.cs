@@ -1,5 +1,4 @@
 ﻿using CompraProgramada.Shared.Exceptions;
-using CompraProgramada.Infra.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Net;
