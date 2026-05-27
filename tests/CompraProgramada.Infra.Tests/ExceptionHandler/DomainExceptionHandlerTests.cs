@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Net;
 using CompraProgramada.Shared.Exceptions.Base;
+using CompraProgramada.Domain;
 
 namespace CompraProgramada.Infra.Tests.ExceptionHandler;
 

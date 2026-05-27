@@ -1,8 +1,8 @@
 ﻿using CompraProgramada.Domain.Entity;
 using CompraProgramada.Shared.Exceptions;
-using CompraProgramada.Domain.Tests.TestsUtils;
 using FluentAssertions;
 using System.Net;
+using CompraProgramada.Domain.Tests.TestUtils;
 
 namespace CompraProgramada.Domain.Tests.Entity;
 

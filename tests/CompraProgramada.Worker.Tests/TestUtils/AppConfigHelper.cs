@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Application.Config;
+﻿using CompraProgramada.Domain.Config;
 using Microsoft.Extensions.Configuration;
 
 namespace CompraProgramada.Worker.Tests.TestUtils;

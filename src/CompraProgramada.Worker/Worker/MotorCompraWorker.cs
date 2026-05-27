@@ -1,5 +1,5 @@
-﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Contract.Service;
+﻿using CompraProgramada.Domain.Config;
+using CompraProgramada.Domain.Contract.Service;
 
 namespace CompraProgramada.Worker.Worker;
 
