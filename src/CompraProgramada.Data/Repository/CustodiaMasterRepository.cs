@@ -1,7 +1,6 @@
-﻿using CompraProgramada.Domain.Entity;
-using CompraProgramada.Domain.Interface;
+﻿using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace CompraProgramada.Data.Repository;
 

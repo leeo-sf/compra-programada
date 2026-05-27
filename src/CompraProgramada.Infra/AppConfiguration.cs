@@ -1,17 +1,20 @@
-﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Application.Contract.Service;
-using CompraProgramada.Application.Mapper;
-using CompraProgramada.Application.Service;
-using CompraProgramada.Data;
+﻿using CompraProgramada.Data;
 using CompraProgramada.Data.Repository;
-using CompraProgramada.Domain.Interface;
+using CompraProgramada.Domain;
+using CompraProgramada.Domain.Config;
+using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Domain.Mapper;
+using CompraProgramada.Domain.Service;
 using CompraProgramada.Infra.Converter;
+using CompraProgramada.Shared;
 using Confluent.Kafka;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json.Serialization;
 
 namespace CompraProgramada.Infra;
 
@@ -23,6 +26,7 @@ public static class AppConfiguration
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
 
         services.ConfigurarExceptionHandler();
@@ -95,7 +99,7 @@ public static class AppConfiguration
     internal static void ConfigurarFluentValidation(this IServiceCollection services)
     {
         services.AddFluentValidationAutoValidation();
-        services.AddValidatorsFromAssembly(typeof(AppConfig).Assembly, includeInternalTypes: true);
+        services.AddValidatorsFromAssembly(typeof(SharedAssembly).Assembly, includeInternalTypes: true);
     }
 
     internal static void ConfigurarRegrasDaAplicacao(this IServiceCollection services, IConfiguration configuration)

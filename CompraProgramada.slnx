@@ -6,7 +6,6 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/CompraProgramada.Api/CompraProgramada.Api.csproj" />
-    <Project Path="src/CompraProgramada.Application/CompraProgramada.Application.csproj" />
     <Project Path="src/CompraProgramada.Data/CompraProgramada.Data.csproj" />
     <Project Path="src/CompraProgramada.Domain/CompraProgramada.Domain.csproj" />
     <Project Path="src/CompraProgramada.Infra/CompraProgramada.Infra.csproj" />
@@ -15,7 +14,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CompraProgramada.Api.Tests/CompraProgramada.Api.Tests.csproj" />
-    <Project Path="tests/CompraProgramada.Application.Tests/CompraProgramada.Application.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Data.Tests/CompraProgramada.Data.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Domain.Tests/CompraProgramada.Domain.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Infra.Tests/CompraProgramada.Infra.Tests.csproj" />

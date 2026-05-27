@@ -1,0 +1,94 @@
+﻿using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Domain.Entity;
+using CompraProgramada.Domain.Service;
+using FluentAssertions;
+using NSubstitute;
+
+namespace CompraProgramada.Domain.Tests.Service;
+
+public class HistoricoExecucaoMotorServiceTests
+{
+    private readonly IHistoricoExecucaoMotorRepository _historicoExecucaoRepository;
+    private readonly ICalendarioMotorCompraService _calendarioCompraService;
+    private readonly HistoricoExecucaoMotorService _sut;
+
+    public HistoricoExecucaoMotorServiceTests()
+    {
+        _historicoExecucaoRepository = Substitute.For<IHistoricoExecucaoMotorRepository>();
+        _calendarioCompraService = Substitute.For<ICalendarioMotorCompraService>();
+        _sut = new(_historicoExecucaoRepository, _calendarioCompraService);
+    }
+
+    [Fact]
+    public async Task HistoricoExecucaoMotor_Deve_Retornar_True_Quando_AindaNaoFoiExecutadoCompra()
+    {
+        // Arrange
+        _calendarioCompraService.DeveExecutarCompraHoje()
+            .Returns(true);
+
+        _historicoExecucaoRepository.ObtemExecucaoRealizadaAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns((HistoricoExecucaoMotor)null!);
+
+        // Act
+        var result = await _sut.ExecutarCompraHojeAsync(CancellationToken.None);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task HistoricoExecucaoMotor_Deve_Retornar_False_Quando_EhDiaDeExecutar_MasJaFoiExecutado()
+    {
+        // Arrange
+        _calendarioCompraService.DeveExecutarCompraHoje()
+            .Returns(true);
+
+        _historicoExecucaoRepository.ObtemExecucaoRealizadaAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(HistoricoExecucaoMotor.CriarRegistroHistorico(DateTime.Now, DateTime.Now));
+
+        // Act
+        var result = await _sut.ExecutarCompraHojeAsync(CancellationToken.None);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task HistoricoExecucaoMotor_Deve_Retornar_False_Quando_NaoEhDiaDeExecutar()
+    {
+        // Arrange
+        _calendarioCompraService.DeveExecutarCompraHoje()
+            .Returns(false);
+
+        // Act
+        var result = await _sut.ExecutarCompraHojeAsync(CancellationToken.None);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SalvarExecucao_Deve_Salvar_Quando_NaoOcorrerFalhas()
+    {
+        // Arrange
+        var dataExecucao = DateTime.Now;
+        var dataReferencia = DateTime.Now;
+
+        var historico = HistoricoExecucaoMotor.CriarRegistroHistorico(dataReferencia, dataExecucao);
+
+        _historicoExecucaoRepository.ObtemExecucaoRealizadaAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(historico);
+
+        // Act
+        await _sut.SalvarExecucaoAsync(dataReferencia, dataExecucao, CancellationToken.None);
+
+        // Assert
+        await _historicoExecucaoRepository.Received(1).CriarHistoricoExecucaoAsync(
+            Arg.Is<HistoricoExecucaoMotor>(h =>
+                h.DataReferencia == dataReferencia &&
+                h.DataExecucao == dataExecucao
+            ),
+            CancellationToken.None);
+    }
+}

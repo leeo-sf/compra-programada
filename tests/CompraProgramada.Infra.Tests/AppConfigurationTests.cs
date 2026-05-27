@@ -1,9 +1,6 @@
-﻿using CompraProgramada.Application.Config;
-using CompraProgramada.Shared.Dto;
+﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Shared.Request;
-using CompraProgramada.Application.Service;
 using CompraProgramada.Data;
-using CompraProgramada.Domain.Interface;
 using Confluent.Kafka;
 using FluentValidation;
 using MediatR;
@@ -13,7 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using CompraProgramada.Shared.Exceptions.Base;
-using CompraProgramada.Application.Contract.Service;
+using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Domain.Config;
+using CompraProgramada.Domain.Service;
 
 namespace CompraProgramada.Infra.Tests;
 
