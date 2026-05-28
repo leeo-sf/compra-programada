@@ -23,7 +23,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerConfiguration();
 
 app.UseHttpsRedirection();
-app.MapControllers();
+app.AddEndpoints();
 
 app.MapMetrics();
 

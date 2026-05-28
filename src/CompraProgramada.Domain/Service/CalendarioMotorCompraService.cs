@@ -1,4 +1,4 @@
-﻿using CompraProgramada.Domain.Config;
+﻿using CompraProgramada.Shared.Config;
 using CompraProgramada.Domain.Contract.Service;
 
 namespace CompraProgramada.Domain.Service;

@@ -11,16 +11,10 @@ internal static class SwaggerConfiguration
         {
             opt.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "API Compra Programada",
+                Title = "Compra.Programada.Api",
                 Version = "v1",
-                Description = "API compra programada de ações"
+                Description = "API de compra programada de ações"
             });
-
-            var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
-            foreach (var xmlFile in xmlFiles)
-            {
-                opt.IncludeXmlComments(xmlFile);
-            }
         });
 
     public static void UseSwaggerConfiguration(this WebApplication app)

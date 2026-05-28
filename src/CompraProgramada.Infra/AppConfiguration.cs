@@ -1,13 +1,13 @@
 ﻿using CompraProgramada.Data;
 using CompraProgramada.Data.Repository;
 using CompraProgramada.Domain;
-using CompraProgramada.Domain.Config;
 using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Mapper;
 using CompraProgramada.Domain.Service;
 using CompraProgramada.Infra.Converter;
 using CompraProgramada.Shared;
+using CompraProgramada.Shared.Config;
 using Confluent.Kafka;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -22,13 +22,7 @@ public static class AppConfiguration
 {
     public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion = null)
     {
-        services.AddControllers()
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            });
-
+        services.ConfigureHttpOptions();
         services.ConfigurarExceptionHandler();
         services.ConfigurarMediatR();
         services.ConfigurarFluentValidation();
@@ -67,7 +61,7 @@ public static class AppConfiguration
     }
 
     internal static void ConfigurarMediatR(this IServiceCollection services)
-        => services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AppConfig).Assembly));
+        => services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DomainExceptionHandler).Assembly));
 
     internal static void AdicionaServicosERepositorios(this IServiceCollection services)
     {
@@ -134,4 +128,11 @@ public static class AppConfiguration
         services.AddSingleton<HistoricoCompraMapper>();
         services.AddSingleton<OrdemCompraMapper>();
     }
+
+    private static void ConfigureHttpOptions(this IServiceCollection services)
+        => services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(new UtcDateTimeConverter());
+            options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        });
 }

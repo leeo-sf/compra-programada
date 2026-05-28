@@ -1,4 +1,4 @@
-﻿namespace CompraProgramada.Domain.Config;
+﻿namespace CompraProgramada.Shared.Config;
 
 public sealed class AppConfig
 {
