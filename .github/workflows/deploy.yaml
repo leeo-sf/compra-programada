@@ -76,7 +76,7 @@ jobs:
           
           sed -i "s/<Version>$OLD_V<\/Version>/<Version>$NEW_V<\/Version>/" $PATH_FILE
 
-      - name: Commit and Push Next Version
+      - name: Commit and Push Current Version
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

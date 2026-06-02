@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Tests
 
 on:
   pull_request:
@@ -7,7 +7,6 @@ on:
 
 env:
   MIN_COVERAGE: ${{ vars.MIN_COVERAGE }}
-  DOCKER_IMAGE_NAME: compra-programada-api
 
 jobs:
 
@@ -24,13 +23,13 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore
+      - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build
+      - name: Build project
         run: dotnet build --no-restore --configuration Release
 
-      - name: Rodar testes com cobertura
+      - name: Run tests with coverage
         run: |
           dotnet test CompraProgramada.slnx \
             --no-build \
@@ -39,7 +38,7 @@ jobs:
             --settings .runsettings \
             --results-directory ./TestResults
 
-      - name: Upload artefatos de cobertura
+      - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-results
@@ -47,31 +46,31 @@ jobs:
           if-no-files-found: error
 
   run-coverage:
-    name: evalulate-coverage-test
+    name: evaluate-coverage-test
     runs-on: ubuntu-latest
     needs: run-tests
 
     steps:
-      - name: Download artefatos
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: coverage-results
           path: ./TestResults
 
-      - name: Instalar reportgenerator
+      - name: Install reportgenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
-      - name: Ver arquivos de cobertura
+      - name: View coverage files
         run: find ./TestResults -name "*.xml"
 
-      - name: Gerar relatório
+      - name: Generate report
         run: |
           reportgenerator \
             -reports:"./TestResults/**/coverage.cobertura.xml" \
             -targetdir:coverage-report \
             -reporttypes:TextSummary
 
-      - name: Validar cobertura mínima
+      - name: Validate minimum coverage
         run: |
           COVERAGE=$(grep -oP 'Line coverage:\s+\K[0-9.]+' coverage-report/Summary.txt)
           
