@@ -9,12 +9,48 @@ env:
   DOCKER_IMAGE_NAME: compra-programada-api
 
 jobs:
-  publish-in-docker-hub:
+  publish-docker-image:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read Current Version
+        id: versioning
+        run: |
+          TARGETS_PATH="VERSION.targets"
+          
+          CURRENT_VERSION=$(grep -oP '(?<=<Version>)[^<]+' $TARGETS_PATH)
+
+          echo "Versão para este deploy: $CURRENT_VERSION"
+          
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          
+          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+
+          NEW_PATCH=$((patch + 1))
+          NEW_MINOR=$minor
+          NEW_MAJOR=$major
+
+          # REGRA ESPECIAL: Se o patch passar de 99, vira o Major/Minor
+          # Exemplo para 0.0.99 -> 1.0.0
+          if [ $NEW_PATCH -gt 99 ]; then
+            NEW_PATCH=0
+            NEW_MINOR=0
+            NEW_MAJOR=$((major + 1))
+          fi
+
+          NEXT_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+          echo "Versão atual: $CURRENT_VERSION -> Próxima versão: $NEXT_VERSION"
+          
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "targets_path=$TARGETS_PATH" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -28,4 +64,23 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          tags: ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          tags: |
+            ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.versioning.outputs.current_version }}
+            ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+      - name: Bump Version for Next Deploy
+        run: |
+          PATH_FILE="${{ steps.versioning.outputs.targets_path }}"
+          OLD_V="${{ steps.versioning.outputs.current_version }}"
+          NEW_V="${{ steps.versioning.outputs.next_version }}"
+          
+          sed -i "s/<Version>$OLD_V<\/Version>/<Version>$NEW_V<\/Version>/" $PATH_FILE
+
+      - name: Commit and Push Next Version
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add ${{ steps.versioning.outputs.targets_path }}
+          git commit -m "chore: bump version to ${{ steps.versioning.outputs.next_version }} for next release [skip ci]"
+          git push
