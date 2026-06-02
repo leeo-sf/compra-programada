@@ -31,8 +31,6 @@ jobs:
 
           echo "Versão para este deploy: $CURRENT_VERSION"
           
-          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          
           IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
 
           NEW_PATCH=$((patch + 1))
@@ -47,10 +45,11 @@ jobs:
             NEW_MAJOR=$((major + 1))
           fi
 
-          NEXT_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
-          echo "Versão atual: $CURRENT_VERSION -> Próxima versão: $NEXT_VERSION"
+          DEPLOY_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+          echo "Versão atual: $CURRENT_VERSION -> Próxima versão: DEPLOY_VERSION"
           
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "deploy_version=$DEPLOY_VERSION" >> $GITHUB_OUTPUT
+          echo "old_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "targets_path=$TARGETS_PATH" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub
@@ -66,14 +65,14 @@ jobs:
           file: ./docker/Dockerfile
           push: true
           tags: |
-            ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.versioning.outputs.current_version }}
+            ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.versioning.outputs.deploy_version }}
             ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
-      - name: Bump Version for Next Deploy
+      - name: Update VERSION.targets File
         run: |
           PATH_FILE="${{ steps.versioning.outputs.targets_path }}"
-          OLD_V="${{ steps.versioning.outputs.current_version }}"
-          NEW_V="${{ steps.versioning.outputs.next_version }}"
+          OLD_V="${{ steps.versioning.outputs.old_version }}"
+          NEW_V="${{ steps.versioning.outputs.deploy_version }}"
           
           sed -i "s/<Version>$OLD_V<\/Version>/<Version>$NEW_V<\/Version>/" $PATH_FILE
 
@@ -83,5 +82,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           git add ${{ steps.versioning.outputs.targets_path }}
-          git commit -m "chore: bump version to ${{ steps.versioning.outputs.next_version }} for next release [skip ci]"
+          git commit -m "chore: bump version to ${{ steps.versioning.outputs.deploy_version }} for next release [skip ci]"
           git push
