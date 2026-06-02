@@ -1,4 +1,3 @@
-using CompraProgramada.Api;
 using CompraProgramada.Api.Config;
 using CompraProgramada.Infra;
 using Prometheus;

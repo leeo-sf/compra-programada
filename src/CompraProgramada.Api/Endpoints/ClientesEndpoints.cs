@@ -1,5 +1,4 @@
-﻿using CompraProgramada.Shared.Dto;
-using CompraProgramada.Shared.Request;
+﻿using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using MediatR;
 
@@ -30,7 +29,7 @@ internal static class ClientesEndpoints
             .WithSummary("Consulta detalhes da carteira");
 
         group.MapGet("{id}/rentabilidade", ConsultarRentabilidadeAsync)
-            .Produces<CarteiraCustodiaResponse>(StatusCodes.Status200OK)
+            .Produces<RentabilidadeResponse>(StatusCodes.Status200OK)
             .WithSummary("Consulta detalhes da rentabilidade da carteira");
     }
 
