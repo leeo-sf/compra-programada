@@ -7,10 +7,10 @@ O cliente escolhe um valor mensal de aporte, e o sistema automaticamente:
 - Distribui os ativos proporcionalmente para a custodia individual de cada cliente.
 - Gerencia rebalanceamentos quando a composicao da carteira recomendada muda ou quando ha desvios significativos de proporcao *(Funcionalidade em breve)*.
 
-Para mais documentações do projeto acesse os links abaixo:
-    - [Motor de Compra](https://github.com/leeo-sf/compra-programada/blob/main/docs/motor-compra.md)
-    - [Motor de Rebalanceamento](https://github.com/leeo-sf/compra-programada/blob/main/docs/motor-rebalanceamento.md)
-    - [Funcionalidades](https://github.com/leeo-sf/compra-programada/blob/main/docs/funcionalidades.md)
+#### Para mais documentações do projeto acesse os links abaixo:
+- [Motor de Compra](https://github.com/leeo-sf/compra-programada/blob/main/docs/motor-compra.md)
+- [Motor de Rebalanceamento](https://github.com/leeo-sf/compra-programada/blob/main/docs/motor-rebalanceamento.md)
+- [Funcionalidades](https://github.com/leeo-sf/compra-programada/blob/main/docs/funcionalidades.md)
 
 ## Conceitos Importantes do Mercado Financeiro
 
