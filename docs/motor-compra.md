@@ -1,10 +1,10 @@
 # Motor de Compra Programada
 
-O motor de compra é o coracao do sistema. Ele deve executar o seguinte fluxo nos **dias úteis iguais ou subsequentes ao dia 5, 15 e 25 de cada mês** (considerando dias úteis como segunda a sexta-feira).
+O motor de compra é o coração do sistema. Ele deve executar o seguinte fluxo nos **dias úteis iguais ou subsequentes ao dia 5, 15 e 25 de cada mês** (considerando dias úteis como segunda a sexta-feira).
 
-Por exemplo: Hoje é dia 25/04/2024 (Sábado), o sistema não executará a compra devido não ser um dia útil. A compra será executada no dia 27/04/2026 (Segunda).
+Por exemplo: Hoje é dia 25/04/2026 (Sábado), o sistema não executará a compra devido não ser um dia útil. A compra será executada no dia 27/04/2026 (Segunda).
 
-#### Passo a passo do motor:
+### Passo a passo do motor:
 
 1. **Agrupamento de pedidos:** Coleta todos os clientes ativos e calcular **1/3 do valor mensal** de cada cliente para a data corrente (o valor mensal é dividido em 3 parcelas: dia 5, dia 15 e dia 25)
 

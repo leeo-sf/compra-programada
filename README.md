@@ -50,7 +50,7 @@ O preço médio de aquisição é o custo médio ponderado de compra de um ativo
 preço médio = (Quantidade Anterior * preço médio Anterior + Quantidade Nova * preço Nova Compra) / (Quantidade Anterior + Quantidade Nova)
 ```
 
-### 1.4. Arquivo COTAHIST da B3
+### 1.5. Arquivo COTAHIST da B3
 
 A B3 disponibiliza diariamente arquivos com as cotações historicas de todos os ativos negociados, chamado **COTAHIST**. Este arquivo contem informações como:
 
