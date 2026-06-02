@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.BYPASS_TOKEN }}
+          token: ${{ secrets.MAIN_BYPASS_TOKEN }}
 
       - name: Read Current Version
         id: versioning
