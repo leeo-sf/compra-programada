@@ -11,7 +11,7 @@ builder.Services.ConfigurarServicosApi(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseMiddleware<RequestIdMiddleware>();
+app.UseXRequestId();
 
 app.UseHttpMetrics();
 
