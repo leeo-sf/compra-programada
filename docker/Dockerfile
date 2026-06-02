@@ -3,7 +3,6 @@ WORKDIR /app
 EXPOSE 5000
 
 COPY ["src/CompraProgramada.Api/CompraProgramada.Api.csproj", "CompraProgramada.Api/"]
-COPY ["src/CompraProgramada.Application/CompraProgramada.Application.csproj", "CompraProgramada.Application/"]
 COPY ["src/CompraProgramada.Data/CompraProgramada.Data.csproj", "CompraProgramada.Data/"]
 COPY ["src/CompraProgramada.Domain/CompraProgramada.Domain.csproj", "CompraProgramada.Domain/"]
 COPY ["src/CompraProgramada.Infra/CompraProgramada.Infra.csproj", "CompraProgramada.Infra/"]
