@@ -36,7 +36,7 @@ jobs:
             --no-build \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
-            --settings coverage.runsettings \
+            --settings .runsettings \
             --results-directory ./TestResults
 
       - name: Upload artefatos de cobertura
