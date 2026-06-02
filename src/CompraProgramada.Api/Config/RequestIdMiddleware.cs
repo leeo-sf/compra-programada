@@ -1,4 +1,4 @@
-﻿namespace CompraProgramada.Api;
+﻿namespace CompraProgramada.Api.Config;
 
 internal class RequestIdMiddleware
 {

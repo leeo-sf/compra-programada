@@ -1,5 +1,5 @@
-﻿using CompraProgramada.Domain.Config;
-using CompraProgramada.Domain.Contract.Service;
+﻿using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Shared.Config;
 using CompraProgramada.Shared.Response;
 using CompraProgramada.Worker.Tests.TestUtils;
 using CompraProgramada.Worker.Worker;

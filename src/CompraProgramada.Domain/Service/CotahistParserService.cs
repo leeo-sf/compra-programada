@@ -1,6 +1,6 @@
 ﻿using CompraProgramada.Shared.Dto;
 using CompraProgramada.Domain.Contract.Service;
-using CompraProgramada.Domain.Config;
+using CompraProgramada.Shared.Config;
 
 namespace CompraProgramada.Domain.Service;
 

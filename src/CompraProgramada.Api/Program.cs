@@ -1,4 +1,3 @@
-using CompraProgramada.Api;
 using CompraProgramada.Api.Config;
 using CompraProgramada.Infra;
 using Prometheus;
@@ -23,7 +22,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerConfiguration();
 
 app.UseHttpsRedirection();
-app.MapControllers();
+app.AddEndpoints();
 
 app.MapMetrics();
 

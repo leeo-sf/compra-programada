@@ -2,7 +2,7 @@
 using CompraProgramada.Domain.Tests.TestUtils;
 using FluentAssertions;
 using NSubstitute;
-using CompraProgramada.Domain.Config;
+using CompraProgramada.Shared.Config;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Service;
 
