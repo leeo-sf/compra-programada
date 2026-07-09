@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Domain.Contract.Service;
+﻿using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Mapper;
 using CompraProgramada.Shared.Dto;
 using CompraProgramada.Shared.Request;
@@ -15,63 +16,60 @@ public class AdministradorHandler
         IRequestHandler<CestaHistoricoRequest, Result<HistoricoCestasResponse>>
 {
     private readonly ILogger<AdministradorHandler> _logger;
-    private readonly ICestaRecomendadaService _cestaService;
-    private readonly IClienteService _clienteService;
+    private readonly ICestaRecomendadaRepository _cestaRecomendadaRepository;
+    private readonly IClienteRepository _clienteRepository;
     private readonly CestaRecomendadaMapper _mapper;
 
     public AdministradorHandler(ILogger<AdministradorHandler> logger,
-        IClienteService clienteService,
-        ICestaRecomendadaService cestaService,
+        ICestaRecomendadaRepository cestaRecomendadaRepository,
+        IClienteRepository clienteRepository,
         CestaRecomendadaMapper mapper)
     {
         _logger = logger;
-        _clienteService = clienteService;
-        _cestaService = cestaService;
+        _cestaRecomendadaRepository = cestaRecomendadaRepository;
+        _clienteRepository = clienteRepository;
         _mapper = mapper;
     }
 
     public async Task<Result<CriarCestaRecomendadaResponse>> Handle(CriarCestaRecomendadaRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando processo de criação de cesta: {Request}", request);
+        _logger.LogInformation("Iniciando processo de criação/atualização de cesta: {Request}", request);
 
-        var result = await _cestaService.CriarCestaAsync(request, cancellationToken);
+        var cestaAnteriorResult = await ObtemEDesativaCestaAtual(cancellationToken);
+        if (!cestaAnteriorResult.IsSuccess)
+            return cestaAnteriorResult.Exception;
 
-        if (!result.IsSuccess)
-        {
-            _logger.LogError("Falha ao processar criação da cesta: {Exception}", result.Exception);
-            return result.Exception;
-        }
+        var cestaAnterior = cestaAnteriorResult.Value;
 
-        if (!result.Value!.CestaAtualizada)
-        {
-            _logger.LogInformation("Cesta criada com sucesso!");
-            return MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, default, default, default);
-        }
+        var itensCesta = request.Itens.Select(i => ComposicaoCesta.CriaItemNaCesta(i.Ticker, i.Percentual)).ToList();
 
-        _logger.LogInformation("Cesta alterada com sucesso!");
+        var cestaCriada = await _cestaRecomendadaRepository.CriarAsync(CestaRecomendada.CriarCesta(request.Nome, itensCesta), cancellationToken);
 
-        var quantidadeUsuariosAtivos = await _clienteService.QuantidadeClientesAtivosAsync(cancellationToken);
-        if (!quantidadeUsuariosAtivos.IsSuccess)
-            return quantidadeUsuariosAtivos.Exception;
+        _logger.LogInformation("Cesta registrada na base de dados {Cesta}", cestaCriada);
 
-        var (ativosRemovidos, ativosAdicionados) = _cestaService.ObterMudancasDeAtivos(result.Value.CestaAnterior!.Itens, result.Value.CestaAtual.Itens);
+        var cestaAtualizada = cestaAnterior is not null;
 
-        var mensagemOperacao = $"Cesta atualizada. Rebalanceamento disparado para {quantidadeUsuariosAtivos.Value} clientes ativos.";
-        return MontarResponseCriarAlterarCesta(result.Value.CestaAtual, result.Value.CestaAtualizada, result.Value.CestaAnterior, ativosRemovidos, ativosAdicionados) with { Mensagem = mensagemOperacao };
+        if (!cestaAtualizada)
+            return ResponseCriarAlterarCesta(cestaCriada, false, default, default, default);
+
+        var quantidadeUsuariosAtivos = await _clienteRepository.QuantidadeAtivosAsync(cancellationToken);
+
+        var (ativosRemovidos, ativosAdicionados) = ObterMudancasDeAtivos(cestaAnterior!.ComposicaoCesta, cestaCriada.ComposicaoCesta);
+
+        var msgOperacaoComAtualizacao = $"Cesta atualizada. Rebalanceamento disparado para {quantidadeUsuariosAtivos} clientes ativos.";
+        return ResponseCriarAlterarCesta(cestaCriada, true, cestaAnterior, ativosRemovidos, ativosAdicionados) with { Mensagem = msgOperacaoComAtualizacao };
     }
 
     public async Task<Result<CestaRecomendadaDto>> Handle(CestaAtualRequest request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando consulta da cesta atual.");
 
-        var result = await _cestaService.ObterCestaAtivaAsync(cancellationToken);
+        var cesta = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
 
-        if (!result.IsSuccess)
-            return result.Exception;
+        if (cesta is null)
+            return new ApplicationException("Nenhuma Cesta Top Five ativa no momento.");
 
         // Obter fechamento atual para retornar
-
-        var cesta = result.Value!;
 
         return _mapper.ToResponse(cesta);
     }
@@ -80,26 +78,57 @@ public class AdministradorHandler
     {
         _logger.LogInformation("Iniciando processo de consulta de histórico de cestas.");
 
-        var cestas = await _cestaService.HistoricoCestasAsync(cancellationToken);
+        var cestas = await _cestaRecomendadaRepository.ObterCestasAsync(cancellationToken);
 
-        if (cestas.Value is null)
-            return new HistoricoCestasResponse(new());
-
-        var cestasDto = cestas.Value.Select(x => _mapper.ToResponse(x)).ToList();
+        var cestasDto = cestas.Select(x => _mapper.ToResponse(x)).ToList();
 
         return new HistoricoCestasResponse(cestasDto);
     }
 
-    private CriarCestaRecomendadaResponse MontarResponseCriarAlterarCesta(CestaRecomendadaDto cesta, bool atualizouCesta, CestaRecomendadaDto? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados)
+    private CriarCestaRecomendadaResponse ResponseCriarAlterarCesta(CestaRecomendada cesta, bool atualizouCesta, CestaRecomendada? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados)
         => new CriarCestaRecomendadaResponse(
-            cesta.CestaId,
+            cesta.Id,
             cesta.Nome,
             cesta.Ativa,
             cesta.DataCriacao,
-            cesta.Itens.Select(cc => new ComposicaoCestaDto { Ticker = cc.Ticker, Percentual = cc.Percentual }).ToList(),
-            cestaAnterior is null ? default : new CestaDesativadaDto { CestaId = cestaAnterior!.CestaId, Nome = cestaAnterior.Nome, DataDesativacao = cestaAnterior.DataDesativacao!.Value },
-            ativosRemovidos is not null ? ativosRemovidos : default,
-            ativosAdicionados is not null ? ativosAdicionados : default,
-            !atualizouCesta ? false : default
+            cesta.ComposicaoCesta.Select(cc => new ComposicaoCestaDto { Ticker = cc.Ticker, Percentual = cc.Percentual }).ToList(),
+            cestaAnterior is null ? default : new CestaDesativadaDto { CestaId = cestaAnterior!.Id, Nome = cestaAnterior.Nome, DataDesativacao = cestaAnterior.DataDesativacao!.Value },
+            ativosRemovidos,
+            ativosAdicionados,
+            atualizouCesta
         );
+
+    private async Task<Result<CestaRecomendada?>> ObtemEDesativaCestaAtual(CancellationToken cancellationToken)
+    {
+        var cestaAtual = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
+
+        if (cestaAtual is null)
+            return default;
+
+        cestaAtual.DesativarCesta();
+
+        await _cestaRecomendadaRepository.AtualizarAsync(cestaAtual, cancellationToken);
+
+        _logger.LogInformation("Cesta atual desativada {Cesta}", cestaAtual);
+
+        return cestaAtual;
+    }
+
+    private (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<ComposicaoCesta> composicaoAnterior, List<ComposicaoCesta> composicaoAtual)
+    {
+        var tickersAnteriores = composicaoAnterior.Select(c => c.Ticker);
+        var tickersAtual = composicaoAtual.Select(c => c.Ticker);
+
+        var ativosRemovidos = tickersAnteriores
+            .Except(tickersAtual)
+            .ToList();
+
+        var ativosAdicionados = tickersAtual
+            .Except(tickersAnteriores)
+            .ToList();
+
+        _logger.LogInformation("Mudanças de ativos identificados {Removidos} - {Adicionados}", ativosRemovidos, ativosAdicionados);
+
+        return (ativosRemovidos, ativosAdicionados);
+    }
 }

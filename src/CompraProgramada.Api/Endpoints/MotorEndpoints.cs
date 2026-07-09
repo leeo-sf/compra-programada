@@ -8,7 +8,7 @@ internal static class MotorEndpoints
 {
     public static void AddMotorEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/motor")
+        var group = app.MapGroup("/motor")
             .WithTags("Motor");
 
         group.MapPost("executar-compra", ExecutarCompraAsync)

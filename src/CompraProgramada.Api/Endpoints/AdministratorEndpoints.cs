@@ -9,7 +9,7 @@ internal static class AdministratorEndpoints
 {
     public static void AddAdministratorEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/admin/cesta")
+        var group = app.MapGroup("/admin/cesta")
             .WithTags("Administrador");
 
         group.MapPost(string.Empty, CriarCestaAsync)

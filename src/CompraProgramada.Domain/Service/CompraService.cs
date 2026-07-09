@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using OperationResult;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Mapper;
+using CompraProgramada.Domain.Contract.Repository;
 
 namespace CompraProgramada.Domain.Service;
 
@@ -13,7 +14,7 @@ public class CompraService : ICompraService
 {
     private readonly ILogger<CompraService> _logger;
     private readonly IHistoricoExecucaoMotorService _historicoExecucaoService;
-    private readonly IClienteService _clienteService;
+    private readonly IClienteRepository _clienteRepository;
     private readonly ICalendarioMotorCompraService _calendarioMotorCompraService;
     private readonly IDistribuicaoService _distribuicaoService;
     private readonly IImpostoRendaService _impostoRendaService;
@@ -24,7 +25,7 @@ public class CompraService : ICompraService
 
     public CompraService(ILogger<CompraService> logger,
         IHistoricoExecucaoMotorService historicoExecucaoService,
-        IClienteService clienteService,
+        IClienteRepository clienteRepository,
         ICalendarioMotorCompraService calendarioMotorCompraService,
         IDistribuicaoService distribuicaoService,
         IImpostoRendaService impostoRendaService,
@@ -35,7 +36,7 @@ public class CompraService : ICompraService
     {
         _logger = logger;
         _historicoExecucaoService = historicoExecucaoService;
-        _clienteService = clienteService;
+        _clienteRepository = clienteRepository;
         _calendarioMotorCompraService = calendarioMotorCompraService;
         _distribuicaoService = distribuicaoService;
         _impostoRendaService = impostoRendaService;
@@ -60,19 +61,15 @@ public class CompraService : ICompraService
 
         var dataExecucao = date ?? DateTime.Now;
 
-        var clientesAtivosResult = await _clienteService.ObtemClientesAtivoAsync(cancellationToken);
-        if (!clientesAtivosResult.IsSuccess)
-            return clientesAtivosResult.Exception;
-
-        var clientesAtivos = clientesAtivosResult.Value;
-        var qtdClientesAtivos = clientesAtivos.Count;
-
-        if (qtdClientesAtivos < 1)
+        var clientes = await _clienteRepository.ObterClientesAtivosAsync(cancellationToken);
+        if (clientes is null)
             throw new CompraException("Nenhum cliente ativo cadastrado", "QTD_CLIENTES_ATIVOS");
+
+        var qtdClientesAtivos = clientes.Count;
 
         _logger.LogInformation("{QuantidadeClientes} clientes ativos para processamento.", qtdClientesAtivos);
 
-        var valorTotalConsolidado = clientesAtivos.Sum(cliente => cliente.ValorAporte);
+        var valorTotalConsolidado = clientes.Sum(cliente => cliente.ValorAporte);
 
         _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
 
@@ -80,7 +77,7 @@ public class CompraService : ICompraService
         if (!ordensCompraResult.IsSuccess)
             return ordensCompraResult.Exception;
 
-        var distribuicoesResult = await _distribuicaoService.DistribuirParaCustodiasAsync(clientesAtivos, ordensCompraResult.Value, dataExecucao, cancellationToken);
+        var distribuicoesResult = await _distribuicaoService.DistribuirParaCustodiasAsync(clientes, ordensCompraResult.Value, dataExecucao, cancellationToken);
         if (!distribuicoesResult.IsSuccess)
             return distribuicoesResult.Exception;
 
