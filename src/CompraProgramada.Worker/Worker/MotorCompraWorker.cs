@@ -12,7 +12,8 @@ public class MotorCompraWorker : BackgroundService
     private readonly AppConfig _appConfig;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public MotorCompraWorker(ILogger<MotorCompraWorker> logger,
+    public MotorCompraWorker(
+        ILogger<MotorCompraWorker> logger,
         AppConfig appConfig,
         IServiceScopeFactory serviceScopeFactory)
     {

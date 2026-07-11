@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Domain.Contract.Repository;
+﻿using CompraProgramada.Domain.Contract.Handler;
+using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Mapper;
@@ -16,7 +17,7 @@ public class ClienteHandle
         IRequestHandler<SaidaProdutoRequest, Result<SaidaProdutoResponse>>,
         IRequestHandler<AtualizarValorMensalRequest, Result<AtualizarValorMensalResponse>>,
         IRequestHandler<CarteiraCustodiaRequest, Result<CarteiraCustodiaResponse>>,
-        IRequestHandler<RentabilidadeRequest, Result<RentabilidadeResponse>>
+        IRequestHandler<RentabilidadeRequest, Result<RentabilidadeResponse>>, IApiRequestHandler
 {
     private readonly ILogger<ClienteHandle> _logger;
     private readonly IClienteRepository _clienteRepository;

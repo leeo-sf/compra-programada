@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Domain.Contract.Repository;
+﻿using CompraProgramada.Domain.Contract.Handler;
+using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Mapper;
@@ -12,7 +13,7 @@ using OperationResult;
 
 namespace CompraProgramada.Domain.Handler.Worker;
 
-public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Result<ExecutarMotorCompraResponse>>
+public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Result<ExecutarMotorCompraResponse>>, IWorkerMotorCompraRequestHandler
 {
     private readonly ILogger<MotorCompraHandler> _logger;
     private readonly IHistoricoExecucaoMotorRepository _historicoExecucaoMotorRepository;

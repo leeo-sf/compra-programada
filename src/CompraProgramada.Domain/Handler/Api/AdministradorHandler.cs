@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Domain.Contract.Repository;
+﻿using CompraProgramada.Domain.Contract.Handler;
+using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Mapper;
 using CompraProgramada.Shared.Dto;
@@ -13,7 +14,7 @@ namespace CompraProgramada.Domain.Handler.Api;
 public class AdministradorHandler
     : IRequestHandler<CriarCestaRecomendadaRequest, Result<CriarCestaRecomendadaResponse>>,
         IRequestHandler<CestaAtualRequest, Result<CestaRecomendadaDto>>,
-        IRequestHandler<CestaHistoricoRequest, Result<HistoricoCestasResponse>>
+        IRequestHandler<CestaHistoricoRequest, Result<HistoricoCestasResponse>>, IApiRequestHandler
 {
     private readonly ILogger<AdministradorHandler> _logger;
     private readonly ICestaRecomendadaRepository _cestaRecomendadaRepository;
