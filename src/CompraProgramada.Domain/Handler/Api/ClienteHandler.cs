@@ -9,7 +9,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using OperationResult;
 
-namespace CompraProgramada.Application.Handler;
+namespace CompraProgramada.Domain.Handler.Api;
 
 public class ClienteHandle
     : IRequestHandler<AdesaoRequest, Result<AdesaoResponse>>,

@@ -74,13 +74,7 @@ public static class AppConfiguration
         services.AddScoped<IHistoricoExecucaoMotorRepository, HistoricoExecucaoMotorRepository>();
         services.AddScoped<IOrdemCompraRepository, OrdemCompraRepository>();
 
-        services.AddScoped<ICestaRecomendadaService, CestaRecomendadaService>();
-        services.AddScoped<IClienteService, ClienteService>();
         services.AddScoped<ICotacaoService, CotacaoService>();
-        services.AddScoped<ICustodiaMasterService, CustodiaMasterService>();
-        services.AddScoped<IDistribuicaoService, DistribuicaoService>();
-        services.AddScoped<IHistoricoExecucaoMotorService, HistoricoExecucaoMotorService>();
-        services.AddScoped<ICompraService, CompraService>();
         services.AddScoped<IOrdemCompraService, OrdemCompraService>();
 
         services.AddSingleton<ICotahistParserService, CotahistParserService>();

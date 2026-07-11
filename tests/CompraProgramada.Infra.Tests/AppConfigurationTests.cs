@@ -177,26 +177,12 @@ public class AppConfigurationTests
         _services.AdicionaServicosERepositorios();
 
         // Act
-        var cestaDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICestaRecomendadaService));
-        var clienteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IClienteService));
         var cotacaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICotacaoService));
-        var custodiaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaMasterService));
-        var distribuicaoMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IDistribuicaoService));
-        var historicoExecucaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IHistoricoExecucaoMotorService));
-        var compraDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICompraService));
         var ordemCompraDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IOrdemCompraService));
 
         // Assert
-        Assert.NotNull(cestaDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, cestaDescriptor?.Lifetime);
-        Assert.NotNull(clienteDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, clienteDescriptor?.Lifetime);
         Assert.NotNull(cotacaoDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, cotacaoDescriptor?.Lifetime);
-        Assert.NotNull(custodiaMasterDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, custodiaMasterDescriptor?.Lifetime);
-        Assert.NotNull(historicoExecucaoDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, historicoExecucaoDescriptor?.Lifetime);
         Assert.NotNull(ordemCompraDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, ordemCompraDescriptor?.Lifetime);
     }

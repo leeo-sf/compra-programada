@@ -1,8 +1,10 @@
 ﻿using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Shared.Config;
+using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using CompraProgramada.Worker.Tests.TestUtils;
 using CompraProgramada.Worker.Worker;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -15,7 +17,7 @@ public class MotorCompraWorkerTests
     private readonly ILogger<MotorCompraWorker> _logger;
     private readonly AppConfig _appConfig;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ICompraService _compraService;
+    private readonly IMediator _mediator;
     private readonly MotorCompraWorker _sut;
 
     public MotorCompraWorkerTests()
@@ -23,7 +25,7 @@ public class MotorCompraWorkerTests
         _logger = Substitute.For<ILogger<MotorCompraWorker>>();
         _appConfig = AppConfigHelper.GetAppConfig();
         _serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
-        _compraService = Substitute.For<ICompraService>();
+        _mediator = Substitute.For<IMediator>();
         _sut = new(_logger, _appConfig, _serviceScopeFactory);
     }
 
@@ -31,13 +33,13 @@ public class MotorCompraWorkerTests
     public async Task Deve_ExecutarCompra_ComSucesso_Quando_Iteracao_Executar()
     {
         // Arrange
-        _compraService.ExecutarCompraAsync(Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
-            .Returns((ExecutarCompraResponse)null!);
+        _mediator.Send(Arg.Any<ExecutarMotorCompraRequest>(), Arg.Any<CancellationToken>())
+            .Returns((ExecutarMotorCompraResponse)null!);
 
         var serviceProvider = Substitute.For<IServiceProvider>();
         serviceProvider
-            .GetService(typeof(ICompraService))
-            .Returns(_compraService);
+            .GetService(typeof(IMediator))
+            .Returns(_mediator);
 
         var scope = Substitute.For<IServiceScope>();
         scope.ServiceProvider.Returns(serviceProvider);
@@ -48,21 +50,21 @@ public class MotorCompraWorkerTests
         await _sut.ExecutarMotorDeCompra(CancellationToken.None);
 
         // Assert
-        await _compraService.Received(1)
-            .ExecutarCompraAsync(null, Arg.Any<CancellationToken>());
+        await _mediator.Received(1)
+            .Send(Arg.Any<ExecutarMotorCompraRequest>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Deve_Falhar_Quando_ExecutarCompra_RetornarException()
     {
         // Arrange
-        _compraService.ExecutarCompraAsync(Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+        _mediator.Send(Arg.Any<ExecutarMotorCompraRequest>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new Exception());
 
         var serviceProvider = Substitute.For<IServiceProvider>();
         serviceProvider
-            .GetService(typeof(ICompraService))
-            .Returns(_compraService);
+            .GetService(typeof(IMediator))
+            .Returns(_mediator);
 
         var scope = Substitute.For<IServiceScope>();
         scope.ServiceProvider.Returns(serviceProvider);

@@ -1,67 +1,104 @@
-﻿using CompraProgramada.Shared.Dto;
-using CompraProgramada.Application.Handler;
+﻿using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Domain.Entity;
+using CompraProgramada.Domain.Handler.Worker;
+using CompraProgramada.Domain.Mapper;
+using CompraProgramada.Domain.Tests.TestUtils;
+using CompraProgramada.Shared.Dto;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using OperationResult;
-using CompraProgramada.Domain.Contract.Service;
 using NSubstitute;
+using OperationResult;
 
 namespace CompraProgramada.Application.Tests.Handler;
 
 public class MotorCompraHandlerTests
 {
     private readonly ILogger<MotorCompraHandler> _logger;
-    private readonly ICompraService _compraService;
+    private readonly IHistoricoExecucaoMotorRepository _historicoExecucaoMotorRepository;
+    private readonly IClienteRepository _clienteRepository;
+    private readonly ICalendarioMotorCompraService _calendarioMotorCompraService;
+    private readonly IImpostoRendaService _impostoRendaService;
+    private readonly IOrdemCompraService _ordemCompraService;
+    private readonly ICustodiaMasterRepository _custodiaMasterRepository;
+    private readonly OrdemCompraMapper _mapperOrdemCompra;
+    private readonly DistribuicaoMapper _distribuicaoMapper;
+    private readonly IDateTimeProvaider _dateTimeProvaider;
     private readonly MotorCompraHandler _sut;
 
     public MotorCompraHandlerTests()
     {
         _logger = Substitute.For<ILogger<MotorCompraHandler>>();
-        _compraService = Substitute.For<ICompraService>();
-        _sut = new MotorCompraHandler(_logger, _compraService);
+        _historicoExecucaoMotorRepository = Substitute.For<IHistoricoExecucaoMotorRepository>();
+        _clienteRepository = Substitute.For<IClienteRepository>();
+        _calendarioMotorCompraService = Substitute.For<ICalendarioMotorCompraService>();
+        _impostoRendaService = Substitute.For<IImpostoRendaService>();
+        _ordemCompraService = Substitute.For<IOrdemCompraService>();
+        _custodiaMasterRepository = Substitute.For<ICustodiaMasterRepository>();
+        _mapperOrdemCompra = Substitute.For<OrdemCompraMapper>();
+        _distribuicaoMapper = Substitute.For<DistribuicaoMapper>();
+        _dateTimeProvaider = Substitute.For<IDateTimeProvaider>();
+        _sut = new MotorCompraHandler(_logger, _historicoExecucaoMotorRepository, _clienteRepository, _calendarioMotorCompraService, _impostoRendaService, _ordemCompraService, _custodiaMasterRepository, _mapperOrdemCompra, _distribuicaoMapper, _dateTimeProvaider);
     }
 
     [Fact]
-    public async Task Handle_DeveRetornarSucesso_QuandoCompraForExecutada()
+    public async Task Handle_DeveRetornarSucesso_QuandoCompraForExecutadaComSucesso()
     {
-        var dataReferencia = new DateOnly(2024, 1, 1);
-        var request = new ExecutarCompraRequest(DateTime.Now, dataReferencia);
+        // Arrange
+        var request = new ExecutarMotorCompraRequest(DateOnly.FromDateTime(DateTime.Now));
+        var clientesAtivos = FakerRequest.ClientesAtivos().Generate();
+        var ordensCompra = FakerRequest.OrdensCompraEmitidas();
+        var distribuicoes = FakerRequest.Distribuicoes();
+        var residuos = FakerRequest.ResiduosNaoDistribuidos();
 
-        var response = new ExecutarCompraResponse(DateTime.Now, 1, 1,
-            new List<OrdemCompraDto> { new OrdemCompraDto { Ticker = "", QuantidadeTotal = 1, Detalhes = new List<OrdemCompraDetalheDto> { new OrdemCompraDetalheDto { Ticker = "", Tipo = "", Quantidade = 1 } }, PrecoUnitario = 1 } },
-            new List<DistribuicaoDto> (),
-            new List<AtivoQuantidadeDto> { new AtivoQuantidadeDto { Ticker = "", Quantidade = 1 } },
-            1, "");
-        var result = Result.Success(response);
+        _clienteRepository.ObterClientesAtivosAsync(Arg.Any<CancellationToken>())
+            .Returns(clientesAtivos);
 
-        _compraService
-            .ExecutarCompraAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())!
-            .Returns(result);
+        _ordemCompraService.EmitirOrdensDeCompraAsync(Arg.Any<decimal>(), Arg.Any<CancellationToken>())
+            .Returns(ordensCompra);
 
-        var resultado = await _sut.Handle(request, CancellationToken.None);
+        _custodiaMasterRepository.ObterResiduosAsync(Arg.Any<CancellationToken>())
+            .Returns([]);
 
-        resultado.IsSuccess.Should().BeTrue();
-        resultado.Value.Should().Be(response);
+        _clienteRepository.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
+            .Returns([]);
+
+        _custodiaMasterRepository.AtualizarResiduosAysnc(Arg.Any<List<CustodiaMaster>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        _impostoRendaService.PublicarIR(Arg.Any<List<Distribuicao>>(), Arg.Any<CancellationToken>())
+            .Returns(10);
+
+        _calendarioMotorCompraService.ObterDataReferenciaExecucao(Arg.Any<DateTime>())
+            .Returns(DateTime.Now);
+
+        _historicoExecucaoMotorRepository.CriarHistoricoExecucaoAsync(Arg.Any<HistoricoExecucaoMotor>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _sut.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Exception.Should().BeNull();
+        result.Value.Should().NotBeNull();
+        result.Value.Should().BeOfType<ExecutarMotorCompraResponse>();
     }
 
     [Fact]
-    public async Task Handle_DeveRetornarErro_QuandoServicoFalhar()
+    public async Task Handle_NaoDeve_ExecutarCompra_Quando_NaoEhDiaDeCompra()
     {
-        var dataReferencia = new DateOnly(2024, 1, 1);
-        var request = new ExecutarCompraRequest(DateTime.Now, dataReferencia);
+        var request = new ExecutarMotorCompraRequest(default);
 
-        var exception = new Exception("Erro na compra");
-        var result = Result.Error<ExecutarCompraResponse>(exception);
-
-        _compraService
-            .ExecutarCompraAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())!
-            .Returns(result);
+        _calendarioMotorCompraService.DeveExecutarCompraHoje(Arg.Any<CancellationToken>())
+            .Returns(false);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
         
-        resultado.IsSuccess.Should().BeFalse();
-        resultado.Exception.Should().Be(exception);
+        resultado.IsSuccess.Should().BeTrue();
+        resultado.Exception.Should().BeNull();
+        resultado.Value.Should().BeNull();
     }
 }

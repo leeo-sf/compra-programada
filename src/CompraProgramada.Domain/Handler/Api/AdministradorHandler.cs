@@ -8,7 +8,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using OperationResult;
 
-namespace CompraProgramada.Domain.Handler;
+namespace CompraProgramada.Domain.Handler.Api;
 
 public class AdministradorHandler
     : IRequestHandler<CriarCestaRecomendadaRequest, Result<CriarCestaRecomendadaResponse>>,
@@ -103,7 +103,7 @@ public class AdministradorHandler
         var cestaAtual = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
 
         if (cestaAtual is null)
-            return default;
+            return Result.Success<CestaRecomendada>(default!)!;
 
         cestaAtual.DesativarCesta();
 
@@ -114,7 +114,7 @@ public class AdministradorHandler
         return cestaAtual;
     }
 
-    private (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<ComposicaoCesta> composicaoAnterior, List<ComposicaoCesta> composicaoAtual)
+    internal (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<ComposicaoCesta> composicaoAnterior, List<ComposicaoCesta> composicaoAtual)
     {
         var tickersAnteriores = composicaoAnterior.Select(c => c.Ticker);
         var tickersAtual = composicaoAtual.Select(c => c.Ticker);

@@ -57,10 +57,7 @@ public class CustodiaMaster
         if (QuantidadeResiduo == 0)
             return quantidadeDesejada;
         
-        var necessidadeLiquida = quantidadeDesejada - QuantidadeResiduo;
-
-        if (necessidadeLiquida < 0)
-            necessidadeLiquida = QuantidadeResiduo - quantidadeDesejada;
+        var necessidadeLiquida = Math.Abs(quantidadeDesejada - QuantidadeResiduo);
 
         return necessidadeLiquida;
     }

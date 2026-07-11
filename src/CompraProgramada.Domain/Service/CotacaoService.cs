@@ -13,7 +13,8 @@ public class CotacaoService : ICotacaoService
     private readonly ICotacaoRepository _cotacaoRepository;
     private readonly ICotahistParserService _cotahistParser;
 
-    public CotacaoService(ILogger<CotacaoService> logger,
+    public CotacaoService(
+        ILogger<CotacaoService> logger,
         ICotacaoRepository cotacaoRepository,
         ICotahistParserService cotahistParser)
     {
@@ -26,10 +27,10 @@ public class CotacaoService : ICotacaoService
     {
         var cotacoesCesta = RealizarMatchFechamentoECestaRecomendada(cestaVigente);
 
-        if (!cotacoesCesta.Any())
+        if (cotacoesCesta is null || !cotacoesCesta.Any())
             return new ApplicationException("Não foi possível obter a cesta recomendada nas cotações da B3.");
 
-        var cotacao = Cotacao.CriarRegistro(cotacoesCesta.FirstOrDefault()!.DataPregao, cotacoesCesta.Select(x => ComposicaoCotacao.CriarItem(x.Ticker, x.PrecoFechamento)).ToList());
+        var cotacao = Cotacao.CriarRegistro(cotacoesCesta.FirstOrDefault()!.DataPregao, [.. cotacoesCesta.Select(x => ComposicaoCotacao.CriarItem(x.Ticker, x.PrecoFechamento))]);
 
         _logger.LogInformation("Cotações de fachamento B3 da cesta Top Five com base na data pregão {DataPregao}. Cotações: {CotacoesFechamento}", cotacao.DataPregao, cotacao.ComposicaoCotacao);
 

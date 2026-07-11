@@ -19,9 +19,9 @@ public static class FakerRequest
     public static Faker<List<Cliente>> ClientesAtivos() => new Faker<List<Cliente>>()
         .CustomInstantiator(f => new List<Cliente>
         {
-            new Cliente(1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue, new(1, "FLH-000001", DateTime.MinValue, new(1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
-            new Cliente(2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue, new(2, "FLH-000002", DateTime.MinValue, new(2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
-            new Cliente(3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue, new(3, "FLH-000003", DateTime.MinValue, new(3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue), new() { }, new() { }, new() { })),
+            new (1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue, new(1, "FLH-000001", DateTime.MinValue, new(1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
+            new (2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue, new(2, "FLH-000002", DateTime.MinValue, new(2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
+            new (3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue, new(3, "FLH-000003", DateTime.MinValue, new(3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue), new() { }, new() { }, new() { })),
         });
 
     public static Faker<Cliente> ClienteAtivo() => new Faker<Cliente>()
@@ -41,11 +41,11 @@ public static class FakerRequest
     public static List<ComposicaoCestaDto> ComposicaoCestaRecomendada()
         => new List<ComposicaoCestaDto>
         {
-            new ComposicaoCestaDto { Ticker = "PETR4", Percentual = 30 },
-            new ComposicaoCestaDto { Ticker = "VALE3", Percentual = 25 },
-            new ComposicaoCestaDto { Ticker = "ITUB4", Percentual = 20 },
-            new ComposicaoCestaDto { Ticker = "BBDC4", Percentual = 15 },
-            new ComposicaoCestaDto { Ticker = "WEGE3", Percentual = 10 }
+            new() { Ticker = "PETR4", Percentual = 30 },
+            new() { Ticker = "VALE3", Percentual = 25 },
+            new() { Ticker = "ITUB4", Percentual = 20 },
+            new() { Ticker = "BBDC4", Percentual = 15 },
+            new() { Ticker = "WEGE3", Percentual = 10 }
         };
 
     public static List<OrdemCompra> OrdensCompraEmitidas()
@@ -88,10 +88,10 @@ public static class FakerRequest
     public static List<AtivoQuantidadeDto> ResiduosNaoDistribuidos()
         => new List<AtivoQuantidadeDto>
         {
-            new AtivoQuantidadeDto { Ticker = "PETR4", Quantidade = 1 },
-            new AtivoQuantidadeDto { Ticker = "VALE3", Quantidade = 0 },
-            new AtivoQuantidadeDto { Ticker = "ITUB4", Quantidade = 1 },
-            new AtivoQuantidadeDto { Ticker = "BBDC4", Quantidade = 0 },
-            new AtivoQuantidadeDto { Ticker = "WEGE3", Quantidade = 1 },
+            new() { Ticker = "PETR4", Quantidade = 1 },
+            new() { Ticker = "VALE3", Quantidade = 0 },
+            new() { Ticker = "ITUB4", Quantidade = 1 },
+            new() { Ticker = "BBDC4", Quantidade = 0 },
+            new() { Ticker = "WEGE3", Quantidade = 1 },
         };
 }

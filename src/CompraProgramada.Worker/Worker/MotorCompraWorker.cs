@@ -1,5 +1,8 @@
-﻿using CompraProgramada.Domain.Contract.Service;
-using CompraProgramada.Shared.Config;
+﻿using CompraProgramada.Shared.Config;
+using CompraProgramada.Shared.Request;
+using CompraProgramada.Shared.Response;
+using MediatR;
+using OperationResult;
 
 namespace CompraProgramada.Worker.Worker;
 
@@ -25,28 +28,31 @@ public class MotorCompraWorker : BackgroundService
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
-            try
+            var result = await ExecutarMotorDeCompra(stoppingToken);
+
+            if (!result.IsSuccess)
             {
-                await ExecutarMotorDeCompra(stoppingToken);
+                _logger.LogError("Erro ao executar o motor de compra. {Exception}", result.Exception);
+                continue;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ocorreu um erro ao executar o motor de compra.");
-                throw;
-            }
+
+            _logger.LogInformation("Motor de compra executado com sucesso {Result}.", result.Value);
         }
     }
 
-    internal async Task ExecutarMotorDeCompra(CancellationToken cancellationToken)
+    internal async Task<Result<ExecutarMotorCompraResponse>> ExecutarMotorDeCompra(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Iniciando o motor de compra...");
 
         using var scope = _serviceScopeFactory.CreateScope();
 
-        var motorCompraService = scope.ServiceProvider.GetRequiredService<ICompraService>();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-        await motorCompraService.ExecutarCompraAsync(null, cancellationToken);
+        var response = await mediator.Send(new ExecutarMotorCompraRequest(default), cancellationToken);
 
-        _logger.LogInformation("Motor de compra finalizado com sucesso.");
+        if (!response.IsSuccess)
+            return response.Exception;
+
+        return response;
     }
 }

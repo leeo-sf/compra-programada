@@ -2,7 +2,7 @@
 
 namespace CompraProgramada.Shared.Response;
 
-public record ExecutarCompraResponse(
+public record ExecutarMotorCompraResponse(
     DateTime DataExecucao,
     int TotalClientes,
     decimal TotalConsolidado,

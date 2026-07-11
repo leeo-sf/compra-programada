@@ -28,12 +28,11 @@ public class MotorEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     public async Task Dado_Request_ExecutarCompra_DeveRetornarSucesso200_QuandoSolicitado()
     {
         // Arrange
-        var dataAtual = DateTime.MinValue;
         var dataExecucao = DateTime.Now.AddDays(-2);
 
-        var request = new ExecutarCompraRequest(dataAtual, DateOnly.FromDateTime(dataExecucao));
+        var request = new ExecutarMotorCompraRequest(DateOnly.FromDateTime(dataExecucao));
 
-        var responseContent = new ExecutarCompraResponse(
+        var responseContent = new ExecutarMotorCompraResponse(
             dataExecucao,
             1,
             100m,
@@ -45,7 +44,7 @@ public class MotorEndpointsTests : IClassFixture<ApiWebApplicationFactory>
         );
 
         _mediator
-            .Send(Arg.Any<ExecutarCompraRequest>())
+            .Send(Arg.Any<ExecutarMotorCompraRequest>())
             .Returns(Result.Success(responseContent));
 
         // Act
@@ -54,7 +53,7 @@ public class MotorEndpointsTests : IClassFixture<ApiWebApplicationFactory>
             new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 
         // Assert
-        await _mediator.Received(1).Send(Arg.Any<ExecutarCompraRequest>());
+        await _mediator.Received(1).Send(Arg.Any<ExecutarMotorCompraRequest>());
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -62,12 +61,12 @@ public class MotorEndpointsTests : IClassFixture<ApiWebApplicationFactory>
     public async Task Dado_Request_E_ApiRetornarException_Quando_ExecutarCompra_Deve_ChamarMediatr_E_RetornarErro()
     {
         // Arrange
-        var request = new ExecutarCompraRequest(DateTime.Now, DateOnly.FromDateTime(DateTime.Now));
+        var request = new ExecutarMotorCompraRequest(DateOnly.FromDateTime(DateTime.Now));
 
         var erroMapeado = new DomainException("mensagem", "codigo");
 
-        _mediator.Send(Arg.Any<ExecutarCompraRequest>())
-            .Returns(Result.Error<ExecutarCompraResponse>(erroMapeado));
+        _mediator.Send(Arg.Any<ExecutarMotorCompraRequest>())
+            .Returns(Result.Error<ExecutarMotorCompraResponse>(erroMapeado));
 
         // Act
         var response = await _client
@@ -75,7 +74,7 @@ public class MotorEndpointsTests : IClassFixture<ApiWebApplicationFactory>
             new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 
         // Assert
-        await _mediator.Received().Send(Arg.Any<ExecutarCompraRequest>());
+        await _mediator.Received().Send(Arg.Any<ExecutarMotorCompraRequest>());
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 }

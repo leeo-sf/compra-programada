@@ -35,7 +35,7 @@ public class ImpostoRendaService : IImpostoRendaService
         return detalhesIr.Count;
     }
 
-    public decimal CalcularImpostoDeRenda(decimal valorOperacao)
+    internal decimal CalcularImpostoDeRenda(decimal valorOperacao)
     {
         var irBruto = valorOperacao * ALIQUOTA;
         return Math.Truncate(irBruto * 100) / 100;

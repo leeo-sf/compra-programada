@@ -2,7 +2,7 @@
 
 public interface ICalendarioMotorCompraService
 {
-    bool DeveExecutarCompraHoje();
+    Task<bool> DeveExecutarCompraHoje(CancellationToken cancellationToken);
     DateTime ObterProximaDataCompra();
     DateTime ObterDataReferenciaExecucao(DateTime dataExecutada);
 }
