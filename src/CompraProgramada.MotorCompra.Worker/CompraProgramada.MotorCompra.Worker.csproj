@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	<InternalsVisibleTo Include="CompraProgramada.Worker.Tests" />
+	<InternalsVisibleTo Include="CompraProgramada.MotorCompra.Worker.Tests" />
   </ItemGroup>
 
   <ItemGroup>

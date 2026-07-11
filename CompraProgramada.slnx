@@ -10,13 +10,13 @@
     <Project Path="src/CompraProgramada.Domain/CompraProgramada.Domain.csproj" />
     <Project Path="src/CompraProgramada.Infra/CompraProgramada.Infra.csproj" />
     <Project Path="src/CompraProgramada.Shared/CompraProgramada.Shared.csproj" />
-    <Project Path="src/CompraProgramada.Worker/CompraProgramada.Worker.csproj" />
+    <Project Path="src/CompraProgramada.MotorCompra.Worker/CompraProgramada.MotorCompra.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CompraProgramada.Api.Tests/CompraProgramada.Api.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Data.Tests/CompraProgramada.Data.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Domain.Tests/CompraProgramada.Domain.Tests.csproj" />
     <Project Path="tests/CompraProgramada.Infra.Tests/CompraProgramada.Infra.Tests.csproj" />
-    <Project Path="tests/CompraProgramada.Worker.Tests/CompraProgramada.Worker.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.MotorCompra.Worker.Tests/CompraProgramada.MotorCompra.Worker.Tests.csproj" />
   </Folder>
 </Solution>

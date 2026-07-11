@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CompraProgramada.Worker\CompraProgramada.Worker.csproj" />
+    <ProjectReference Include="..\..\src\CompraProgramada.MotorCompra.Worker\CompraProgramada.MotorCompra.Worker.csproj" />
   </ItemGroup>
 
   <ItemGroup>
