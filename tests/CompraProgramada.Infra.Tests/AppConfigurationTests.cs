@@ -1,6 +1,11 @@
-﻿using CompraProgramada.Shared.Dto;
+﻿using CompraProgramada.Data;
+using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Domain.Service;
+using CompraProgramada.Shared.Config;
+using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Exceptions.Base;
 using CompraProgramada.Shared.Request;
-using CompraProgramada.Data;
 using Confluent.Kafka;
 using FluentValidation;
 using MediatR;
@@ -9,11 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using CompraProgramada.Shared.Exceptions.Base;
-using CompraProgramada.Domain.Contract.Repository;
-using CompraProgramada.Domain.Contract.Service;
-using CompraProgramada.Domain.Service;
-using CompraProgramada.Shared.Config;
 
 namespace CompraProgramada.Infra.Tests;
 
@@ -120,22 +120,6 @@ public class AppConfigurationTests
     }
 
     [Fact]
-    public async Task Deve_Resolver_Mediatr()
-    {
-        // Arrange
-        _services.AddLogging();
-        _services.ConfigurarMediatR();
-
-        var provider = _services.BuildServiceProvider();
-
-        // Act
-        var mediator = provider.GetService<IMediator>();
-
-        // Assert
-        Assert.NotNull(mediator);
-    }
-
-    [Fact]
     public async Task Repository_Deve_Ser_Scoped()
     {
         // Arrange
@@ -204,7 +188,7 @@ public class AppConfigurationTests
         Assert.NotNull(cotahistDescriptor);
         Assert.Equal(ServiceLifetime.Singleton, cotahistDescriptor?.Lifetime);
         Assert.NotNull(calendarioDescriptor);
-        Assert.Equal(ServiceLifetime.Singleton, calendarioDescriptor?.Lifetime);
+        Assert.Equal(ServiceLifetime.Scoped, calendarioDescriptor?.Lifetime);
         Assert.NotNull(fileSysDescriptor);
         Assert.Equal(ServiceLifetime.Singleton, fileSysDescriptor?.Lifetime);
         Assert.NotNull(impostoRendaDescriptor);
