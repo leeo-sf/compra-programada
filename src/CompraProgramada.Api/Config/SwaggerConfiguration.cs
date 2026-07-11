@@ -1,25 +1,30 @@
-﻿using Microsoft.OpenApi;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace CompraProgramada.Api.Config;
 
 [ExcludeFromCodeCoverage]
 internal static class SwaggerConfiguration
 {
+    private const string API_TITLE = "Compra.Programada.Api";
+
     public static void AddSwaggerConfiguration(this IServiceCollection services)
-        => services.AddSwaggerGen(opt =>
+        => services.AddOpenApi(options =>
         {
-            opt.SwaggerDoc("v1", new OpenApiInfo
+            options.AddDocumentTransformer((document, context, cancellationToken) =>
             {
-                Title = "Compra.Programada.Api",
-                Version = "v1",
-                Description = "API de compra programada de ações"
+                document.Info.Title = API_TITLE;
+                document.Info.Version = "v1";
+                document.Info.Description = "API de compra programada de ações";
+                return Task.CompletedTask;
             });
         });
 
     public static void UseSwaggerConfiguration(this WebApplication app)
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
+        app.MapOpenApi();
+        app.UseSwaggerUI(opt =>
+        {
+            opt.SwaggerEndpoint("/openapi/v1.json", $"{API_TITLE} v1");
+        });
     }
 }

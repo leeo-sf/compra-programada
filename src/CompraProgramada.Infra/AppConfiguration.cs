@@ -76,9 +76,9 @@ public static class AppConfiguration
 
         services.AddScoped<ICotacaoService, CotacaoService>();
         services.AddScoped<IOrdemCompraService, OrdemCompraService>();
+        services.AddScoped<ICalendarioMotorCompraService, CalendarioMotorCompraService>();
 
         services.AddSingleton<ICotahistParserService, CotahistParserService>();
-        services.AddSingleton<ICalendarioMotorCompraService, CalendarioMotorCompraService>();
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IImpostoRendaService, ImpostoRendaService>();
         services.AddSingleton<IDateTimeProvaider, DateTimeProvaider>();
