@@ -90,7 +90,6 @@ public static class AppConfiguration
         services.AddScoped<IClienteRepository, ClienteRepository>();
         services.AddScoped<IContaMasterRepository, ContaMasterRepository>();
         services.AddScoped<ICotacaoRepository, CotacaoRepository>();
-        services.AddScoped<ICustodiaFilhoteRepository, CustodiaFilhoteRepository>();
         services.AddScoped<ICustodiaMasterRepository, CustodiaMasterRepository>();
         services.AddScoped<IHistoricoExecucaoMotorRepository, HistoricoExecucaoMotorRepository>();
         services.AddScoped<IOrdemCompraRepository, OrdemCompraRepository>();
@@ -148,6 +147,7 @@ public static class AppConfiguration
         => services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.Converters.Add(new UtcDateTimeConverter());
+            options.SerializerOptions.Converters.Add(new DecimalTwoDecimalPlacesConverter());
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });
 

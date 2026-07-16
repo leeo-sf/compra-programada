@@ -4,15 +4,13 @@ using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Handler.Worker;
 using CompraProgramada.Domain.Mapper;
 using CompraProgramada.Domain.Tests.TestUtils;
-using CompraProgramada.Shared.Dto;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using OperationResult;
 
-namespace CompraProgramada.Application.Tests.Handler;
+namespace CompraProgramada.Domain.Tests.Handler;
 
 public class MotorCompraHandlerTests
 {
@@ -74,7 +72,7 @@ public class MotorCompraHandlerTests
         _calendarioMotorCompraService.ObterDataReferenciaExecucao(Arg.Any<DateTime>())
             .Returns(DateTime.Now);
 
-        _historicoExecucaoMotorRepository.CriarHistoricoExecucaoAsync(Arg.Any<HistoricoExecucaoMotor>(), Arg.Any<CancellationToken>())
+        _historicoExecucaoMotorRepository.SalvarHistoricoExecucaoAsync(Arg.Any<HistoricoExecucaoMotor>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
         // Act

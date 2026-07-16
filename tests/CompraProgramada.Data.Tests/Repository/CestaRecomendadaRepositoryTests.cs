@@ -52,7 +52,7 @@ public class CestaRecomendadaRepositoryTests : SqliteTestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ObterCestaAtivaAsync(CancellationToken.None);
+        var result = await _repo.ObterCestaAtualAsync(CancellationToken.None);
 
         // Assert
         _context.CestaRecomendada.Should().HaveCount(2);

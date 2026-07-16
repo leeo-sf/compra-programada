@@ -65,7 +65,7 @@ public class AdministradorHandler
     {
         _logger.LogInformation("Iniciando consulta da cesta atual.");
 
-        var cesta = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
+        var cesta = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
 
         if (cesta is null)
             return new ApplicationException("Nenhuma Cesta Top Five ativa no momento.");
@@ -101,7 +101,7 @@ public class AdministradorHandler
 
     private async Task<Result<CestaRecomendada?>> ObtemEDesativaCestaAtual(CancellationToken cancellationToken)
     {
-        var cestaAtual = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
+        var cestaAtual = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
 
         if (cestaAtual is null)
             return Result.Success<CestaRecomendada>(default!)!;

@@ -10,12 +10,12 @@ public class HistoricoExecucaoMotorRepository : IHistoricoExecucaoMotorRepositor
 
     public HistoricoExecucaoMotorRepository(AppDbContext context) => _context = context;
 
-    public async Task<HistoricoExecucaoMotor?> ObtemExecucaoRealizadaAsync(DateTime dataDeExecucao, CancellationToken cancellationToken)
+    public async Task<HistoricoExecucaoMotor?> ObterHistoricoExecucaoAsync(DateTime dataDeExecucao, CancellationToken cancellationToken)
         => await _context.HistoricoExecucaoMotor
             .AsNoTracking()
             .FirstOrDefaultAsync(he => he.DataExecucao.Date == dataDeExecucao.Date && he.Executado, cancellationToken);
 
-    public async Task CriarHistoricoExecucaoAsync(HistoricoExecucaoMotor execucao, CancellationToken cancellationToken)
+    public async Task SalvarHistoricoExecucaoAsync(HistoricoExecucaoMotor execucao, CancellationToken cancellationToken)
     {
         _context.HistoricoExecucaoMotor.Add(execucao);
         await _context.SaveChangesAsync(cancellationToken);

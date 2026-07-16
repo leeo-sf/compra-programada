@@ -20,7 +20,7 @@ public class HistoricoExecucaoMotorRepositoryTests : SqliteTestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ObtemExecucaoRealizadaAsync(new DateTime(2026, 05, 10), CancellationToken.None);
+        var result = await _repo.ObterHistoricoExecucaoAsync(new DateTime(2026, 05, 10), CancellationToken.None);
 
         // Assert
         _context.HistoricoExecucaoMotor.Should().HaveCount(1);
@@ -37,7 +37,7 @@ public class HistoricoExecucaoMotorRepositoryTests : SqliteTestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ObtemExecucaoRealizadaAsync(new DateTime(2026, 05, 11), CancellationToken.None);
+        var result = await _repo.ObterHistoricoExecucaoAsync(new DateTime(2026, 05, 11), CancellationToken.None);
 
         // Assert
         _context.HistoricoExecucaoMotor.Should().HaveCount(1);
@@ -46,13 +46,13 @@ public class HistoricoExecucaoMotorRepositoryTests : SqliteTestBase
     }
 
     [Fact]
-    public async Task CriarHistoricoExecucaoAsync_Deve_Persistir_HistoricoExecucaoMotor()
+    public async Task SalvarHistoricoExecucaoAsync_Deve_Persistir_HistoricoExecucaoMotor()
     {
         // Arrange
         var execucao = HistoricoExecucaoMotor.CriarRegistroHistorico(new DateTime(2026, 05, 10), new DateTime(2026, 05, 11));
 
         // Act
-        await _repo.CriarHistoricoExecucaoAsync(execucao, CancellationToken.None);
+        await _repo.SalvarHistoricoExecucaoAsync(execucao, CancellationToken.None);
 
         // Assert
         _context.HistoricoExecucaoMotor.Should().HaveCount(1);

@@ -48,7 +48,7 @@ public class Cliente
     }
 
     public static Cliente Criar(AdesaoRequest request)
-        => new Cliente(0, request.Nome, request.Cpf, request.Email, request.ValorMensal, request.ValorMensal, true, DateTime.Now);
+        => new(0, request.Nome, request.Cpf, request.Email, request.ValorMensal, request.ValorMensal, true, DateTime.Now);
 
     public void AtualizarValorMensal(AtualizarValorMensalRequest request)
     {

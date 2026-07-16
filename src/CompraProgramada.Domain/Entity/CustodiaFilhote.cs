@@ -26,7 +26,7 @@ public class CustodiaFilhote
     }
 
     public static CustodiaFilhote GerarCustodia(string ticker)
-        => new CustodiaFilhote(0, 0, ticker, 0, 0);
+        => new(0, 0, ticker, 0, 0);
 
     /// <summary>
     /// Atribuí nova quantidade de ativos (soma quantidade anterior + nova quantidade)
@@ -54,13 +54,12 @@ public class CustodiaFilhote
         var valorCompraAnterior = Quantidade * PrecoMedio;
         var valorCompraAtual = novaQuantidadeDeAtivos * precoFechamentoAtivo;
 
-        decimal precoMedio = valorCompraAtual / novaQuantidadeDeAtivos;
+        PrecoMedio = valorCompraAtual / novaQuantidadeDeAtivos;
 
         if (Quantidade > 0)
-            precoMedio = (valorCompraAnterior + valorCompraAtual) / Quantidade + novaQuantidadeDeAtivos;
+            PrecoMedio = (valorCompraAnterior + valorCompraAtual) / Quantidade + novaQuantidadeDeAtivos;
 
-        PrecoMedio = precoMedio;
-        return precoMedio;
+        return PrecoMedio;
     }
 
     /// <summary>

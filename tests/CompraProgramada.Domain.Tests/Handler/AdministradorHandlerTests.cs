@@ -10,7 +10,7 @@ using NSubstitute;
 using CompraProgramada.Domain.Handler.Api;
 using CompraProgramada.Domain.Contract.Repository;
 
-namespace CompraProgramada.Application.Tests.Handler;
+namespace CompraProgramada.Domain.Tests.Handler;
 
 public class AdministradorHandlerTests
 {
@@ -35,7 +35,7 @@ public class AdministradorHandlerTests
         var request = FakerRequest.CriarCestaRecomendadaRequest();
 
         _cestaRecomendadaRepository
-            .ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+            .ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
         _cestaRecomendadaRepository
@@ -61,7 +61,7 @@ public class AdministradorHandlerTests
         var cestaAnterior = new CestaRecomendada(1, "Cesta Anterior", DateTime.MinValue, DateTime.MinValue, true, []);
 
         _cestaRecomendadaRepository
-            .ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+            .ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns(cestaAnterior);
 
         _cestaRecomendadaRepository
@@ -92,7 +92,7 @@ public class AdministradorHandlerTests
         var response = CestaRecomendada.CriarCesta("Name", [.. itensCesta.Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual))]);
 
         _cestaRecomendadaRepository
-            .ObterCestaAtivaAsync(Arg.Any<CancellationToken>())!
+            .ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
             .Returns(response);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -108,7 +108,7 @@ public class AdministradorHandlerTests
         var request = new CestaAtualRequest();
 
         _cestaRecomendadaRepository
-            .ObterCestaAtivaAsync(Arg.Any<CancellationToken>())!
+            .ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
             .Returns((CestaRecomendada)null!);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);

@@ -33,7 +33,7 @@ public class OrdemCompraServiceTests
     public async Task OrdemCompra_Deve_RetornarApplicationExcpetion_Quando_NaoTiverCestaRecomendada()
     {
         // Arrange
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())!
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
             .Returns((CestaRecomendada)null!);
 
         // Act
@@ -50,7 +50,7 @@ public class OrdemCompraServiceTests
     public async Task OrdemCompra_Deve_RetornarException_Quando_FalharObterFechamento()
     {
         // Arrange
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())!
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
             .Returns(CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) }));
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
@@ -70,7 +70,7 @@ public class OrdemCompraServiceTests
     public async Task OrdemCompra_Deve_Gerar_Quando_Solicitado_E_SemErros()
     {
         // Arrange
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())!
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
             .Returns(CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) }));
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
@@ -79,7 +79,7 @@ public class OrdemCompraServiceTests
         _custodiaMasterRepository.ObterResiduosAsync(Arg.Any<CancellationToken>())
             .Returns(new List<CustodiaMaster>());
 
-        _ordemCompraRepository.SalvarOrdensDeCompra(Arg.Any<List<OrdemCompra>>(), Arg.Any<CancellationToken>())
+        _ordemCompraRepository.SalvarOrdensCompraAsync(Arg.Any<List<OrdemCompra>>(), Arg.Any<CancellationToken>())
             .Returns(new List<OrdemCompra>() { OrdemCompra.GerarOrdemCompra("PETR4", 10, 40) });
 
         // Act

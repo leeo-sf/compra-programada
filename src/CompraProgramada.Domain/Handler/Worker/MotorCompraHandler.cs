@@ -100,7 +100,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
         _logger.LogInformation("Ir Dedo Duro calculado e publicado para {QtdClientes} clientes.", qtdIrPublicadoResult.Value);
 
         var dataReferencia = _calendarioMotorCompraService.ObterDataReferenciaExecucao(dataExecucao);
-        await _historicoExecucaoMotorRepository.CriarHistoricoExecucaoAsync(HistoricoExecucaoMotor.CriarRegistroHistorico(dataReferencia, dataExecucao), cancellationToken);
+        await _historicoExecucaoMotorRepository.SalvarHistoricoExecucaoAsync(HistoricoExecucaoMotor.CriarRegistroHistorico(dataReferencia, dataExecucao), cancellationToken);
 
         _logger.LogInformation("Registrado histórico da execução do motor de compra na base de dados.");
 

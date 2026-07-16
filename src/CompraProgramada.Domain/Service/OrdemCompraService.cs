@@ -33,7 +33,7 @@ public class OrdemCompraService : IOrdemCompraService
     {
         _logger.LogInformation("Iniciando emissão de ordens de compra...");
 
-        var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
+        var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)
             return new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
@@ -67,7 +67,7 @@ public class OrdemCompraService : IOrdemCompraService
             ordensCompra.Add(ordemCompra);
         }
 
-        var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensDeCompra(ordensCompra, cancellationToken);
+        var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensCompraAsync(ordensCompra, cancellationToken);
 
         _logger.LogInformation("Ordens de compra emitidas e registradas. {OrdemCompra}", ordensCompraEmitidas);
 

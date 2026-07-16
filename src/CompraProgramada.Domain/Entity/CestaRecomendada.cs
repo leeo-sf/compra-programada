@@ -25,6 +25,15 @@ public class CestaRecomendada
         ComposicaoCesta = itens;
     }
 
+    internal CestaRecomendada(int id, string nome, DateTime dataCriacao, DateTime? dataDesativacao, bool ativa)
+    {
+        Id = id;
+        Nome = nome;
+        DataCriacao = dataCriacao;
+        DataDesativacao = dataDesativacao;
+        Ativa = ativa;
+    }
+
     public static CestaRecomendada CriarCesta(string nome, List<ComposicaoCesta> itens)
     {
         if (itens.Count != QUANTIDADE_EXATA_ITENS_CESTA)

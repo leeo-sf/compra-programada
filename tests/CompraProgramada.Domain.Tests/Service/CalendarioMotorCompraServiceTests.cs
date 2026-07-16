@@ -32,7 +32,7 @@ public class CalendarioMotorCompraServiceTests
         var dateTimeProvaiderFaker = new DateTimeProvaiderHelper(DateTime.Parse(dataAtual));
         var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker, _historicoExecucaoMotorRepository);
 
-        _historicoExecucaoMotorRepository.ObtemExecucaoRealizadaAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+        _historicoExecucaoMotorRepository.ObterHistoricoExecucaoAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
             .Returns(compraJaFoiExecutada ? HistoricoExecucaoMotor.CriarRegistroHistorico(DateTime.MinValue, DateTime.MinValue) : null);
 
         // Act

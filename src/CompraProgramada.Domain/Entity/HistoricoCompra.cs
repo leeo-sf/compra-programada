@@ -12,8 +12,6 @@ public class HistoricoCompra
     public DateOnly Data { get; private set; }
     public ContaGrafica ContaGrafica { get; set; } = default!;
 
-    private HistoricoCompra() { }
-
     internal HistoricoCompra(int id, int contaGraficaId, string ticker, int quantidade, decimal precoExecutado, decimal precoMedio, decimal valorAporte, DateOnly data)
     {
         Id = id;
@@ -28,7 +26,7 @@ public class HistoricoCompra
 
     public static HistoricoCompra RegistrarHistorico(int contaGraficaId, string ticker, int quantidade, decimal precoExecutado, decimal precoMedio, decimal valorAporte, DateOnly data)
     {
-        if (string.IsNullOrEmpty(ticker))
+        if (string.IsNullOrWhiteSpace(ticker))
             throw new ApplicationException("O ativo precisa ser definido!");
 
         if (quantidade < 0)
@@ -37,6 +35,6 @@ public class HistoricoCompra
         if (precoExecutado < 0)
             throw new ApplicationException("Preco de fechamento não pode ser negativo");
 
-        return new HistoricoCompra(0, contaGraficaId, ticker, quantidade, precoExecutado, precoMedio, valorAporte, data);
+        return new(0, contaGraficaId, ticker, quantidade, precoExecutado, precoMedio, valorAporte, data);
     }
 }

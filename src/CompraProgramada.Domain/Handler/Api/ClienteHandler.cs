@@ -43,11 +43,11 @@ public class ClienteHandle
     {
         _logger.LogInformation("Iniciando processo de adesão para o cliente {Nome}", request.Nome);
 
-        var clienteExistente = await _clienteRepository.ExisteAsync(request.Cpf, cancellationToken);
+        var clienteExistente = await _clienteRepository.CpfExistenteAsync(request.Cpf, cancellationToken);
         if (clienteExistente)
             return new CpfExistenteException();
 
-        var temCestaRecomendada = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken) is not null;
+        var temCestaRecomendada = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken) is not null;
         if (!temCestaRecomendada)
         {
             _logger.LogWarning("Adesão não pode ser realizada, pois não há cesta recomendada ativa");
@@ -87,7 +87,7 @@ public class ClienteHandle
 
         cliente.Desativar();
 
-        var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
+        var clienteAtualizado = await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
 
         _logger.LogInformation("Solicitação de saída do produto realizada com sucesso.");
 
@@ -109,7 +109,7 @@ public class ClienteHandle
 
         cliente.AtualizarValorMensal(request);
 
-        var clienteAtualizado = await _clienteRepository.AtualizarClienteAsync(cliente, cancellationToken);
+        var clienteAtualizado = await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
 
         _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", clienteAtualizado.Id, clienteAtualizado.ValorMensal);
 
@@ -126,7 +126,7 @@ public class ClienteHandle
 
         _logger.LogInformation("Cliente solicitando consulta da carteira: {ClienteId}", request);
 
-        var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
+        var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)
             return new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
@@ -150,7 +150,7 @@ public class ClienteHandle
 
         _logger.LogInformation("Cliente solicitando consulta da rentabilidade da carteira: {ClienteId}", request);
 
-        var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtivaAsync(cancellationToken);
+        var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)
             return new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
@@ -167,7 +167,7 @@ public class ClienteHandle
 
     private async Task<Result<Cliente>> IdentificarCliente(int id, CancellationToken cancellationToken)
     {
-        var cliente = await _clienteRepository.ObterClienteAsync(id, cancellationToken);
+        var cliente = await _clienteRepository.ObterAsync(id, cancellationToken);
 
         if (cliente is not null)
             return cliente;

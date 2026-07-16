@@ -8,13 +8,11 @@ using CompraProgramada.Shared.Dto;
 using CompraProgramada.Shared.Exceptions;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
-using Confluent.Kafka;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using OperationResult;
 
-namespace CompraProgramada.Application.Tests.Handler;
+namespace CompraProgramada.Domain.Tests.Handler;
 
 public class ClienteHandlerTests
 {
@@ -41,10 +39,10 @@ public class ClienteHandlerTests
         var request = FakerRequest.AdesaoRequest().Generate();
         var response = FakerRequest.ClienteAtivo().Generate();
 
-        _clienteRepository.ExisteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _clienteRepository.CpfExistenteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns(CestaRecomendada.CriarCesta("", [.. FakerRequest.ComposicaoCestaRecomendada().Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual))]));
 
         _clienteRepository
@@ -74,7 +72,7 @@ public class ClienteHandlerTests
         var request = FakerRequest.AdesaoRequest().Generate();
         var exception = new CpfExistenteException();
 
-        _clienteRepository.ExisteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _clienteRepository.CpfExistenteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -89,10 +87,10 @@ public class ClienteHandlerTests
         var request = FakerRequest.AdesaoRequest().Generate();
         var exception = new AppException("Adesão não pode ser realizada", "CESTA_NAO_ENCONTRADA");
 
-        _clienteRepository.ExisteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _clienteRepository.CpfExistenteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -107,10 +105,10 @@ public class ClienteHandlerTests
         var request = new SaidaProdutoRequest(1);
         var cliente = FakerRequest.ClienteAtivo().Generate();
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
             .Returns(cliente);
 
-        _clienteRepository.AtualizarClienteAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
+        _clienteRepository.AtualizarAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
             .Returns(cliente);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -129,7 +127,7 @@ public class ClienteHandlerTests
         cliente.Desativar();
         var exception = new AppException("Cliente já está inativo", "CLIENTE_INATIVO");
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
             .Returns(cliente);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -144,10 +142,10 @@ public class ClienteHandlerTests
         var request = new AtualizarValorMensalRequest(1, 50000);
         var cliente = FakerRequest.ClienteAtivo().Generate();
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
             .Returns(cliente);
 
-        _clienteRepository.AtualizarClienteAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
+        _clienteRepository.AtualizarAsync(Arg.Any<Cliente>(), Arg.Any<CancellationToken>())
             .Returns(cliente);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -164,7 +162,7 @@ public class ClienteHandlerTests
         var cliente = FakerRequest.ClienteAtivo().Generate();
         cliente.Desativar();
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
             .Returns(cliente);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -209,10 +207,10 @@ public class ClienteHandlerTests
                 new DetalheCarteiraDto { Ticker = "MGLU3", Quantidade = 1000, PrecoMedio = 5.20m, CotacaoAtual = 1.95m, ValorAtual = 1950, Pl = -3250m, PlPercentual = -62.50m, ComposicaoCarteira = 7.00m }
             });
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
             .Returns(cliente);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns(cestaAtiva);
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
@@ -238,10 +236,10 @@ public class ClienteHandlerTests
         var cliente = FakerRequest.ClienteAtivo().Generate();
         var exception = new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
             .Returns(cliente);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -257,10 +255,10 @@ public class ClienteHandlerTests
         var cliente = FakerRequest.ClienteAtivo().Generate();
         var exception = new Exception("Nenhuma cesta vigente encontrada");
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
             .Returns(cliente);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
@@ -301,10 +299,10 @@ public class ClienteHandlerTests
             new() { new HistoricoAporteDto { Parcela = "1/3", Valor = 1, Data = DateOnly.FromDateTime(new DateTime(2026, 03, 05)) } },
             new() { new EvolucaoCarteiraDto { Rentabilidade = 547400, ValorCarteira = 5475, ValorInvestido = 1, Data = DateOnly.FromDateTime(new DateTime(2026, 03, 05)) } });
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
             .Returns(cliente);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns(cestaAtiva);
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
@@ -330,10 +328,10 @@ public class ClienteHandlerTests
         var cliente = FakerRequest.ClienteAtivo().Generate();
         var exception = new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
             .Returns(cliente);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -349,10 +347,10 @@ public class ClienteHandlerTests
         var cliente = FakerRequest.ClienteAtivo().Generate();
         var exception = new Exception("Nenhuma cesta vigente encontrada");
 
-        _clienteRepository.ObterClienteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
+        _clienteRepository.ObterAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())!
             .Returns(cliente);
 
-        _cestaRecomendadaRepository.ObterCestaAtivaAsync(Arg.Any<CancellationToken>())
+        _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
         _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!

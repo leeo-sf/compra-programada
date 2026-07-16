@@ -1,4 +1,6 @@
 ﻿using CompraProgramada.Shared.Enum;
+using CompraProgramada.Shared.Exceptions;
+using System.Net;
 
 namespace CompraProgramada.Domain.Entity;
 
@@ -14,17 +16,6 @@ public class OrdemCompra
     public List<OrdemCompraDetalhe> Detalhes { get; private set; } = new List<OrdemCompraDetalhe>();
 
     private OrdemCompra() { }
-
-    internal OrdemCompra(int id, string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal, DateTime data)
-    {
-        Id = id;
-        Ticker = ticker;
-        QuantidadeTotal = quantidadeTotal;
-        PrecoUnitario = precoUnitario;
-        ValorTotal = valorTotal;
-        Data = data;
-    }
-
     internal OrdemCompra(int id, string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal, DateTime data, List<OrdemCompraDetalhe> detalhes)
     {
         Id = id;
@@ -38,15 +29,18 @@ public class OrdemCompra
 
     public static OrdemCompra GerarOrdemCompra(string ticker, int quantidadeTotal, decimal precoUnitario)
     {
-        var detalhes = new List<OrdemCompraDetalhe>();
+        if (quantidadeTotal < 1)
+            throw new AppException("Solicitação de registro de ordem de compra inferior a 1", "ORDEM_COMPRA_INVALIDA", HttpStatusCode.BadRequest);
+
+        List<OrdemCompraDetalhe> detalhes = [];
         var multiplosPresente = Math.DivRem(quantidadeTotal, 100, out int restos);
 
-        if (restos != 0)
-            detalhes.Add(OrdemCompraDetalhe.GerarDetalhe(OrdemCompraTipo.Fracionario, $"{ticker}F", restos, 0));
+        if (restos > 0)
+            detalhes.Add(OrdemCompraDetalhe.GerarDetalhe(OrdemCompraTipo.Fracionario, $"{ticker}F", restos));
 
         if (multiplosPresente > 0)
-            detalhes.Add(OrdemCompraDetalhe.GerarDetalhe(OrdemCompraTipo.Padrao, ticker, multiplosPresente * 100, 0));
+            detalhes.Add(OrdemCompraDetalhe.GerarDetalhe(OrdemCompraTipo.Padrao, ticker, multiplosPresente * 100));
 
-        return new OrdemCompra(0, ticker, quantidadeTotal, precoUnitario, quantidadeTotal * precoUnitario, DateTime.Now, detalhes);
+        return new(0, ticker, quantidadeTotal, precoUnitario, quantidadeTotal * precoUnitario, DateTime.Now, detalhes);
     }
 }

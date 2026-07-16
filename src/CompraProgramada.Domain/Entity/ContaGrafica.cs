@@ -33,7 +33,7 @@ public class ContaGrafica : BaseConta
     }
 
     public static ContaGrafica Gerar(Cliente cliente)
-        => new ContaGrafica(cliente);
+        => new(cliente);
 
     public void AdicionarDistribuicao(Distribuicao distribuicao)
         => Distribuicoes.Add(distribuicao);
@@ -47,10 +47,10 @@ public class ContaGrafica : BaseConta
     /// <param name="fechamento">Fechamento dos ativos da cesta recomendada</param>
     public ResumoCarteiraDto CalcularResumoDeRentabilidade(Cotacao fechamento)
     {
-        if (!fechamento.ComposicaoCotacao.Any())
+        if (fechamento.ComposicaoCotacao.Count == 0)
             throw new ApplicationException("Itens do fechamento inválido!");
 
-        if (!CustodiaFilhotes.Any())
+        if (CustodiaFilhotes.Count == 0)
             throw new ApplicationException("Cliente não tem uma carteira populada.");
 
         decimal valorTotalInvestido = 0;
@@ -85,7 +85,7 @@ public class ContaGrafica : BaseConta
     /// <returns>Lista de históico de aportes</returns>
     public List<HistoricoAporteDto> HistoricoAportes()
     {
-        if (!HistoricoCompra.Any())
+        if (HistoricoCompra.Count == 0)
             throw new ApplicationException("Cliente ainda não tem compras realizadas.");
 
         var historicoCompraOrdenado = HistoricoCompra
@@ -93,7 +93,7 @@ public class ContaGrafica : BaseConta
             .OrderBy(x => x.Data)
             .ToList();
 
-        return historicoCompraOrdenado
+        return [.. historicoCompraOrdenado
             .GroupBy(x => new { x.Data.Year, x.Data.Month })
             .SelectMany(grupo =>
                 grupo.OrderBy(x => x.Data)
@@ -103,8 +103,7 @@ public class ContaGrafica : BaseConta
                     Valor = item.ValorAporte,
                     Parcela = $"{index + 1}/{NUMERO_PARCELA_MAXIMO_COMPRA}"
                 }))
-            .OrderBy(x => x.Data)
-            .ToList();
+            .OrderBy(x => x.Data)];
     }
 
     /// <summary>
@@ -114,10 +113,10 @@ public class ContaGrafica : BaseConta
     /// <returns>Lista da evolução da carteira</returns>
     public List<EvolucaoCarteiraDto> CalcularEvolucaoCarteira(Cotacao fechamento)
     {
-        if (!fechamento.ComposicaoCotacao.Any())
+        if (fechamento.ComposicaoCotacao.Count == 0)
             throw new ApplicationException("Itens do fechamento inválido!");
 
-        if (!HistoricoCompra.Any())
+        if (HistoricoCompra.Count == 0)
             throw new ApplicationException("Cliente ainda não tem compras realizadas.");
 
         var historicoCompraAgrupado = HistoricoCompra
@@ -126,7 +125,7 @@ public class ContaGrafica : BaseConta
             .ToList();
 
         decimal valorAporteAnterior = 0;
-        List<EvolucaoCarteiraDto> evolucaoCarteira = new() { };
+        List<EvolucaoCarteiraDto> evolucaoCarteira = [];
 
         foreach (var grupo in historicoCompraAgrupado)
         {
@@ -160,10 +159,10 @@ public class ContaGrafica : BaseConta
     /// <returns>Lista de detalhes de cada ativo da carteira</returns>
     public List<DetalheCarteiraDto> CalcularDetalhesCarteira(Cotacao fechamento, decimal valorTotalAtualCarteira)
     {
-        if (!fechamento.ComposicaoCotacao.Any())
+        if (fechamento.ComposicaoCotacao.Count == 0)
             throw new ApplicationException("Itens do fechamento inválido!");
 
-        if (!CustodiaFilhotes.Any())
+        if (CustodiaFilhotes.Count == 0)
             throw new ApplicationException("Conta não tem uma carteira no momento.");
 
         var detalhesAtivos = CustodiaFilhotes

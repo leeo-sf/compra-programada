@@ -1,17 +1,34 @@
 ﻿using CompraProgramada.Domain.Entity;
 using CompraProgramada.Shared.Enum;
+using CompraProgramada.Shared.Exceptions;
 using FluentAssertions;
+using System.Net;
 
 namespace CompraProgramada.Domain.Tests.Entity;
 
 public class OrdemCompraTests
 {
     [Theory]
+    [InlineData("PETR4", 0, 42.83)]
+    [InlineData("VALE3", -1, 62)]
+    [InlineData("BBDC4", -10, 15)]
+    public async Task GerarOrdemCompra_DeveRetornarAppException_Quando_QuantidadeCompra_InferiorA1(string ticker, int quantidadeTotal, decimal precoUnitario)
+    {
+        var act = () => OrdemCompra.GerarOrdemCompra(ticker, quantidadeTotal, precoUnitario);
+        var exception = act.Should().Throw<AppException>().Which;
+
+        exception.Message.Should().Be("Solicitação de registro de ordem de compra inferior a 1");
+        exception.Codigo.Should().Be("ORDEM_COMPRA_INVALIDA");
+        exception.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Theory]
     [InlineData("PETR4", 80, 42.83)]
     [InlineData("VALE3", 98, 62)]
     [InlineData("ITUB4", 77, 30)]
     [InlineData("BBDC4", 12, 15)]
     [InlineData("WEGE3", 26, 40)]
+    [InlineData("AAPL4", 1, 40)]
     public void GerarOrdemCompra_DeveRetornarOrdemCompra_ComLoteFracionario_Quando_QuantidadeCompra_InferiorA100(string ticker, int quantidadeTotal, decimal precoUnitario)
     {
         var valorTotal = quantidadeTotal * precoUnitario;

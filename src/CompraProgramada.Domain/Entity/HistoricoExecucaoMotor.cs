@@ -7,8 +7,6 @@ public class HistoricoExecucaoMotor
     public DateTime DataExecucao { get; init; }
     public bool Executado { get; init; }
 
-    private HistoricoExecucaoMotor() { }
-
     internal HistoricoExecucaoMotor(int id, DateTime dataReferencia, DateTime dataExecucao, bool executado)
     {
         Id = id;
@@ -18,5 +16,5 @@ public class HistoricoExecucaoMotor
     }
 
     public static HistoricoExecucaoMotor CriarRegistroHistorico(DateTime dataReferencia, DateTime dataExecucao)
-        => new HistoricoExecucaoMotor(0, dataReferencia, dataExecucao, true);
+        => new(0, dataReferencia, dataExecucao, true);
 }

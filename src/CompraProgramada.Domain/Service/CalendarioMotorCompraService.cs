@@ -27,7 +27,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 
         if (_config.DiasDeCompra.Contains(_dataAtual.Day) && ehDiaUtil)
         {
-            var jaFoiExecutado = await _historicoExecucaoMotorRepository.ObtemExecucaoRealizadaAsync(_dataAtual, cancellationToken) is not null;
+            var jaFoiExecutado = await _historicoExecucaoMotorRepository.ObterHistoricoExecucaoAsync(_dataAtual, cancellationToken) is not null;
 
             if (!jaFoiExecutado)
                 return true;

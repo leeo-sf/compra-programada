@@ -54,7 +54,7 @@ public class OrdemCompraRepositoryTests : SqliteTestBase
     }
 
     [Fact]
-    public async Task SalvarOrdensDeCompra_Deve_Persistir_OrdensCompra()
+    public async Task SalvarOrdensCompraAsync_Deve_Persistir_OrdensCompra()
     {
         // Arrange
         List<OrdemCompra> ordensCompra = new()
@@ -64,7 +64,7 @@ public class OrdemCompraRepositoryTests : SqliteTestBase
         };
 
         // Act
-        var result = await _repo.SalvarOrdensDeCompra(ordensCompra, CancellationToken.None);
+        var result = await _repo.SalvarOrdensCompraAsync(ordensCompra, CancellationToken.None);
 
         // Assert
         _context.OrdemCompra.Should().HaveCount(2);

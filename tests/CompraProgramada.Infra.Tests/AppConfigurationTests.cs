@@ -130,7 +130,6 @@ public class AppConfigurationTests
         var clienteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IClienteRepository));
         var contaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IContaMasterRepository));
         var cotacaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICotacaoRepository));
-        var custodiaFilhoteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaFilhoteRepository));
         var custodiaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaMasterRepository));
         var historicoExecucaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IHistoricoExecucaoMotorRepository));
         var ordemCompraDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IOrdemCompraRepository));
@@ -144,8 +143,6 @@ public class AppConfigurationTests
         Assert.Equal(ServiceLifetime.Scoped, contaMasterDescriptor?.Lifetime);
         Assert.NotNull(cotacaoDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, cotacaoDescriptor?.Lifetime);
-        Assert.NotNull(custodiaFilhoteDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, custodiaFilhoteDescriptor?.Lifetime);
         Assert.NotNull(custodiaMasterDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, custodiaMasterDescriptor?.Lifetime);
         Assert.NotNull(historicoExecucaoDescriptor);

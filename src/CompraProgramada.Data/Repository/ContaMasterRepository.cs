@@ -20,7 +20,7 @@ public class ContaMasterRepository : IContaMasterRepository
     public async Task<ContaMaster?> ObterContaMasterAsync(CancellationToken cancellationToken)
         => await _context.ContaMaster
         .Include(cm => cm.CustodiaMasters)
-        .FirstOrDefaultAsync();
+        .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<ContaMaster> AtualizarResiduosAysnc(ContaMaster conta, CancellationToken cancellationToken)
     {
