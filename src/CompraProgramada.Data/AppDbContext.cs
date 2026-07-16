@@ -16,8 +16,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CustodiaMaster> CustodiaMaster { get; set; } = default!;
     public DbSet<CustodiaFilhote> CustodiaFilhote { get; set; } = default!;
     public DbSet<OrdemCompra> OrdemCompra { get; set; } = default!;
-    public DbSet<Distribuicao> Distribuicao { get; set; } = default!;
-    public DbSet<HistoricoCompra> HistoricoCompra { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
