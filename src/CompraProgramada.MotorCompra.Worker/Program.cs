@@ -1,5 +1,5 @@
 using CompraProgramada.Infra;
-using CompraProgramada.Worker.Worker;
+using CompraProgramada.MotorCompra.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
 

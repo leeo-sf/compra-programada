@@ -4,7 +4,7 @@ using CompraProgramada.Shared.Response;
 using MediatR;
 using OperationResult;
 
-namespace CompraProgramada.Worker.Worker;
+namespace CompraProgramada.MotorCompra.Worker;
 
 public class MotorCompraWorker : BackgroundService
 {

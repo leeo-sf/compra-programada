@@ -2,14 +2,13 @@
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using CompraProgramada.Worker.Tests.TestUtils;
-using CompraProgramada.Worker.Worker;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
-namespace CompraProgramada.Worker.Tests.Worker;
+namespace CompraProgramada.MotorCompra.Worker.Tests;
 
 public class MotorCompraWorkerTests
 {
