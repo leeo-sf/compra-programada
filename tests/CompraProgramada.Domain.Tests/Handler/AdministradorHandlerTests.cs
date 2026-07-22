@@ -136,10 +136,10 @@ public class AdministradorHandlerTests
 
     [Theory]
     [MemberData(nameof(MudancaAtivosRequest))]
-    public void MudancaAtivos_Deve_RetornarAtivosAdicionados_E_Removidos_Quando_HouverAlteracao(List<ComposicaoCesta> composicaoAnterior, List<string> ativosRemovidos, List<ComposicaoCesta> composicaoAtual, List<string> ativosAdicionados)
+    public void MudancaAtivos_Deve_RetornarAtivosAdicionados_E_Removidos_Quando_HouverAlteracao(List<string> composicaoAnterior, List<string> ativosRemovidos, List<string> composicaoAtual, List<string> ativosAdicionados)
     {
         // Arrange & Act
-        var (ativosRemovidosResult, ativosAdicionadosResult) = _sut.ObterMudancasDeAtivos(composicaoAnterior, composicaoAtual);
+        var (ativosRemovidosResult, ativosAdicionadosResult) = AdministradorHandler.ObterMudancasDeAtivos(composicaoAnterior, composicaoAtual);
 
         // Assert
         ativosRemovidosResult.Should().NotBeEmpty();
@@ -148,20 +148,20 @@ public class AdministradorHandlerTests
         ativosAdicionadosResult.Should().BeEqualTo(ativosAdicionados);
     }
 
-    public static TheoryData<List<ComposicaoCesta>, List<string>, List<ComposicaoCesta>, List<string>> MudancaAtivosRequest()
+    public static TheoryData<List<string>, List<string>, List<string>, List<string>> MudancaAtivosRequest()
     {
         return new()
         {
             {
-                new List<ComposicaoCesta> { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("AAPL4", 15), ComposicaoCesta.CriaItemNaCesta("ITUB4", 25) },
+                new List<string> { "PETR4", "AAPL4", "ITUB4" },
                 new List<string> { "AAPL4", "ITUB4" },
-                new List<ComposicaoCesta> { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("TEST5", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 25) },
+                new List<string> { "PETR4", "TEST5", "WEGE3" },
                 new List<string> { "TEST5", "WEGE3" }
             },
             {
-                new List<ComposicaoCesta> { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 15), ComposicaoCesta.CriaItemNaCesta("RENT3", 25) },
+                new List<string> { "PETR4", "VALE3", "RENT3" },
                 new List<string> { "VALE3" },
-                new List<ComposicaoCesta> { ComposicaoCesta.CriaItemNaCesta("PETR4", 35), ComposicaoCesta.CriaItemNaCesta("ABEV3", 17), ComposicaoCesta.CriaItemNaCesta("RENT3", 10) },
+                new List<string> { "PETR4", "ABEV3", "RENT3" },
                 new List<string> { "ABEV3" }
             }
         };

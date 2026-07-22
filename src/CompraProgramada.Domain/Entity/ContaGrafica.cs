@@ -50,9 +50,6 @@ public class ContaGrafica : BaseConta
         if (fechamento.ComposicaoCotacao.Count == 0)
             throw new ApplicationException("Itens do fechamento inválido!");
 
-        if (CustodiaFilhotes.Count == 0)
-            throw new ApplicationException("Cliente não tem uma carteira populada.");
-
         decimal valorTotalInvestido = 0;
         decimal valorTotalAtualCarteira = 0;
         decimal plTotal = 0;
@@ -61,7 +58,7 @@ public class ContaGrafica : BaseConta
         {
             var precoFechamento = fechamento.ComposicaoCotacao.FirstOrDefault(x => x.Ticker == custodia.Ticker)?.PrecoFechamento ?? 0;
 
-            var valorInvestido = custodia.CalcularValorInvestido();
+            var valorInvestido = custodia.ValorInvestido;
             var valorAtual = custodia.CalcularValorAtualCarteira(precoFechamento);
             var plAtivo = custodia.CalcularPl(precoFechamento);
 
@@ -162,15 +159,12 @@ public class ContaGrafica : BaseConta
         if (fechamento.ComposicaoCotacao.Count == 0)
             throw new ApplicationException("Itens do fechamento inválido!");
 
-        if (CustodiaFilhotes.Count == 0)
-            throw new ApplicationException("Conta não tem uma carteira no momento.");
-
         var detalhesAtivos = CustodiaFilhotes
             .Select(custodia =>
             {
                 var precoFechamento = fechamento.ComposicaoCotacao.FirstOrDefault(x => x.Ticker == custodia.Ticker)?.PrecoFechamento ?? 0;
 
-                var valorInvestido = custodia.CalcularValorInvestido();
+                var valorInvestido = custodia.ValorInvestido;
                 var valorAtual = custodia.CalcularValorAtualCarteira(precoFechamento);
                 var pl = custodia.CalcularPl(precoFechamento);
                 var plPercentual = CalcularPlPercentual(valorAtual, valorInvestido);
@@ -226,4 +220,10 @@ public class ContaGrafica : BaseConta
 
         return Math.Round(plPercentual, 2);
     }
+
+    /// <summary>
+    /// Valida se a carteira do cliente está ativa (tem ativos na carteira)
+    /// </summary>
+    /// <returns>true se tiver ativos na carteira</returns>
+    public bool CarteiraAtiva => CustodiaFilhotes.Any(x => x.Quantidade > 0);
 }

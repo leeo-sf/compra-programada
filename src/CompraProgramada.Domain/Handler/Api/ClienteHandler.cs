@@ -124,13 +124,16 @@ public class ClienteHandle
 
         var cliente = clienteResult.Value;
 
+        if (cliente.ContaGrafica is { CarteiraAtiva: false })
+            return new AppException("Cliente não tem uma carteira ativa", "CARTEIRA_INATIVA");
+
         _logger.LogInformation("Cliente solicitando consulta da carteira: {ClienteId}", request);
 
         var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)
             return new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
-        var cotacaoResult = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cestaVigente, cancellationToken);
+        var cotacaoResult = await _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(cestaVigente, cancellationToken);
         if (!cotacaoResult.IsSuccess)
             return cotacaoResult.Exception;
 
@@ -148,13 +151,16 @@ public class ClienteHandle
 
         var cliente = clienteResult.Value;
 
+        if (cliente.ContaGrafica is { CarteiraAtiva: false })
+            return new AppException("Cliente não tem uma carteira ativa", "CARTEIRA_INATIVA");
+
         _logger.LogInformation("Cliente solicitando consulta da rentabilidade da carteira: {ClienteId}", request);
 
         var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)
             return new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
-        var fechamento = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cestaVigente, cancellationToken);
+        var fechamento = await _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(cestaVigente, cancellationToken);
         if (!fechamento.IsSuccess)
             return fechamento.Exception;
 

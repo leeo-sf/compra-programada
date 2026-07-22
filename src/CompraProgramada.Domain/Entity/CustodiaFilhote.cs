@@ -10,6 +10,7 @@ public class CustodiaFilhote
     public decimal PrecoMedio { get; private set; }
     public int Quantidade { get; private set; }
     public ContaGrafica ContaGrafica { get; init; } = default!;
+    public decimal ValorInvestido => Quantidade * PrecoMedio;
 
     private CustodiaFilhote() { }
 
@@ -61,13 +62,6 @@ public class CustodiaFilhote
 
         return PrecoMedio;
     }
-
-    /// <summary>
-    /// Calcula o valor investido na carteira
-    /// </summary>
-    /// <returns>Valor investido</returns>
-    internal decimal CalcularValorInvestido()
-        => Quantidade * PrecoMedio;
 
     /// <summary>
     /// Calcula valor de PL (Lucro/Prejuízo) por ativo

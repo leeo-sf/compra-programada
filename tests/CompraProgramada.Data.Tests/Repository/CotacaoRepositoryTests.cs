@@ -14,13 +14,13 @@ public class CotacaoRepositoryTests : SqliteTestBase
     public async Task ObterCotacaoAsync_Deve_RetornarNull_Quando_CotacaoNaoExistir_Na_Data()
     {
         // Arrange
-        var cotacao = Cotacao.CriarRegistro(DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 37) });
+        var cotacao = Cotacao.CriarRegistro(DateOnly.MinValue, new() { ComposicaoCotacao.CriarItem("PETR4", 37) });
 
         _context.Cotacao.Add(cotacao);
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ObterCotacaoAsync(DateTime.Now.AddDays(-1), CancellationToken.None);
+        var result = await _repo.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), CancellationToken.None);
 
         // Assert
         _context.Cotacao.Should().HaveCount(1);
@@ -31,13 +31,13 @@ public class CotacaoRepositoryTests : SqliteTestBase
     public async Task ObterCotacaoAsync_Deve_RetornarCotacao_Quando_CotacaoExistir_Na_Data()
     {
         // Arrange
-        var cotacao = Cotacao.CriarRegistro(DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 37) });
+        var cotacao = Cotacao.CriarRegistro(DateOnly.MinValue, new() { ComposicaoCotacao.CriarItem("PETR4", 37) });
 
         _context.Cotacao.Add(cotacao);
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ObterCotacaoAsync(DateTime.Now, CancellationToken.None);
+        var result = await _repo.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.Now), CancellationToken.None);
 
         // Assert
         _context.Cotacao.Should().HaveCount(1);
@@ -49,7 +49,7 @@ public class CotacaoRepositoryTests : SqliteTestBase
     public async Task SalvarCotacaoAsync_Deve_Persistir_Cotacao()
     {
         // Arrange
-        var cotacao = Cotacao.CriarRegistro(DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 37) });
+        var cotacao = Cotacao.CriarRegistro(DateOnly.MinValue, new() { ComposicaoCotacao.CriarItem("PETR4", 37) });
 
         // Act
         var result = await _repo.SalvarCotacaoAsync(cotacao, CancellationToken.None);

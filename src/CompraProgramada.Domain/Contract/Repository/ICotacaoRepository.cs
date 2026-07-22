@@ -4,6 +4,6 @@ namespace CompraProgramada.Domain.Contract.Repository;
 
 public interface ICotacaoRepository
 {
-    Task<Cotacao?> ObterCotacaoAsync(DateTime dataPregao, CancellationToken cancellationToken);
-    Task<Cotacao> SalvarCotacaoAsync(Cotacao cotacao,CancellationToken cancellationToken);
+    Task<Cotacao?> ObterCotacaoAsync(DateOnly dataRegistro, CancellationToken cancellationToken);
+    Task<Cotacao> SalvarCotacaoAsync(Cotacao cotacao, CancellationToken cancellationToken);
 }

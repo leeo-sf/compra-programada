@@ -53,7 +53,7 @@ public class OrdemCompraServiceTests
         _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
             .Returns(CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) }));
 
-        _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
+        _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
             .Returns(new ApplicationException("Message"));
 
         // Act
@@ -73,8 +73,8 @@ public class OrdemCompraServiceTests
         _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
             .Returns(CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) }));
 
-        _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
-            .Returns(Cotacao.CriarRegistro(DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 35), ComposicaoCotacao.CriarItem("VALE3", 62), ComposicaoCotacao.CriarItem("ITUB4", 30), ComposicaoCotacao.CriarItem("BBDC4", 15), ComposicaoCotacao.CriarItem("WEGE3", 40) }));
+        _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
+            .Returns(Cotacao.CriarRegistro(DateOnly.MinValue, new() { ComposicaoCotacao.CriarItem("PETR4", 35), ComposicaoCotacao.CriarItem("VALE3", 62), ComposicaoCotacao.CriarItem("ITUB4", 30), ComposicaoCotacao.CriarItem("BBDC4", 15), ComposicaoCotacao.CriarItem("WEGE3", 40) }));
 
         _custodiaMasterRepository.ObterResiduosAsync(Arg.Any<CancellationToken>())
             .Returns(new List<CustodiaMaster>());

@@ -9,7 +9,7 @@ public class CotacaoTests
     [Fact]
     public async Task CriarRegistro_DeveRetornarCotacaoComSucesso_Quando_DadosValidosInformados()
     {
-        var dataPregao = DateTime.Now;
+        var dataPregao = DateOnly.FromDateTime(DateTime.Now);
         List<ComposicaoCotacao> composicao = new() { ComposicaoCotacao.CriarItem("PETR4", 42.83m) };
         var cotacao = Cotacao.CriarRegistro(dataPregao, composicao);
 

@@ -5,5 +5,5 @@ namespace CompraProgramada.Domain.Contract.Service;
 
 public interface ICotacaoService
 {
-    Task<Result<Cotacao>> ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(CestaRecomendada cestaVigente, CancellationToken cancellationToken);
+    Task<Result<Cotacao>> ObterCotacoesDaCestaRecomendadaAsync(CestaRecomendada cestaVigente, CancellationToken cancellationToken);
 }

@@ -213,8 +213,8 @@ public class ClienteHandlerTests
         _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns(cestaAtiva);
 
-        _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
-            .Returns(new Cotacao(1, DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
+        _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
+            .Returns(new Cotacao(1, DateOnly.MinValue, DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
 
         // Act
         var result = await _sut.Handle(request, CancellationToken.None);
@@ -261,7 +261,7 @@ public class ClienteHandlerTests
         _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
-        _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
+        _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
             .Returns(exception);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);
@@ -305,8 +305,8 @@ public class ClienteHandlerTests
         _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns(cestaAtiva);
 
-        _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
-            .Returns(new Cotacao(1, DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
+        _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
+            .Returns(new Cotacao(1, DateOnly.MinValue, DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
 
         // Act
         var result = await _sut.Handle(request, CancellationToken.None);
@@ -353,7 +353,7 @@ public class ClienteHandlerTests
         _cestaRecomendadaRepository.ObterCestaAtualAsync(Arg.Any<CancellationToken>())
             .Returns((CestaRecomendada)null!);
 
-        _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
+        _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
             .Returns(exception);
 
         var resultado = await _sut.Handle(request, CancellationToken.None);

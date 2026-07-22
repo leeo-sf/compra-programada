@@ -34,7 +34,7 @@ public class DistribuicaoTests
         var act = () => Distribuicao.CriarDistribuicao(10, conta, ordemCompra);
         var exception = act.Should().Throw<TickerNaoPreenchidoException>().Which;
 
-        exception.Message.Should().Be("O nome do ativo não pode estar em branco.");
+        exception.Message.Should().Be("O nome do ativo deve ser preenchido");
         exception.Codigo.Should().Be("TICKER_INVALIDO");
         exception.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
     }
@@ -49,7 +49,7 @@ public class DistribuicaoTests
         var act = () => Distribuicao.CriarDistribuicao(-1, conta, ordemCompra);
         var exception = act.Should().Throw<QuantidadeNegativaException>().Which;
 
-        exception.Message.Should().Be("Quantidade não pode ser negativa.");
+        exception.Message.Should().Be("Quantidade não pode ser negativa");
         exception.Codigo.Should().Be("QUANTIDADE_NEGATIVA");
         exception.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
     }

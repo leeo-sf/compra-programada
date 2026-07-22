@@ -55,7 +55,7 @@ public class AdministradorHandler
 
         var quantidadeUsuariosAtivos = await _clienteRepository.QuantidadeAtivosAsync(cancellationToken);
 
-        var (ativosRemovidos, ativosAdicionados) = ObterMudancasDeAtivos(cestaAnterior!.ComposicaoCesta, cestaCriada.ComposicaoCesta);
+        var (ativosRemovidos, ativosAdicionados) = ObterMudancasDeAtivos([.. cestaAnterior!.ComposicaoCesta.Select(c => c.Ticker)], [.. cestaCriada.ComposicaoCesta.Select(c => c.Ticker)]);
 
         var msgOperacaoComAtualizacao = $"Cesta atualizada. Rebalanceamento disparado para {quantidadeUsuariosAtivos} clientes ativos.";
         return ResponseCriarAlterarCesta(cestaCriada, true, cestaAnterior, ativosRemovidos, ativosAdicionados) with { Mensagem = msgOperacaoComAtualizacao };
@@ -87,7 +87,7 @@ public class AdministradorHandler
     }
 
     private CriarCestaRecomendadaResponse ResponseCriarAlterarCesta(CestaRecomendada cesta, bool atualizouCesta, CestaRecomendada? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados)
-        => new CriarCestaRecomendadaResponse(
+        => new(
             cesta.Id,
             cesta.Nome,
             cesta.Ativa,
@@ -115,20 +115,15 @@ public class AdministradorHandler
         return cestaAtual;
     }
 
-    internal (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<ComposicaoCesta> composicaoAnterior, List<ComposicaoCesta> composicaoAtual)
+    internal static (List<string> ativosRemovidos, List<string> ativosAdicionados) ObterMudancasDeAtivos(List<string> tickersAnteriores, List<string> tickersAtuais)
     {
-        var tickersAnteriores = composicaoAnterior.Select(c => c.Ticker);
-        var tickersAtual = composicaoAtual.Select(c => c.Ticker);
-
         var ativosRemovidos = tickersAnteriores
-            .Except(tickersAtual)
+            .Except(tickersAtuais)
             .ToList();
 
-        var ativosAdicionados = tickersAtual
+        var ativosAdicionados = tickersAtuais
             .Except(tickersAnteriores)
             .ToList();
-
-        _logger.LogInformation("Mudanças de ativos identificados {Removidos} - {Adicionados}", ativosRemovidos, ativosAdicionados);
 
         return (ativosRemovidos, ativosAdicionados);
     }

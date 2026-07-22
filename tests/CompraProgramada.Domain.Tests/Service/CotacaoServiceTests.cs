@@ -32,16 +32,16 @@ public class CotacaoServiceTests
         var cestaVigente = CestaRecomendada.CriarCesta("Cesta", new() { ComposicaoCesta.CriaItemNaCesta("TEST1", 30), ComposicaoCesta.CriaItemNaCesta("TEST2", 25), ComposicaoCesta.CriaItemNaCesta("TEST3", 20), ComposicaoCesta.CriaItemNaCesta("TEST4", 15), ComposicaoCesta.CriaItemNaCesta("TEST5", 10) });
 
         _cotahistParserService.ParseArquivo()
-            .Returns(CotcaoesB3());
+            .Returns((IEnumerable<CotacaoB3Dto>)null!);
 
         // Act
-        var result = await _sut.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cestaVigente, CancellationToken.None);
+        var result = await _sut.ObterCotacoesDaCestaRecomendadaAsync(cestaVigente, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Exception.Should().NotBeNull();
         result.Exception.Should().BeOfType<ApplicationException>();
-        result.Exception.Message.Should().Be("Não foi possível obter a cesta recomendada nas cotações da B3.");
+        result.Exception.Message.Should().Be("Não foi possível obter a cotação da cesta recomendada na B3.");
         result.Value.Should().BeNull();
     }
 
@@ -50,7 +50,7 @@ public class CotacaoServiceTests
     {
         // Arrange
         var resultValue = Cotacao.CriarRegistro(
-            DateTime.MinValue,
+            DateOnly.MinValue,
             new()
             {
                 ComposicaoCotacao.CriarItem("PETR4", 35),
@@ -69,7 +69,7 @@ public class CotacaoServiceTests
             .Returns(resultValue);
 
         // Act
-        var result = await _sut.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cestaVigente, CancellationToken.None);
+        var result = await _sut.ObterCotacoesDaCestaRecomendadaAsync(cestaVigente, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -155,7 +155,7 @@ public class CotacaoServiceTests
             .Returns(CotcaoesB3());
 
         // Act
-        var result = _sut.RealizarMatchFechamentoECestaRecomendada(cestaVigente);
+        var result = _sut.RealizarMatchB3ECestaRecomendada(cestaVigente);
 
         // Assert
         result.Should().NotBeNullOrEmpty();
@@ -173,7 +173,7 @@ public class CotacaoServiceTests
             .Returns(CotcaoesB3());
 
         // Act
-        var result = _sut.RealizarMatchFechamentoECestaRecomendada(cestaVigente);
+        var result = _sut.RealizarMatchB3ECestaRecomendada(cestaVigente);
 
         // Assert
         result.Should().BeEmpty();

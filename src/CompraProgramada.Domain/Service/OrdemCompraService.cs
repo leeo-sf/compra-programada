@@ -37,7 +37,7 @@ public class OrdemCompraService : IOrdemCompraService
         if (cestaVigente is null)
             return new AppException("Nenhuma cesta vigente encontrada", "CESTA_NAO_ENCONTRADA");
 
-        var fechamentosResult = await _cotacaoService.ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(cestaVigente, cancellationToken);
+        var fechamentosResult = await _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(cestaVigente, cancellationToken);
         if (!fechamentosResult.IsSuccess)
             return fechamentosResult.Exception;
 

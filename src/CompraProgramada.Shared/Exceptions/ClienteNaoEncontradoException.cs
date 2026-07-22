@@ -6,7 +6,7 @@ namespace CompraProgramada.Shared.Exceptions;
 public class ClienteNaoEncontradoException : DomainException
 {
     public ClienteNaoEncontradoException()
-        : base("Cliente nao encontrado.",
+        : base("Cliente não encontrado",
             "CLIENTE_NAO_ENCONTRADO",
             HttpStatusCode.NotFound)
     { }
