@@ -51,19 +51,20 @@ public class OrdemCompraService : IOrdemCompraService
 
         foreach (var fechamento in fechamentos.ComposicaoCotacao)
         {
-            var custodia = residuos?.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
-            var ativoCesta = cestaVigente.ComposicaoCesta.FirstOrDefault(x => x.Ticker == fechamento.Ticker);
+            var ticker = fechamento.Ticker;
+            var custodia = residuos?.FirstOrDefault(x => x.Ticker == ticker);
+            var ativoCesta = cestaVigente.ComposicaoCesta.FirstOrDefault(x => x.Ticker == ticker);
 
             if (ativoCesta is null)
             {
-                _logger.LogWarning("Ativo {Ticker} não encontrado na composição da cesta vigente", fechamento.Ticker);
+                _logger.LogWarning("Ativo {Ticker} não encontrado na composição da cesta vigente", ticker);
                 continue;
             }
 
             var qtdNecessariaParaDistribuicao = (int)Math.Truncate(ativoCesta.ValorConsolidado(valorTotalConsolidado) / fechamento.PrecoFechamento);
             var quantidadeDeCompraAtivo = custodia?.CalculaNecessidadeLiquidaCompra(qtdNecessariaParaDistribuicao) ?? qtdNecessariaParaDistribuicao;
 
-            var ordemCompra = OrdemCompra.GerarOrdemCompra(fechamento.Ticker, quantidadeDeCompraAtivo, fechamento.PrecoFechamento);
+            var ordemCompra = OrdemCompra.GerarOrdemCompra(ticker, quantidadeDeCompraAtivo, fechamento.PrecoFechamento);
             ordensCompra.Add(ordemCompra);
         }
 

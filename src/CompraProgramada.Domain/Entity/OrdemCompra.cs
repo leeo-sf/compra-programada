@@ -16,6 +16,7 @@ public class OrdemCompra
     public List<OrdemCompraDetalhe> Detalhes { get; private set; } = new List<OrdemCompraDetalhe>();
 
     private OrdemCompra() { }
+
     internal OrdemCompra(int id, string ticker, int quantidadeTotal, decimal precoUnitario, decimal valorTotal, DateTime data, List<OrdemCompraDetalhe> detalhes)
     {
         Id = id;

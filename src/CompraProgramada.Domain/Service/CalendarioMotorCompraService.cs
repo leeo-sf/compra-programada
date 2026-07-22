@@ -73,7 +73,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 
         foreach (var dia in diasOrdenadosDeExecucao)
         {
-            if (dataExecutada.Day > 0 && dataExecutada.Day < diasOrdenadosDeExecucao.First())
+            if (dataExecutada is { Day: var day and > 0 } && day < diasOrdenadosDeExecucao.First())
             {
                 var mesAnterior = _dataAtual.AddMonths(-1);
                 return new DateTime(mesAnterior.Year, mesAnterior.Month, diasOrdenadosDeExecucao[diasOrdenadosDeExecucao.Count - 1]);
@@ -86,7 +86,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
             }
         }
 
-        return new DateTime(_dataAtual.Year, _dataAtual.Month, diasOrdenadosDeExecucao[diasOrdenadosDeExecucao.Count - 1]);
+        return new DateTime(_dataAtual.Year, _dataAtual.Month, diasOrdenadosDeExecucao[^1]);
     }
 
     public bool EhDiaUtil(DateTime data)

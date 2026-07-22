@@ -12,8 +12,6 @@ public class CustodiaFilhote
     public ContaGrafica ContaGrafica { get; init; } = default!;
     public decimal ValorInvestido => Quantidade * PrecoMedio;
 
-    private CustodiaFilhote() { }
-
     internal CustodiaFilhote(int id, int contaGraficaId, string ticker, decimal precoMedio, int quantidade)
     {
         if (string.IsNullOrEmpty(ticker))

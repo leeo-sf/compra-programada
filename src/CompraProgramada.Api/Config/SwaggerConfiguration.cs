@@ -5,7 +5,7 @@ namespace CompraProgramada.Api.Config;
 [ExcludeFromCodeCoverage]
 internal static class SwaggerConfiguration
 {
-    private const string API_TITLE = "Compra.Programada.Api";
+    private const string API_TITLE = "CompraProgramada.Api";
 
     public static void AddSwaggerConfiguration(this IServiceCollection services)
         => services.AddOpenApi(options =>

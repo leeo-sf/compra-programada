@@ -8,8 +8,6 @@ public class ComposicaoCotacao
     public decimal PrecoFechamento { get; init; }
     public Cotacao Cotacao { get; init; } = default!;
 
-    private ComposicaoCotacao() { }
-
     internal ComposicaoCotacao(int id, int cotacaoId, string ticker, decimal precoFechamento)
     {
         Id = id;
