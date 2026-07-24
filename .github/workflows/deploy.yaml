@@ -9,11 +9,13 @@ env:
   DOCKER_IMAGE_NAME: compra-programada-api
 
 jobs:
-  publish-docker-image:
+  run-build-docker-image:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
+    outputs:
+      deploy_version: ${{ steps.versioning.outputs.deploy_version }}
+      old_version: ${{ steps.versioning.outputs.old_version }}
+      targets_path: ${{ steps.versioning.outputs.targets_path }}
 
     steps:
       - name: Checkout code
@@ -46,7 +48,7 @@ jobs:
           fi
 
           DEPLOY_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
-          echo "Versão atual: $CURRENT_VERSION -> Próxima versão: DEPLOY_VERSION"
+          echo "Versão atual: $CURRENT_VERSION -> Próxima versão: $DEPLOY_VERSION"
           
           echo "deploy_version=$DEPLOY_VERSION" >> $GITHUB_OUTPUT
           echo "old_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
@@ -68,11 +70,20 @@ jobs:
             ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.versioning.outputs.deploy_version }}
             ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
+  run-update-bundle-version:
+    runs-on: ubuntu-latest
+
+    needs: run-build-docker-image
+
+    permissions:
+      contents: write
+
+    steps:
       - name: Update VERSION.targets File
         run: |
-          PATH_FILE="${{ steps.versioning.outputs.targets_path }}"
-          OLD_V="${{ steps.versioning.outputs.old_version }}"
-          NEW_V="${{ steps.versioning.outputs.deploy_version }}"
+          PATH_FILE="${{ needs.run-build-docker-image.outputs.targets_path }}"
+          OLD_V="${{ needs.run-build-docker-image.outputs.old_version }}"
+          NEW_V="${{ needs.run-build-docker-image.outputs.deploy_version }}"
           
           sed -i "s/<Version>$OLD_V<\/Version>/<Version>$NEW_V<\/Version>/" $PATH_FILE
 
@@ -81,6 +92,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add ${{ steps.versioning.outputs.targets_path }}
-          git commit -m "chore: bump version to ${{ steps.versioning.outputs.deploy_version }} for next release [skip ci]"
+          git add ${{ needs.run-build-docker-image.outputs.targets_path }}
+          git commit -m "chore: bump version to ${{ needs.run-build-docker-image.outputs.deploy_version }} for next release [skip ci]"
           git push
