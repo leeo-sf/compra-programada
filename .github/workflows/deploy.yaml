@@ -20,9 +20,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.MAIN_BYPASS_TOKEN }}
 
       - name: Read Current Version
         id: versioning
@@ -79,6 +76,12 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MAIN_BYPASS_TOKEN }}
+
       - name: Update VERSION.targets File
         run: |
           PATH_FILE="${{ needs.run-build-docker-image.outputs.targets_path }}"
