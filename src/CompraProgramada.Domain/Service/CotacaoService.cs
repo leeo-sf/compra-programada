@@ -29,7 +29,7 @@ public class CotacaoService : ICotacaoService
         var cotacao = await _cotacaoRepository.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
         if (cotacao is not null)
         {
-            var teveMudanca = AdministradorHandler.ObterMudancasDeAtivos(
+            var teveMudanca = CriarCestaHandler.ObterMudancasDeAtivos(
                 [.. cotacao.ComposicaoCotacao.Select(c => c.Ticker)],
                 [.. cestaVigente.ComposicaoCesta.Select(c => c.Ticker)])
                 is { ativosAdicionados.Count: > 0 };

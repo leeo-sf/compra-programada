@@ -1,32 +1,27 @@
-﻿using CompraProgramada.Shared.Dto;
-using CompraProgramada.Shared.Request;
-using CompraProgramada.Shared.Response;
-using CompraProgramada.Domain.Tests.TestUtils;
+﻿using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Entity;
+using CompraProgramada.Domain.Handler.Api;
+using CompraProgramada.Domain.Tests.TestUtils;
+using CompraProgramada.Shared.Response;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using CompraProgramada.Domain.Mapper;
 using NSubstitute;
-using CompraProgramada.Domain.Handler.Api;
-using CompraProgramada.Domain.Contract.Repository;
 
 namespace CompraProgramada.Domain.Tests.Handler;
 
-public class AdministradorHandlerTests
+public class CriarCestaHandlerTests
 {
-    private readonly ILogger<AdministradorHandler> _logger;
+    private readonly ILogger<CriarCestaHandler> _logger;
     private readonly ICestaRecomendadaRepository _cestaRecomendadaRepository;
     private readonly IClienteRepository _clienteRepository;
-    private readonly CestaRecomendadaMapper _mapper;
-    private readonly AdministradorHandler _sut;
+    private readonly CriarCestaHandler _sut;
 
-    public AdministradorHandlerTests()
+    public CriarCestaHandlerTests()
     {
-        _logger = Substitute.For<ILogger<AdministradorHandler>>();
+        _logger = Substitute.For<ILogger<CriarCestaHandler>>();
         _cestaRecomendadaRepository = Substitute.For<ICestaRecomendadaRepository>();
         _clienteRepository = Substitute.For<IClienteRepository>();
-        _mapper = Substitute.For<CestaRecomendadaMapper>();
-        _sut = new AdministradorHandler(_logger, _cestaRecomendadaRepository, _clienteRepository, _mapper);
+        _sut = new(_logger, _cestaRecomendadaRepository, _clienteRepository);
     }
 
     [Fact]
@@ -83,63 +78,12 @@ public class AdministradorHandlerTests
         response.Mensagem.Should().Be("Cesta atualizada. Rebalanceamento disparado para 1 clientes ativos.");
     }
 
-    [Fact]
-    public async Task Handle_DeveRetornarSucesso_Quando_CestaAtualConsultada_ComSucesso()
-    {
-        var request = new CestaAtualRequest();
-
-        var itensCesta = FakerRequest.ComposicaoCestaRecomendada();
-        var response = CestaRecomendada.CriarCesta("Name", [.. itensCesta.Select(x => ComposicaoCesta.CriaItemNaCesta(x.Ticker, x.Percentual))]);
-
-        _cestaRecomendadaRepository
-            .ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
-            .Returns(response);
-
-        var resultado = await _sut.Handle(request, CancellationToken.None);
-
-        resultado.IsSuccess.Should().BeTrue();
-        resultado.Exception.Should().BeNull();
-        resultado.Value.Should().BeOfType<CestaRecomendadaDto>();
-    }
-
-    [Fact]
-    public async Task Handle_DeveRetornarApplicationException_Quando_NaoTiverCestaAtiva()
-    {
-        var request = new CestaAtualRequest();
-
-        _cestaRecomendadaRepository
-            .ObterCestaAtualAsync(Arg.Any<CancellationToken>())!
-            .Returns((CestaRecomendada)null!);
-
-        var resultado = await _sut.Handle(request, CancellationToken.None);
-        
-        resultado.IsSuccess.Should().BeFalse();
-        resultado.Exception.Should().BeOfType<ApplicationException>();
-        resultado.Exception.Message.Should().Be("Nenhuma Cesta Top Five ativa no momento.");
-    }
-
-    [Fact]
-    public async Task Handle_DeveRetornarSucesso_Quando_HistoricoCestaConsultada()
-    {
-        var request = new CestaHistoricoRequest();
-        var response = new List<CestaRecomendada> { };
-
-        _cestaRecomendadaRepository.ObterCestasAsync(Arg.Any<CancellationToken>())
-            .Returns(response);
-
-        var resultado = await _sut.Handle(request, CancellationToken.None);
-
-        resultado.IsSuccess.Should().BeTrue();
-        resultado.Exception.Should().BeNull();
-        resultado.Value.Should().BeOfType<HistoricoCestasResponse>();
-    }
-
     [Theory]
     [MemberData(nameof(MudancaAtivosRequest))]
     public void MudancaAtivos_Deve_RetornarAtivosAdicionados_E_Removidos_Quando_HouverAlteracao(List<string> composicaoAnterior, List<string> ativosRemovidos, List<string> composicaoAtual, List<string> ativosAdicionados)
     {
         // Arrange & Act
-        var (ativosRemovidosResult, ativosAdicionadosResult) = AdministradorHandler.ObterMudancasDeAtivos(composicaoAnterior, composicaoAtual);
+        var (ativosRemovidosResult, ativosAdicionadosResult) = CriarCestaHandler.ObterMudancasDeAtivos(composicaoAnterior, composicaoAtual);
 
         // Assert
         ativosRemovidosResult.Should().NotBeEmpty();
