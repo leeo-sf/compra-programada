@@ -7,7 +7,7 @@ COPY ["src/CompraProgramada.Data/CompraProgramada.Data.csproj", "CompraProgramad
 COPY ["src/CompraProgramada.Domain/CompraProgramada.Domain.csproj", "CompraProgramada.Domain/"]
 COPY ["src/CompraProgramada.Infra/CompraProgramada.Infra.csproj", "CompraProgramada.Infra/"]
 COPY ["src/CompraProgramada.Shared/CompraProgramada.Shared.csproj", "CompraProgramada.Shared/"]
-COPY ["src/CompraProgramada.Worker/CompraProgramada.Worker.csproj", "CompraProgramada.Worker/"]
+COPY ["src/CompraProgramada.MotorCompra.Worker/CompraProgramada.MotorCompra.Worker.csproj", "CompraProgramada.MotorCompra.Worker/"]
 
 RUN dotnet restore "CompraProgramada.Api/CompraProgramada.Api.csproj"
 
