@@ -17,7 +17,7 @@ public class Distribuicao
 
     internal Distribuicao(int id, int ordemCompraId, int contaGraficaId, string ticker, int quantidadeAlocada, decimal valorOperacao, OrdemCompra ordemCompra, ContaGrafica contaGrafica)
     {
-        if (string.IsNullOrEmpty(ticker))
+        if (string.IsNullOrWhiteSpace(ticker))
             throw new TickerNaoPreenchidoException();
 
         if (quantidadeAlocada < 0)
@@ -34,7 +34,7 @@ public class Distribuicao
     }
 
     public static Distribuicao CriarDistribuicao(int quantidadeAlocada, ContaGrafica conta, OrdemCompra ordemCompra)
-        => new Distribuicao(
+        => new(
             0,
             ordemCompra.Id,
             conta.Id,

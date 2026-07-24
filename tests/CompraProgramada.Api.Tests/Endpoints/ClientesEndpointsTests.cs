@@ -68,15 +68,15 @@ public class ClientesEndpointsTests(ApiWebApplicationFactory factory) : IClassFi
             .PostAsync(ADESAO_ENDPOINT,
             new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 
-        var result = await response.Content.ReadAsStringAsync();
+        var result = TestUtils.ReadResultContentApi<ErroResponse>(await response.Content.ReadAsStringAsync());
 
         await _mediator.Received().Send(request);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        result.Should().BeEquivalentTo(JsonSerializer.Serialize(new
+        result.Should().BeEquivalentTo(new
         {
-            Mensagem = "CPF ja cadastrado no sistema.",
+            Mensagem = "CPF já cadastrado no sistema",
             Codigo = "CLIENTE_CPF_DUPLICADO"
-        }));
+        });
     }
 
     [Fact]
@@ -93,15 +93,15 @@ public class ClientesEndpointsTests(ApiWebApplicationFactory factory) : IClassFi
             .PostAsync(ADESAO_ENDPOINT,
             new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 
-        var result = await response.Content.ReadAsStringAsync();
+        var result = TestUtils.ReadResultContentApi<ErroResponse>(await response.Content.ReadAsStringAsync());
 
         await _mediator.Received().Send(request);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        result.Should().BeEquivalentTo(JsonSerializer.Serialize(new
+        result.Should().BeEquivalentTo(new
         {
-            Mensagem = "O valor mensal minimo e de R$ 100,00",
+            Mensagem = "O valor mensal mínimo é de R$ 100,00",
             Codigo = "VALOR_MENSAL_INVALIDO"
-        }));
+        });
     }
 
     [Fact]
@@ -140,15 +140,15 @@ public class ClientesEndpointsTests(ApiWebApplicationFactory factory) : IClassFi
             .PostAsync(SAIDA_ENDPOINT.Replace("{id}", request.ClienteId.ToString()),
             new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 
-        var result = await response.Content.ReadAsStringAsync();
+        var result = TestUtils.ReadResultContentApi<ErroResponse>(await response.Content.ReadAsStringAsync());
 
         await _mediator.Received().Send(request);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        result.Should().BeEquivalentTo(JsonSerializer.Serialize(new
+        result.Should().BeEquivalentTo(new
         {
-            Mensagem = "Cliente nao encontrado.",
+            Mensagem = "Cliente não encontrado",
             Codigo = "CLIENTE_NAO_ENCONTRADO"
-        }));
+        });
     }
 
     [Fact]
@@ -187,15 +187,15 @@ public class ClientesEndpointsTests(ApiWebApplicationFactory factory) : IClassFi
             .PutAsync(VALOR_MENSAL_ENDPOINT.Replace("{id}", request.ClienteId.ToString()),
             new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 
-        var result = await response.Content.ReadAsStringAsync();
+        var result = TestUtils.ReadResultContentApi<ErroResponse>(await response.Content.ReadAsStringAsync());
 
         await _mediator.Received().Send(request);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        result.Should().BeEquivalentTo(JsonSerializer.Serialize(new
+        result.Should().BeEquivalentTo(new
         {
-            Mensagem = "Cliente nao encontrado.",
+            Mensagem = "Cliente não encontrado",
             Codigo = "CLIENTE_NAO_ENCONTRADO"
-        }));
+        });
     }
 
     [Fact]

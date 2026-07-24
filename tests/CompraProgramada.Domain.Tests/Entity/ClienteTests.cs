@@ -37,7 +37,7 @@ public class ClienteTests
         var act = () => Cliente.Criar(new(NOME, CPF, EMAIL, valorMensal));
         var exception = act.Should().Throw<ValorMensalException>().Which;
 
-        exception.Message.Should().Be("O valor mensal minimo e de R$ 100,00");
+        exception.Message.Should().Be("O valor mensal mínimo é de R$ 100,00");
         exception.Codigo.Should().Be("VALOR_MENSAL_INVALIDO");
         exception.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -69,7 +69,7 @@ public class ClienteTests
         var act = () => cliente.AtualizarValorMensal(new(0, valorMensal));
         var exception = act.Should().Throw<ValorMensalException>().Which;
 
-        exception.Message.Should().Be("O valor mensal minimo e de R$ 100,00");
+        exception.Message.Should().Be("O valor mensal mínimo é de R$ 100,00");
         exception.Codigo.Should().Be("VALOR_MENSAL_INVALIDO");
         exception.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

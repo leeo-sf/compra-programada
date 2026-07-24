@@ -260,8 +260,13 @@ namespace CompraProgramada.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DataPregao")
+                    b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime(6)")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
+
+                    b.Property<DateOnly>("DataPregao")
+                        .HasColumnType("date")
                         .HasColumnName("data_pregao")
                         .HasComment("data do pregão");
 

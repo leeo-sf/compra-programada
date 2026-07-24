@@ -4,6 +4,6 @@ namespace CompraProgramada.Domain.Contract.Repository;
 
 public interface IHistoricoExecucaoMotorRepository
 {
-    Task<HistoricoExecucaoMotor?> ObtemExecucaoRealizadaAsync(DateTime dataDeExecucao, CancellationToken cancellationToken);
-    Task CriarHistoricoExecucaoAsync(HistoricoExecucaoMotor execucao, CancellationToken cancellationToken);
+    Task<HistoricoExecucaoMotor?> ObterHistoricoExecucaoAsync(DateTime dataDeExecucao, CancellationToken cancellationToken);
+    Task SalvarHistoricoExecucaoAsync(HistoricoExecucaoMotor execucao, CancellationToken cancellationToken);
 }

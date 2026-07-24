@@ -4,9 +4,6 @@ using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using FluentAssertions;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using OperationResult;
 using System.Net;
@@ -76,7 +73,7 @@ public class AdministratorEndpointsTests(ApiWebApplicationFactory factory) : ICl
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         result.Should().BeEquivalentTo(JsonSerializer.Serialize(new
         {
-            Mensagem = "A cesta deve conter exatamente 5 ativos. Quantidade informada: 3.",
+            Mensagem = "A cesta deve conter exatamente 5 ativos. Quantidade informada: 3",
             Codigo = "QUANTIDADE_ATIVOS_INVALIDA"
         }));
     }
@@ -108,7 +105,7 @@ public class AdministratorEndpointsTests(ApiWebApplicationFactory factory) : ICl
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         result.Should().BeEquivalentTo(JsonSerializer.Serialize(new
         {
-            Mensagem = "A soma dos percentuais deve ser exatamente 100%. Soma atual: 98%.",
+            Mensagem = "A soma dos percentuais deve ser exatamente 100%. Soma atual: 98%",
             Codigo = "PERCENTUAIS_INVALIDOS"
         }));
     }

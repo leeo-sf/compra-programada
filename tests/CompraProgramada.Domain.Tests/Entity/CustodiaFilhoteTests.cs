@@ -25,7 +25,7 @@ public class CustodiaFilhoteTests
         var act = () => CustodiaFilhote.GerarCustodia("");
         var exception = act.Should().Throw<TickerNaoPreenchidoException>().Which;
 
-        exception.Message.Should().Be("O nome do ativo não pode estar em branco.");
+        exception.Message.Should().Be("O nome do ativo deve ser preenchido");
         exception.Codigo.Should().Be("TICKER_INVALIDO");
         exception.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
     }
@@ -64,7 +64,7 @@ public class CustodiaFilhoteTests
         var act = () => custodia.AdicionarNovaQuantidade(-1);
         var exception = act.Should().Throw<QuantidadeNegativaException>().Which;
 
-        exception.Message.Should().Be("Quantidade não pode ser negativa.");
+        exception.Message.Should().Be("Quantidade não pode ser negativa");
         exception.Codigo.Should().Be("QUANTIDADE_NEGATIVA");
         exception.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
     }
@@ -98,7 +98,7 @@ public class CustodiaFilhoteTests
         var act = () => custodia.CalcularPl(35);
         var exception = act.Should().Throw<QuantidadeCustodiaException>().Which;
 
-        exception.Message.Should().Be("Quantidade deve ser maior que zero.");
+        exception.Message.Should().Be("Quantidade deve ser maior que zero");
         exception.Codigo.Should().Be("QUANTIDADE_INVALIDA");
         exception.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
     }

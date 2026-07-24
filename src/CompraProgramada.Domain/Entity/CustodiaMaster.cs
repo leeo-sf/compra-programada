@@ -40,9 +40,7 @@ public class CustodiaMaster
     {
         var qtdDisponivelDistribuicao = QuantidadeResiduo + qtdNovosAtivosComprados;
 
-        var residuo = Math.Max(0, qtdDisponivelDistribuicao - qtdUtilizada);
-
-        QuantidadeResiduo = residuo;
+        QuantidadeResiduo = Math.Max(0, qtdDisponivelDistribuicao - qtdUtilizada);
 
         return QuantidadeResiduo;
     }
@@ -57,10 +55,7 @@ public class CustodiaMaster
         if (QuantidadeResiduo == 0)
             return quantidadeDesejada;
         
-        var necessidadeLiquida = quantidadeDesejada - QuantidadeResiduo;
-
-        if (necessidadeLiquida < 0)
-            necessidadeLiquida = QuantidadeResiduo - quantidadeDesejada;
+        var necessidadeLiquida = Math.Abs(quantidadeDesejada - QuantidadeResiduo);
 
         return necessidadeLiquida;
     }

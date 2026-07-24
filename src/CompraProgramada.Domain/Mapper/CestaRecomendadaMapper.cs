@@ -11,7 +11,6 @@ public partial class CestaRecomendadaMapper
     [MapProperty(nameof(CestaRecomendada.Id), nameof(CestaRecomendadaDto.CestaId))]
     [MapProperty(nameof(CestaRecomendada.ComposicaoCesta), nameof(CestaRecomendadaDto.Itens))]
     public partial CestaRecomendadaDto ToResponse(CestaRecomendada cesta);
-    public partial List<CestaRecomendadaDto> ToResponse(List<CestaRecomendada> cesta);
 
 
     public partial CestaRecomendadaResponse ToResponse(CestaRecomendadaDto cesta);

@@ -47,7 +47,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     [Theory]
     [InlineData("11111111111", true)]
     [InlineData("11111111112", false)]
-    public async Task ExisteAsync_Deve_Retornar_True_Quando_CpfExistir(string cpf, bool deveExistir)
+    public async Task CpfExistenteAsync_Deve_Retornar_True_Quando_CpfExistir(string cpf, bool deveExistir)
     {
         // Arrange
         var cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150));
@@ -56,7 +56,7 @@ public class ClienteRepositoryTests : SqliteTestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ExisteAsync(cpf, CancellationToken.None);
+        var result = await _repo.CpfExistenteAsync(cpf, CancellationToken.None);
 
         // Assert
         _context.Cliente.Should().HaveCount(1);
@@ -64,7 +64,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     }
 
     [Fact]
-    public async Task AtualizarClienteAsync_Deve_Atualizar_Cliente()
+    public async Task AtualizarAsync_Deve_Atualizar_Cliente()
     {
         // Arrange
         var cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150));
@@ -75,7 +75,7 @@ public class ClienteRepositoryTests : SqliteTestBase
         cliente.AtualizarValorMensal(new(0, 200));
 
         // Act
-        var result = await _repo.AtualizarClienteAsync(cliente, CancellationToken.None);
+        var result = await _repo.AtualizarAsync(cliente, CancellationToken.None);
 
         // Assert
         _context.Cliente.Should().HaveCount(1);
@@ -124,7 +124,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     }
 
     [Fact]
-    public async Task ObterClienteAsync_Deve_Retornar_Cliente_QuandoExistir()
+    public async Task ObterAsync_Deve_Retornar_Cliente_QuandoExistir()
     {
         // Arrange
         var cliente = new Cliente(1, "Name A", "11111111111", "email_a@mail.com", 100, 100, true, DateTime.MinValue);
@@ -133,7 +133,7 @@ public class ClienteRepositoryTests : SqliteTestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ObterClienteAsync(cliente.Id, CancellationToken.None);
+        var result = await _repo.ObterAsync(cliente.Id, CancellationToken.None);
 
         // Assert
         _context.Cliente.Should().HaveCount(1);
@@ -141,10 +141,10 @@ public class ClienteRepositoryTests : SqliteTestBase
     }
 
     [Fact]
-    public async Task ObterClienteAsync_Deve_Retornar_Null_Quando_ClienteNaoExistir()
+    public async Task ObterAsync_Deve_Retornar_Null_Quando_ClienteNaoExistir()
     {
         // Arrange & Act
-        var result = await _repo.ObterClienteAsync(1, CancellationToken.None);
+        var result = await _repo.ObterAsync(1, CancellationToken.None);
 
         // Assert
         _context.Cliente.Should().HaveCount(0);

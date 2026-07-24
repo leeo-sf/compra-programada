@@ -8,8 +8,6 @@ public class ComposicaoCesta
     public decimal Percentual { get; private set; }
     public CestaRecomendada Cesta { get; init; } = default!;
 
-    private ComposicaoCesta() { }
-
     private ComposicaoCesta(int id, int cestaId, string ticker, decimal percentual)
     {
         Id = id;
@@ -19,7 +17,7 @@ public class ComposicaoCesta
     }
 
     public static ComposicaoCesta CriaItemNaCesta(string ticker, decimal percentual)
-        => new ComposicaoCesta(0, 0, ticker.ToUpper(), percentual);
+        => new(0, 0, ticker.ToUpper(), percentual);
 
     public decimal ValorConsolidado(decimal valorTotalConsolidado)
         => valorTotalConsolidado * (Percentual / 100);

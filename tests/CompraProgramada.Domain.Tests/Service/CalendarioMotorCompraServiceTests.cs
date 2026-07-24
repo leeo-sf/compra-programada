@@ -2,32 +2,44 @@
 using CompraProgramada.Domain.Service;
 using CompraProgramada.Domain.Tests.TestUtils;
 using FluentAssertions;
+using CompraProgramada.Domain.Contract.Repository;
+using NSubstitute;
+using CompraProgramada.Domain.Entity;
 
 namespace CompraProgramada.Domain.Tests.Service;
 
 public class CalendarioMotorCompraServiceTests
 {
     private readonly AppConfig _config;
+    private readonly IHistoricoExecucaoMotorRepository _historicoExecucaoMotorRepository;
 
-    public CalendarioMotorCompraServiceTests() => _config = AppConfigHelper.GetAppConfig();
+    public CalendarioMotorCompraServiceTests()
+    {
+        _config = AppConfigHelper.GetAppConfig();
+        _historicoExecucaoMotorRepository = Substitute.For<IHistoricoExecucaoMotorRepository>();
+    }
 
     [Theory]
-    [InlineData("2026-01-15", true)]
-    [InlineData("2026-02-15", false)]
-    [InlineData("2026-02-11", false)]
-    [InlineData("2026-03-25", true)]
-    [InlineData("2026-05-05", true)]
-    public void Deve_Retornar_SeEhDiaDeCompra_Quando_DeveExecutarCompraHoje_Solicitado(string dataAtual, bool deveExecutarCompraResult)
+    [InlineData("2026-01-15", false, true)]
+    [InlineData("2026-01-15", true, false)]
+    [InlineData("2026-02-15", false, false)]
+    [InlineData("2026-02-11", false, false)]
+    [InlineData("2026-03-25", true, false)]
+    [InlineData("2026-05-05", false, true)]
+    public async Task Deve_Retornar_SeEhDiaDeCompra_Quando_DeveExecutarCompraHoje_Solicitado(string dataAtual, bool compraJaFoiExecutada, bool deveExecutarCompraValorEsperado)
     {
         // Arrange
         var dateTimeProvaiderFaker = new DateTimeProvaiderHelper(DateTime.Parse(dataAtual));
-        var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker);
+        var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker, _historicoExecucaoMotorRepository);
+
+        _historicoExecucaoMotorRepository.ObterHistoricoExecucaoAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+            .Returns(compraJaFoiExecutada ? HistoricoExecucaoMotor.CriarRegistroHistorico(DateTime.MinValue, DateTime.MinValue) : null);
 
         // Act
-        var result = sut.DeveExecutarCompraHoje();
+        var result = await sut.DeveExecutarCompraHoje(CancellationToken.None);
 
         // Assert
-        result.Should().Be(deveExecutarCompraResult);
+        result.Should().Be(deveExecutarCompraValorEsperado);
     }
 
     [Theory]
@@ -41,7 +53,7 @@ public class CalendarioMotorCompraServiceTests
     {
         // Arrange
         var dateTimeProvaiderFaker = new DateTimeProvaiderHelper(DateTime.Parse(dataAtual));
-        var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker);
+        var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker, default!);
 
         // Act
         var result = sut.ObterProximaDataCompra();
@@ -59,7 +71,7 @@ public class CalendarioMotorCompraServiceTests
     {
         // Arrange
         var dateTimeProvaiderFaker = new DateTimeProvaiderHelper(DateTime.Parse(dataAtual));
-        var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker);
+        var sut = new CalendarioMotorCompraService(_config, dateTimeProvaiderFaker, default!);
 
         // Act
         var result = sut.ObterDataReferenciaExecucao(DateTime.Parse(dataExecutada));
@@ -76,7 +88,7 @@ public class CalendarioMotorCompraServiceTests
     public void Deve_Retornar_SeEhDiaUtil_Quando_Solicitado(string data, bool ehDiaUtil)
     {
         // Arrange
-        var sut = new CalendarioMotorCompraService(_config);
+        var sut = new CalendarioMotorCompraService(_config, default!, default!);
 
         // Act
         var result = sut.EhDiaUtil(DateTime.Parse(data));
@@ -93,7 +105,7 @@ public class CalendarioMotorCompraServiceTests
     public void Deve_Retornar_ProximoDiaUtil_Quando_Solicitado(string data, string proximoDiaUtil)
     {
         // Arrange
-        var sut = new CalendarioMotorCompraService(_config);
+        var sut = new CalendarioMotorCompraService(_config, default!, default!);
 
         // Act
         var result = sut.ObterProximoDiaUtil(DateTime.Parse(data));

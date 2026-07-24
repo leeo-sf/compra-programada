@@ -20,7 +20,7 @@ public class CustodiaMasterRepository : ICustodiaMasterRepository
     public async Task<List<CustodiaMaster>?> ObterResiduosAsync(CancellationToken cancellationToken)
         => await _context.CustodiaMaster
             .Include(x => x.ContaMaster)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
     public async Task AtualizarResiduosAysnc(List<CustodiaMaster> custodias, CancellationToken cancellationToken)
     {

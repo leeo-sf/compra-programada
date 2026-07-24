@@ -6,8 +6,10 @@ internal static class EndpointsConfiguration
 {
     public static void AddEndpoints(this IEndpointRouteBuilder app)
     {
-        app.AddAdministratorEndpoints();
-        app.AddClienteEndpoints();
-        app.AddMotorEndpoints();
+        var apiGroup = app.MapGroup("/api");
+
+        apiGroup.AddAdministratorEndpoints();
+        apiGroup.AddClienteEndpoints();
+        apiGroup.AddMotorEndpoints();
     }
 }

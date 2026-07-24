@@ -1,5 +1,6 @@
 ﻿using CompraProgramada.Shared.Config;
 using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Domain.Contract.Repository;
 
 namespace CompraProgramada.Domain.Service;
 
@@ -8,23 +9,29 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
     private readonly MotorCompraConfig _config;
     private readonly IDateTimeProvaider _dateTimeProvaider;
     private DateTime _dataAtual => _dateTimeProvaider.Now;
+    private readonly IHistoricoExecucaoMotorRepository _historicoExecucaoMotorRepository;
 
-    public CalendarioMotorCompraService(AppConfig config)
-        : this(config, new DateTimeProvaider()) { }
-
-    public CalendarioMotorCompraService(AppConfig config,
-        IDateTimeProvaider dateTimeProvaider)
+    public CalendarioMotorCompraService(
+        AppConfig config,
+        IDateTimeProvaider dateTimeProvaider,
+        IHistoricoExecucaoMotorRepository historicoExecucaoMotorRepository)
     {
         _config = config.MotorCompraConfig;
         _dateTimeProvaider = dateTimeProvaider;
+        _historicoExecucaoMotorRepository = historicoExecucaoMotorRepository;
     }
 
-    public bool DeveExecutarCompraHoje()
+    public async Task<bool> DeveExecutarCompraHoje(CancellationToken cancellationToken)
     {
         var ehDiaUtil = EhDiaUtil(_dataAtual);
 
         if (_config.DiasDeCompra.Contains(_dataAtual.Day) && ehDiaUtil)
-            return true;
+        {
+            var jaFoiExecutado = await _historicoExecucaoMotorRepository.ObterHistoricoExecucaoAsync(_dataAtual, cancellationToken) is not null;
+
+            if (!jaFoiExecutado)
+                return true;
+        }
 
         return false;
     }
@@ -66,7 +73,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 
         foreach (var dia in diasOrdenadosDeExecucao)
         {
-            if (dataExecutada.Day > 0 && dataExecutada.Day < diasOrdenadosDeExecucao.First())
+            if (dataExecutada is { Day: var day and > 0 } && day < diasOrdenadosDeExecucao.First())
             {
                 var mesAnterior = _dataAtual.AddMonths(-1);
                 return new DateTime(mesAnterior.Year, mesAnterior.Month, diasOrdenadosDeExecucao[diasOrdenadosDeExecucao.Count - 1]);
@@ -79,7 +86,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
             }
         }
 
-        return new DateTime(_dataAtual.Year, _dataAtual.Month, diasOrdenadosDeExecucao[diasOrdenadosDeExecucao.Count - 1]);
+        return new DateTime(_dataAtual.Year, _dataAtual.Month, diasOrdenadosDeExecucao[^1]);
     }
 
     public bool EhDiaUtil(DateTime data)

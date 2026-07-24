@@ -7,9 +7,8 @@
   </PropertyGroup>
 	
   <ItemGroup>
-	<InternalsVisibleTo Include="CompraProgramada.Application.Tests" />
 	<InternalsVisibleTo Include="CompraProgramada.Data.Tests" />
-	  <InternalsVisibleTo Include="CompraProgramada.Domain.Tests" />
+	<InternalsVisibleTo Include="CompraProgramada.Domain.Tests" />
   </ItemGroup>
 	
   <ItemGroup>

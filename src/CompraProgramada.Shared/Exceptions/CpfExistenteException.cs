@@ -5,7 +5,7 @@ namespace CompraProgramada.Shared.Exceptions;
 public class CpfExistenteException : DomainException
 {
     public CpfExistenteException()
-        : base("CPF ja cadastrado no sistema.",
+        : base("CPF já cadastrado no sistema",
             "CLIENTE_CPF_DUPLICADO")
     { }
 }

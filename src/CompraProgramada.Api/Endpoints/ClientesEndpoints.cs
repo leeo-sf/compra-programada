@@ -8,7 +8,7 @@ internal static class ClientesEndpoints
 {
     public static void AddClienteEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("api/clientes")
+        var group = app.MapGroup("/clientes")
             .WithTags("Clientes");
 
         group.MapPost("adesao", RealizarAdesaoAsync)

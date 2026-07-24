@@ -30,7 +30,7 @@ public class CestaRecomendadaTests
         var act = () => CestaRecomendada.CriarCesta(NOME, composicaoCesta);
         var exception = act.Should().Throw<QuantidadeItensCestaException>().Which;
 
-        exception.Message.Should().Be($"A cesta deve conter exatamente 5 ativos. Quantidade informada: {qtdItens}.");
+        exception.Message.Should().Be($"A cesta deve conter exatamente 5 ativos. Quantidade informada: {qtdItens}");
         exception.Codigo.Should().Be("QUANTIDADE_ATIVOS_INVALIDA");
         exception.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -43,7 +43,7 @@ public class CestaRecomendadaTests
         var act = () => CestaRecomendada.CriarCesta(NOME, composicaoCesta);
         var exception = act.Should().Throw<PercentualCestaException>().Which;
 
-        exception.Message.Should().Be($"A soma dos percentuais deve ser exatamente 100%. Soma atual: {somaPercentual}%.");
+        exception.Message.Should().Be($"A soma dos percentuais deve ser exatamente 100%. Soma atual: {somaPercentual}%");
         exception.Codigo.Should().Be("PERCENTUAIS_INVALIDOS");
         exception.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

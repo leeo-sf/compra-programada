@@ -24,14 +24,14 @@ public class CestaRecomendadaRepository : ICestaRecomendadaRepository
         return cesta;
     }
 
-    public async Task<CestaRecomendada?> ObterCestaAtivaAsync(CancellationToken cancellationToken)
+    public async Task<CestaRecomendada?> ObterCestaAtualAsync(CancellationToken cancellationToken)
         => await _context.CestaRecomendada
             .Include(c => c.ComposicaoCesta)
             .FirstOrDefaultAsync(c => c.Ativa, cancellationToken);
 
-    public async Task<List<CestaRecomendada>> ObterTodasCestasAsync(CancellationToken cancellationToken)
+    public async Task<List<CestaRecomendada>> ObterCestasAsync(CancellationToken cancellationToken)
         => await _context.CestaRecomendada
             .Include(c => c.ComposicaoCesta)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 }

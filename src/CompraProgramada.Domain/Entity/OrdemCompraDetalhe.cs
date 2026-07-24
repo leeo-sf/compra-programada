@@ -11,8 +11,6 @@ public class OrdemCompraDetalhe
     public int OrdemCompraId { get; protected set; }
     public OrdemCompra OrdemCompra { get; protected set; } = default!;
 
-    private OrdemCompraDetalhe() { }
-
     internal OrdemCompraDetalhe(int id, OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId)
     {
         Id = id;
@@ -22,6 +20,6 @@ public class OrdemCompraDetalhe
         OrdemCompraId = ordemCompraId;
     }
 
-    public static OrdemCompraDetalhe GerarDetalhe(OrdemCompraTipo tipo, string ticker, int quantidade, int ordemCompraId)
-        => new OrdemCompraDetalhe(0, tipo, ticker, quantidade, ordemCompraId);
+    public static OrdemCompraDetalhe GerarDetalhe(OrdemCompraTipo tipo, string ticker, int quantidade)
+        => new(0, tipo, ticker, quantidade, 0);
 }

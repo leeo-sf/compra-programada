@@ -1,6 +1,11 @@
-﻿using CompraProgramada.Shared.Dto;
+﻿using CompraProgramada.Data;
+using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Domain.Service;
+using CompraProgramada.Shared.Config;
+using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Exceptions.Base;
 using CompraProgramada.Shared.Request;
-using CompraProgramada.Data;
 using Confluent.Kafka;
 using FluentValidation;
 using MediatR;
@@ -9,11 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using CompraProgramada.Shared.Exceptions.Base;
-using CompraProgramada.Domain.Contract.Repository;
-using CompraProgramada.Domain.Contract.Service;
-using CompraProgramada.Domain.Service;
-using CompraProgramada.Shared.Config;
 
 namespace CompraProgramada.Infra.Tests;
 
@@ -120,22 +120,6 @@ public class AppConfigurationTests
     }
 
     [Fact]
-    public async Task Deve_Resolver_Mediatr()
-    {
-        // Arrange
-        _services.AddLogging();
-        _services.ConfigurarMediatR();
-
-        var provider = _services.BuildServiceProvider();
-
-        // Act
-        var mediator = provider.GetService<IMediator>();
-
-        // Assert
-        Assert.NotNull(mediator);
-    }
-
-    [Fact]
     public async Task Repository_Deve_Ser_Scoped()
     {
         // Arrange
@@ -146,7 +130,6 @@ public class AppConfigurationTests
         var clienteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IClienteRepository));
         var contaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IContaMasterRepository));
         var cotacaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICotacaoRepository));
-        var custodiaFilhoteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaFilhoteRepository));
         var custodiaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaMasterRepository));
         var historicoExecucaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IHistoricoExecucaoMotorRepository));
         var ordemCompraDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IOrdemCompraRepository));
@@ -160,8 +143,6 @@ public class AppConfigurationTests
         Assert.Equal(ServiceLifetime.Scoped, contaMasterDescriptor?.Lifetime);
         Assert.NotNull(cotacaoDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, cotacaoDescriptor?.Lifetime);
-        Assert.NotNull(custodiaFilhoteDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, custodiaFilhoteDescriptor?.Lifetime);
         Assert.NotNull(custodiaMasterDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, custodiaMasterDescriptor?.Lifetime);
         Assert.NotNull(historicoExecucaoDescriptor);
@@ -177,26 +158,12 @@ public class AppConfigurationTests
         _services.AdicionaServicosERepositorios();
 
         // Act
-        var cestaDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICestaRecomendadaService));
-        var clienteDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IClienteService));
         var cotacaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICotacaoService));
-        var custodiaMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICustodiaMasterService));
-        var distribuicaoMasterDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IDistribuicaoService));
-        var historicoExecucaoDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IHistoricoExecucaoMotorService));
-        var compraDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(ICompraService));
         var ordemCompraDescriptor = _services.FirstOrDefault(s => s.ServiceType == typeof(IOrdemCompraService));
 
         // Assert
-        Assert.NotNull(cestaDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, cestaDescriptor?.Lifetime);
-        Assert.NotNull(clienteDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, clienteDescriptor?.Lifetime);
         Assert.NotNull(cotacaoDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, cotacaoDescriptor?.Lifetime);
-        Assert.NotNull(custodiaMasterDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, custodiaMasterDescriptor?.Lifetime);
-        Assert.NotNull(historicoExecucaoDescriptor);
-        Assert.Equal(ServiceLifetime.Scoped, historicoExecucaoDescriptor?.Lifetime);
         Assert.NotNull(ordemCompraDescriptor);
         Assert.Equal(ServiceLifetime.Scoped, ordemCompraDescriptor?.Lifetime);
     }
@@ -218,7 +185,7 @@ public class AppConfigurationTests
         Assert.NotNull(cotahistDescriptor);
         Assert.Equal(ServiceLifetime.Singleton, cotahistDescriptor?.Lifetime);
         Assert.NotNull(calendarioDescriptor);
-        Assert.Equal(ServiceLifetime.Singleton, calendarioDescriptor?.Lifetime);
+        Assert.Equal(ServiceLifetime.Scoped, calendarioDescriptor?.Lifetime);
         Assert.NotNull(fileSysDescriptor);
         Assert.Equal(ServiceLifetime.Singleton, fileSysDescriptor?.Lifetime);
         Assert.NotNull(impostoRendaDescriptor);

@@ -18,7 +18,7 @@ public class ClienteRepository : IClienteRepository
             .Where(c => c.Ativo)
             .ToListAsync(cancellationToken);
 
-    public async Task<bool> ExisteAsync(string cpf, CancellationToken cancellationToken)
+    public async Task<bool> CpfExistenteAsync(string cpf, CancellationToken cancellationToken)
         => await _context.Cliente.AnyAsync(x => x.Cpf == cpf, cancellationToken);
 
     public async Task<Cliente> CriarAsync(Cliente cliente, CancellationToken cancellationToken)
@@ -28,20 +28,20 @@ public class ClienteRepository : IClienteRepository
         return cliente;
     }
 
-    public async Task<int> QuantidadeAtivosAsync(CancellationToken cancellationToken)
+    public async Task<long> QuantidadeAtivosAsync(CancellationToken cancellationToken)
         => await _context.Cliente
             .AsNoTracking()
-            .CountAsync(c => c.Ativo);
+            .CountAsync(c => c.Ativo, cancellationToken);
 
-    public async Task<Cliente?> ObterClienteAsync(int id, CancellationToken cancellationToken)
+    public async Task<Cliente?> ObterAsync(int id, CancellationToken cancellationToken)
         => await _context.Cliente
             .Include(x => x.ContaGrafica)
                 .ThenInclude(conta => conta.CustodiaFilhotes)
             .Include(x => x.ContaGrafica)
                 .ThenInclude(conta => conta.HistoricoCompra)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public async Task<Cliente> AtualizarClienteAsync(Cliente cliente, CancellationToken cancellationToken)
+    public async Task<Cliente> AtualizarAsync(Cliente cliente, CancellationToken cancellationToken)
     {
         _context.Entry(cliente).CurrentValues.SetValues(cliente);
         await _context.SaveChangesAsync(cancellationToken);
@@ -51,7 +51,7 @@ public class ClienteRepository : IClienteRepository
     public async Task<ContaGrafica> CriarContaAsync(ContaGrafica conta, CancellationToken cancellationToken)
     {
         _context.ContaGrafica.Add(conta);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
         return conta;
     }
 

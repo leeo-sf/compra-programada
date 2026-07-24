@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using OperationResult;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Contract.Repository;
+using CompraProgramada.Domain.Handler.Api;
 
 namespace CompraProgramada.Domain.Service;
 
@@ -13,7 +14,8 @@ public class CotacaoService : ICotacaoService
     private readonly ICotacaoRepository _cotacaoRepository;
     private readonly ICotahistParserService _cotahistParser;
 
-    public CotacaoService(ILogger<CotacaoService> logger,
+    public CotacaoService(
+        ILogger<CotacaoService> logger,
         ICotacaoRepository cotacaoRepository,
         ICotahistParserService cotahistParser)
     {
@@ -22,30 +24,46 @@ public class CotacaoService : ICotacaoService
         _cotahistParser = cotahistParser;
     }
 
-    public async Task<Result<Cotacao>> ObterCotacoesFechamentoB3DaCestaRecomendadaAsync(CestaRecomendada cestaVigente, CancellationToken cancellationToken)
+    public async Task<Result<Cotacao>> ObterCotacoesDaCestaRecomendadaAsync(CestaRecomendada cestaVigente, CancellationToken cancellationToken)
     {
-        var cotacoesCesta = RealizarMatchFechamentoECestaRecomendada(cestaVigente);
+        var cotacao = await _cotacaoRepository.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
+        if (cotacao is not null)
+        {
+            var teveMudanca = CriarCestaHandler.ObterMudancasDeAtivos(
+                [.. cotacao.ComposicaoCotacao.Select(c => c.Ticker)],
+                [.. cestaVigente.ComposicaoCesta.Select(c => c.Ticker)])
+                is { ativosAdicionados.Count: > 0 };
 
-        if (!cotacoesCesta.Any())
-            return new ApplicationException("Não foi possível obter a cesta recomendada nas cotações da B3.");
+            if (!teveMudanca)
+                return cotacao;
+        }
 
-        var cotacao = Cotacao.CriarRegistro(cotacoesCesta.FirstOrDefault()!.DataPregao, cotacoesCesta.Select(x => ComposicaoCotacao.CriarItem(x.Ticker, x.PrecoFechamento)).ToList());
+        var cotacoesCesta = RealizarMatchB3ECestaRecomendada(cestaVigente);
 
-        _logger.LogInformation("Cotações de fachamento B3 da cesta Top Five com base na data pregão {DataPregao}. Cotações: {CotacoesFechamento}", cotacao.DataPregao, cotacao.ComposicaoCotacao);
+        if (cotacoesCesta is null || !cotacoesCesta.Any())
+            return new ApplicationException("Não foi possível obter a cotação da cesta recomendada na B3.");
 
-        var cotacaoSalva = await _cotacaoRepository.SalvarCotacaoAsync(cotacao, cancellationToken);
+        Cotacao cotacaoAhRegistrar = Cotacao.CriarRegistro(
+            DateOnly.FromDateTime(cotacoesCesta.Select(x => x.DataPregao).First()),
+            [.. cotacoesCesta.Select(x => ComposicaoCotacao.CriarItem(x.Ticker, x.PrecoFechamento))]);
+
+        _logger.LogInformation("Cotações de fachamento B3 da cesta Top Five com base na data pregão {DataPregao}. Cotações: {CotacoesFechamento}", cotacaoAhRegistrar.DataPregao, cotacaoAhRegistrar.ComposicaoCotacao);
+
+        var cotacaoSalva = await _cotacaoRepository.SalvarCotacaoAsync(cotacaoAhRegistrar, cancellationToken);
 
         return cotacaoSalva;
     }
 
-    public IEnumerable<CotacaoB3Dto?> RealizarMatchFechamentoECestaRecomendada(CestaRecomendada cestaVigente)
+    internal IEnumerable<CotacaoB3Dto>? RealizarMatchB3ECestaRecomendada(CestaRecomendada cestaVigente)
     {
         var cotacoesB3 = _cotahistParser.ParseArquivo();
+        if (cotacoesB3 is null)
+            return default;
 
-        var cestaVigenteTickers = new HashSet<string>(cestaVigente.ComposicaoCesta.Select(x => x.Ticker), StringComparer.OrdinalIgnoreCase);
+        var cestaHashTickers = cestaVigente.ComposicaoCesta.Select(x => x.Ticker)
+            .Where(ticker => !string.IsNullOrWhiteSpace(ticker))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var cotacoesCesta = cotacoesB3.Where(cotacao => cestaVigenteTickers.Contains(cotacao.Ticker));
-
-        return cotacoesCesta;
+        return cotacoesB3.Where(cotacao => cestaHashTickers.Contains(cotacao.Ticker));
     }
 }

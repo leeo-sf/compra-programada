@@ -10,11 +10,11 @@ public class CotacaoRepository : ICotacaoRepository
 
     public CotacaoRepository(AppDbContext context) => _context = context;
 
-    public async Task<Cotacao?> ObterCotacaoAsync(DateTime dataPregao, CancellationToken cancellationToken)
+    public async Task<Cotacao?> ObterCotacaoAsync(DateOnly dataRegistro, CancellationToken cancellationToken)
         => await _context.Cotacao
             .Include(x => x.ComposicaoCotacao)
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.DataPregao.Date == dataPregao.Date, cancellationToken);
+            .FirstOrDefaultAsync(x => DateOnly.FromDateTime(x.DataCriacao) == dataRegistro, cancellationToken);
 
     public async Task<Cotacao> SalvarCotacaoAsync(Cotacao cotacao, CancellationToken cancellationToken)
     {

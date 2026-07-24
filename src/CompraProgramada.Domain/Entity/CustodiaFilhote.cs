@@ -10,8 +10,7 @@ public class CustodiaFilhote
     public decimal PrecoMedio { get; private set; }
     public int Quantidade { get; private set; }
     public ContaGrafica ContaGrafica { get; init; } = default!;
-
-    private CustodiaFilhote() { }
+    public decimal ValorInvestido => Quantidade * PrecoMedio;
 
     internal CustodiaFilhote(int id, int contaGraficaId, string ticker, decimal precoMedio, int quantidade)
     {
@@ -26,7 +25,7 @@ public class CustodiaFilhote
     }
 
     public static CustodiaFilhote GerarCustodia(string ticker)
-        => new CustodiaFilhote(0, 0, ticker, 0, 0);
+        => new(0, 0, ticker, 0, 0);
 
     /// <summary>
     /// Atribuí nova quantidade de ativos (soma quantidade anterior + nova quantidade)
@@ -54,21 +53,13 @@ public class CustodiaFilhote
         var valorCompraAnterior = Quantidade * PrecoMedio;
         var valorCompraAtual = novaQuantidadeDeAtivos * precoFechamentoAtivo;
 
-        decimal precoMedio = valorCompraAtual / novaQuantidadeDeAtivos;
+        PrecoMedio = valorCompraAtual / novaQuantidadeDeAtivos;
 
         if (Quantidade > 0)
-            precoMedio = (valorCompraAnterior + valorCompraAtual) / Quantidade + novaQuantidadeDeAtivos;
+            PrecoMedio = (valorCompraAnterior + valorCompraAtual) / Quantidade + novaQuantidadeDeAtivos;
 
-        PrecoMedio = precoMedio;
-        return precoMedio;
+        return PrecoMedio;
     }
-
-    /// <summary>
-    /// Calcula o valor investido na carteira
-    /// </summary>
-    /// <returns>Valor investido</returns>
-    internal decimal CalcularValorInvestido()
-        => Quantidade * PrecoMedio;
 
     /// <summary>
     /// Calcula valor de PL (Lucro/Prejuízo) por ativo

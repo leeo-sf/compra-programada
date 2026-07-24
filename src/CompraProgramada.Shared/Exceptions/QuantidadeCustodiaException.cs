@@ -6,7 +6,7 @@ namespace CompraProgramada.Shared.Exceptions;
 public class QuantidadeCustodiaException : DomainException
 {
     public QuantidadeCustodiaException()
-        : base("Quantidade deve ser maior que zero.",
+        : base("Quantidade deve ser maior que zero",
             "QUANTIDADE_INVALIDA",
             HttpStatusCode.UnprocessableEntity)
     { }
