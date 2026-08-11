@@ -17,7 +17,7 @@ internal static class ClientesEndpoints
             .WithDescription("Adere ao produto e sempre que o sistema realizar compras será distribuído ativos à sua conta");
 
         group.MapPost("{id}/saida", SairDoProdutoAsync)
-            .Produces(StatusCodes.Status200OK)
+            .Produces<SaidaProdutoResponse>(StatusCodes.Status200OK)
             .WithSummary("Cancela a permanência do cliente ao produto");
 
         group.MapPut("{id}/valor-mensal", AtualizarValorMensalAsync)

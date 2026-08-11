@@ -35,7 +35,7 @@ public class CriarCestaHandlerTests
 
         _cestaRecomendadaRepository
             .CriarAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
-            .Returns(new CestaRecomendada(0, "", DateTime.MinValue, DateTime.MinValue, true, []));
+            .Returns(new CestaRecomendada("Cesta", true, []));
 
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -53,7 +53,7 @@ public class CriarCestaHandlerTests
     public async Task Handle_Deve_CriarNovaCesta_E_DesativarAnterior_Quando_TiverUmaCestaAtiva()
     {
         var request = FakerRequest.CriarCestaRecomendadaRequest();
-        var cestaAnterior = new CestaRecomendada(1, "Cesta Anterior", DateTime.MinValue, DateTime.MinValue, true, []);
+        var cestaAnterior = new CestaRecomendada("Cesta Anterior", true, []);
 
         _cestaRecomendadaRepository
             .ObterCestaAtualAsync(Arg.Any<CancellationToken>())
@@ -61,7 +61,7 @@ public class CriarCestaHandlerTests
 
         _cestaRecomendadaRepository
             .CriarAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
-            .Returns(new CestaRecomendada(0, "", DateTime.MinValue, DateTime.MinValue, true, []));
+            .Returns(new CestaRecomendada("Cesta", true, []));
 
         _clienteRepository.QuantidadeAtivosAsync(Arg.Any<CancellationToken>())
             .Returns(1);

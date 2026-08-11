@@ -15,7 +15,7 @@ public class ImpostoRendaServiceTests
     public ImpostoRendaServiceTests()
     {
         _kafkaProducer = Substitute.For<IKafkaProducer>();
-        _sut = new(_kafkaProducer);
+        _sut = new(_kafkaProducer, AppConfigHelper.GetAppConfig());
     }
 
     [Fact]

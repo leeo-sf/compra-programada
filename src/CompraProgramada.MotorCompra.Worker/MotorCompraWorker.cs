@@ -9,7 +9,7 @@ namespace CompraProgramada.MotorCompra.Worker;
 public class MotorCompraWorker : BackgroundService
 {
     private readonly ILogger<MotorCompraWorker> _logger;
-    private readonly AppConfig _appConfig;
+    private readonly MotorCompraConfig _motorConfig;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public MotorCompraWorker(
@@ -18,13 +18,13 @@ public class MotorCompraWorker : BackgroundService
         IServiceScopeFactory serviceScopeFactory)
     {
         _logger = logger;
-        _appConfig = appConfig;
+        _motorConfig = appConfig.MotorCompraConfig;
         _serviceScopeFactory = serviceScopeFactory;
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var periodo = TimeSpan.FromHours(_appConfig.MotorCompraConfig?.TempoEmHoraAhCadaExecucao ?? 1);
+        var periodo = TimeSpan.FromHours(_motorConfig.TempoEmHoraAhCadaExecucao);
         var timer = new PeriodicTimer(periodo);
 
         while (await timer.WaitForNextTickAsync(stoppingToken))

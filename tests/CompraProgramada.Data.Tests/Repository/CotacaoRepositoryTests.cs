@@ -37,7 +37,7 @@ public class CotacaoRepositoryTests : SqliteTestBase
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.Now), CancellationToken.None);
+        var result = await _repo.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.UtcNow), CancellationToken.None);
 
         // Assert
         _context.Cotacao.Should().HaveCount(1);

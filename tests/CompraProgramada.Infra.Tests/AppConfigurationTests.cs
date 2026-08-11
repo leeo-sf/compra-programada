@@ -22,14 +22,16 @@ public class AppConfigurationTests
     private readonly ServiceCollection _services;
     private readonly Dictionary<string, string> _appSettings = new Dictionary<string, string>
     {
-        { "ApplicationConfig:MotorCompraConfig:DiasDeCompra:0", "5" },
-        { "ApplicationConfig:MotorCompraConfig:DiasDeCompra:1", "15" },
-        { "ApplicationConfig:MotorCompraConfig:DiasDeCompra:2", "25" },
-        { "ApplicationConfig:MotorCompraConfig:TempoEmHoraAhCadaExecucao", "10" },
-        { "ApplicationConfig:MotorCompraConfig:NomePastaArquivosB3", "cotacoes" },
-        { "Service:DataBase:ConnectionString", "Server=fake;" },
+        { "MotorCompraConfig:DiasDeCompra:0", "5" },
+        { "MotorCompraConfig:DiasDeCompra:1", "15" },
+        { "MotorCompraConfig:DiasDeCompra:2", "25" },
+        { "MotorCompraConfig:TempoEmHoraAhCadaExecucao", "10" },
+        { "MotorCompraConfig:NomePastaArquivosB3", "cotacoes" },
+        { "ConnectionStrings:DefaultDb", "Server=fake;" },
         { "Service:Kafka:Server", "localhost:9092" },
-        { "Service:Kafka:SendMaxRetries", "5" }
+        { "Service:Kafka:SendMaxRetries", "5" },
+        { "Service:Kafka:ImpostoRendaTopic", "topic.test" },
+        { "Service:Kafka:Aliquota", "0.5" }
     };
 
     public AppConfigurationTests() => _services = new ServiceCollection();
@@ -221,11 +223,11 @@ public class AppConfigurationTests
         // Arrange
         var inMemorySettings = new Dictionary<string, string>
         {
-            { "ApplicationConfig:MotorCompraConfig:DiasDeCompra:0", "2" },
-            { "ApplicationConfig:MotorCompraConfig:DiasDeCompra:1", "7" },
-            { "ApplicationConfig:MotorCompraConfig:DiasDeCompra:2", "75" },
-            { "ApplicationConfig:MotorCompraConfig:TempoEmHoraAhCadaExecucao", "23" },
-            { "ApplicationConfig:MotorCompraConfig:NomePastaArquivosB3", "directory" }
+            { "MotorCompraConfig:DiasDeCompra:0", "2" },
+            { "MotorCompraConfig:DiasDeCompra:1", "7" },
+            { "MotorCompraConfig:DiasDeCompra:2", "75" },
+            { "MotorCompraConfig:TempoEmHoraAhCadaExecucao", "23" },
+            { "MotorCompraConfig:NomePastaArquivosB3", "directory" }
         };
 
         var configuration = new ConfigurationBuilder()
@@ -241,10 +243,10 @@ public class AppConfigurationTests
 
         // Assert
         Assert.NotNull(config);
-        Assert.NotNull(config?.MotorCompraConfig);
-        Assert.Equal(new List<int> { 2, 7, 75 }, config?.MotorCompraConfig.DiasDeCompra);
-        Assert.Equal(23, config?.MotorCompraConfig.TempoEmHoraAhCadaExecucao);
-        Assert.Equal("directory", config?.MotorCompraConfig.NomePastaArquivosB3);
+        Assert.NotNull(config.MotorCompraConfig);
+        Assert.Equal(new List<int> { 2, 7, 75 }, config.MotorCompraConfig.DiasDeCompra);
+        Assert.Equal(23, config.MotorCompraConfig.TempoEmHoraAhCadaExecucao);
+        Assert.Equal("directory", config.MotorCompraConfig.NomePastaArquivosB3);
     }
 
     [Fact]

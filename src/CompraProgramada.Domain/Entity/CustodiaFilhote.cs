@@ -1,31 +1,31 @@
-﻿using CompraProgramada.Shared.Exceptions;
+﻿using CompraProgramada.Domain.Entity.BaseEntity;
+using CompraProgramada.Shared.Exceptions;
 
 namespace CompraProgramada.Domain.Entity;
 
-public class CustodiaFilhote
+public class CustodiaFilhote : EntidadeBase
 {
-    public int Id { get; private set; }
-    public int ContaGraficaId { get; private set; }
-    public string Ticker { get; private set; } = string.Empty;
+    public int ContaGraficaId { get; init; }
+    public string Ticker { get; init; } = string.Empty;
     public decimal PrecoMedio { get; private set; }
     public int Quantidade { get; private set; }
     public ContaGrafica ContaGrafica { get; init; } = default!;
     public decimal ValorInvestido => Quantidade * PrecoMedio;
 
-    internal CustodiaFilhote(int id, int contaGraficaId, string ticker, decimal precoMedio, int quantidade)
+    internal CustodiaFilhote(int contaGraficaId, string ticker, decimal precoMedio, int quantidade)
+        : base(0)
     {
         if (string.IsNullOrEmpty(ticker))
             throw new TickerNaoPreenchidoException();
 
-        Id = id;
         ContaGraficaId = contaGraficaId;
         Ticker = ticker;
         PrecoMedio = precoMedio;
         Quantidade = quantidade;
     }
 
-    public static CustodiaFilhote GerarCustodia(string ticker)
-        => new(0, 0, ticker, 0, 0);
+    public static CustodiaFilhote GerarCustodia(int contaGraficaId, string ticker)
+        => new(contaGraficaId, ticker, 0, 0);
 
     /// <summary>
     /// Atribuí nova quantidade de ativos (soma quantidade anterior + nova quantidade)
@@ -42,21 +42,16 @@ public class CustodiaFilhote
     /// <summary>
     /// Calcula e atualiza preço médio ponderado de compra do ativo
     /// </summary>
-    /// <param name="precoFechamentoAtivo">Valor do fechamento do ativo</param>
+    /// <param name="precoUnitario">Preço unitário do ativo</param>
     /// <param name="novaQuantidadeDeAtivos">Nova quantidade de ativos que serão atribuídos a conta do cliente</param>
     /// <returns>Valor do preço médio</returns>
-    public decimal CalcularPrecoMedio(decimal precoFechamentoAtivo, int novaQuantidadeDeAtivos)
+    public decimal CalcularPrecoMedio(decimal precoUnitario, int novaQuantidadeDeAtivos)
     {
         if (novaQuantidadeDeAtivos < 1)
             return 0;
 
-        var valorCompraAnterior = Quantidade * PrecoMedio;
-        var valorCompraAtual = novaQuantidadeDeAtivos * precoFechamentoAtivo;
-
-        PrecoMedio = valorCompraAtual / novaQuantidadeDeAtivos;
-
-        if (Quantidade > 0)
-            PrecoMedio = (valorCompraAnterior + valorCompraAtual) / Quantidade + novaQuantidadeDeAtivos;
+        var precoMedioCalculado = (Quantidade * PrecoMedio + novaQuantidadeDeAtivos * precoUnitario) / (Quantidade + novaQuantidadeDeAtivos);
+        PrecoMedio = Math.Round(precoMedioCalculado, 2); 
 
         return PrecoMedio;
     }

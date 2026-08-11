@@ -61,7 +61,7 @@ public class CriarCestaHandler : IRequestHandler<CriarCestaRecomendadaRequest, R
             cesta.Ativa,
             cesta.DataCriacao,
             cesta.ComposicaoCesta.Select(cc => new ComposicaoCestaDto { Ticker = cc.Ticker, Percentual = cc.Percentual }).ToList(),
-            cestaAnterior is null ? default : new CestaDesativadaDto { CestaId = cestaAnterior!.Id, Nome = cestaAnterior.Nome, DataDesativacao = cestaAnterior.DataDesativacao!.Value },
+            cestaAnterior is null ? default : new CestaDesativadaDto { CestaId = cestaAnterior!.Id, Nome = cestaAnterior.Nome, DataDesativacao = cestaAnterior.DataAtualizacao },
             ativosRemovidos,
             ativosAdicionados,
             atualizouCesta

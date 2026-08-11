@@ -88,9 +88,9 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task QuantidadeAtivosAsync_Deve_RetornarQtd_Clientes_Ativos()
     {
         // Arrange
-        var clienteA = new Cliente(0, "Name A", "11111111111", "email_a@mail.com", 100, 100, true, DateTime.MinValue);
-        var clienteB = new Cliente(0, "Name B", "11111111112", "email_b@mail.com", 100, 100, false, DateTime.MinValue);
-        var clienteC = new Cliente(0, "Name C", "11111111113", "email_c@mail.com", 100, 100, true, DateTime.MinValue);
+        var clienteA = new Cliente(0, "Name A", "11111111111", "email_a@mail.com", 100, 100, true, DateTime.MinValue, DateTime.MinValue, default!);
+        var clienteB = new Cliente(0, "Name B", "11111111112", "email_b@mail.com", 100, 100, false, DateTime.MinValue, DateTime.MinValue, default!);
+        var clienteC = new Cliente(0, "Name C", "11111111113", "email_c@mail.com", 100, 100, true, DateTime.MinValue, DateTime.MinValue, default!);
 
         _context.Cliente.AddRange([clienteA, clienteB, clienteC]);
         await _context.SaveChangesAsync();
@@ -107,9 +107,9 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task ObterClientesAtivosAsync_Deve_Retornar_Clientes_Ativos()
     {
         // Arrange
-        var clienteA = new Cliente(0, "Name A", "11111111111", "email_a@mail.com", 100, 100, true, DateTime.MinValue);
-        var clienteB = new Cliente(0, "Name B", "11111111112", "email_b@mail.com", 100, 100, false, DateTime.MinValue);
-        var clienteC = new Cliente(0, "Name C", "11111111113", "email_c@mail.com", 100, 100, true, DateTime.MinValue);
+        var clienteA = new Cliente(0, "Name A", "11111111111", "email_a@mail.com", 100, 100, true, DateTime.MinValue, DateTime.MinValue, default!);
+        var clienteB = new Cliente(0, "Name B", "11111111112", "email_b@mail.com", 100, 100, false, DateTime.MinValue, DateTime.MinValue, default!);
+        var clienteC = new Cliente(0, "Name C", "11111111113", "email_c@mail.com", 100, 100, true, DateTime.MinValue, DateTime.MinValue, default!);
 
         _context.Cliente.AddRange([clienteA, clienteB, clienteC]);
         await _context.SaveChangesAsync();
@@ -127,7 +127,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task ObterAsync_Deve_Retornar_Cliente_QuandoExistir()
     {
         // Arrange
-        var cliente = new Cliente(1, "Name A", "11111111111", "email_a@mail.com", 100, 100, true, DateTime.MinValue);
+        var cliente = new Cliente("Name A", "11111111111", "email_a@mail.com", 100);
 
         _context.Cliente.Add(cliente);
         await _context.SaveChangesAsync();
@@ -155,7 +155,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task CriarAsync_Deve_Persistir_ContaGrafica()
     {
         // Arrange
-        var cliente = new Cliente(1, "Name", "11111111111", "email@mail.com", 100, 100, true, DateTime.MinValue);
+        var cliente = new Cliente("Name", "11111111111", "email@mail.com", 100);
         var conta = new ContaGrafica(cliente);
 
         // Act
@@ -169,7 +169,7 @@ public class ClienteRepositoryTests : SqliteTestBase
     public async Task AtualizarContasAsync_Deve_Atualizar_ContasGrafica()
     {
         // Arrange
-        var cliente = new Cliente(1, "Name", "11111111111", "email@mail.com", 100, 100, true, DateTime.MinValue);
+        var cliente = new Cliente("Name", "11111111111", "email@mail.com", 100);
         var conta = new ContaGrafica(cliente);
 
         _context.ContaGrafica.Add(conta);

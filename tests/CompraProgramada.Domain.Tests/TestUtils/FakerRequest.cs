@@ -19,9 +19,9 @@ public static class FakerRequest
     public static Faker<List<Cliente>> ClientesAtivos() => new Faker<List<Cliente>>()
         .CustomInstantiator(f => new List<Cliente>
         {
-            new (1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue, new(1, "FLH-000001", DateTime.MinValue, new(1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
-            new (2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue, new(2, "FLH-000002", DateTime.MinValue, new(2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue), new() { }, new() { }, new() { })),
-            new (3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue, new(3, "FLH-000003", DateTime.MinValue, new(3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue), new() { }, new() { }, new() { })),
+            new (1, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000, 3000, true, DateTime.MinValue, DateTime.MinValue, new(1, "FLH-000001", DateTime.MinValue, new(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 3000), new() { }, new() { }, new() { })),
+            new (2, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000, 6000, true, DateTime.MinValue, DateTime.MinValue, new(2, "FLH-000002", DateTime.MinValue, new(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 6000), new() { }, new() { }, new() { })),
+            new (3, f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500, 1500, true, DateTime.MinValue, DateTime.MinValue, new(3, "FLH-000003", DateTime.MinValue, new(f.Person.UserName, f.Person.Cpf(false), f.Person.Email, 1500), new() { }, new() { }, new() { })),
         });
 
     public static Faker<Cliente> ClienteAtivo() => new Faker<Cliente>()

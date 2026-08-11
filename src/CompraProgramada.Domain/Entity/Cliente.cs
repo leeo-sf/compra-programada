@@ -1,54 +1,50 @@
-﻿using CompraProgramada.Shared.Exceptions;
+﻿using CompraProgramada.Domain.Entity.BaseEntity;
+using CompraProgramada.Shared.Exceptions;
 using CompraProgramada.Shared.Request;
 
 namespace CompraProgramada.Domain.Entity;
 
-public class Cliente
+public class Cliente : EntidadeBase
 {
-    public int Id { get; init; }
     public string Nome { get; private set; } = default!;
-    public string Cpf { get; private set; } = default!;
+    public string Cpf { get; } = default!;
     public string Email { get; private set; } = default!;
     public decimal ValorAnterior { get; private set; }
     public decimal ValorMensal { get; private set; }
     public bool Ativo { get; private set; }
-    public DateTime DataAdesao{ get; private set; }
     public ContaGrafica ContaGrafica { get; private set; } = default!;
     public decimal ValorAporte => ValorMensal / 3;
     private const decimal VALOR_MINIMO_ADESAO = 100;
 
     private Cliente() { }
 
-    internal Cliente(int id, string nome, string cpf, string email, decimal valorAnterior, decimal valorMensal, bool ativo, DateTime dataAdesao, ContaGrafica contaGrafica)
+    internal Cliente(int id, string nome, string cpf, string email, decimal valorAnterior, decimal valorMensal, bool ativo, DateTime dataAdesao, DateTime dataAtualizacao, ContaGrafica contaGrafica)
+        : base(id, dataAdesao, dataAtualizacao)
     {
-        Id = id;
         Nome = nome;
         Cpf = cpf;
         Email = email;
         ValorAnterior = valorAnterior;
         ValorMensal = valorMensal;
         Ativo = ativo;
-        DataAdesao = dataAdesao;
         ContaGrafica = contaGrafica;
     }
 
-    internal Cliente(int id, string nome, string cpf, string email, decimal valorAnterior, decimal valorMensal, bool ativo, DateTime dataAdesao)
+    internal Cliente(string nome, string cpf, string email, decimal valorMensal) : base(0)
     {
         if (valorMensal < VALOR_MINIMO_ADESAO)
             throw new ValorMensalException(VALOR_MINIMO_ADESAO);
 
-        Id = id;
         Nome = nome;
         Cpf = cpf;
         Email = email;
-        ValorAnterior = valorAnterior;
+        ValorAnterior = valorMensal;
         ValorMensal = valorMensal;
-        Ativo = ativo;
-        DataAdesao = dataAdesao;
+        Ativo = true;
     }
 
     public static Cliente Criar(AdesaoRequest request)
-        => new(0, request.Nome, request.Cpf, request.Email, request.ValorMensal, request.ValorMensal, true, DateTime.Now);
+        => new(request.Nome, request.Cpf, request.Email, request.ValorMensal);
 
     public void AtualizarValorMensal(AtualizarValorMensalRequest request)
     {

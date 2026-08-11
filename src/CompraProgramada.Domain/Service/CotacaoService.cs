@@ -26,7 +26,7 @@ public class CotacaoService : ICotacaoService
 
     public async Task<Result<Cotacao>> ObterCotacoesDaCestaRecomendadaAsync(CestaRecomendada cestaVigente, CancellationToken cancellationToken)
     {
-        var cotacao = await _cotacaoRepository.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.Now), cancellationToken);
+        var cotacao = await _cotacaoRepository.ObterCotacaoAsync(DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
         if (cotacao is not null)
         {
             var teveMudanca = CriarCestaHandler.ObterMudancasDeAtivos(

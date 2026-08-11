@@ -13,7 +13,7 @@ services:
       compra-programada-db:
         condition: service_healthy
     environment:
-      - Service__DataBase__ConnectionString=Server=compra-programada-db;Port=3306;Database=compraprogramada;User=root;Password=rootpassword;AllowPublicKeyRetrieval=True;SSLMode=None;
+      - ConnectionStrings__DefaultDb=Server=compra-programada-db;Port=3306;Database=compraprogramada;User=root;Password=rootpassword;AllowPublicKeyRetrieval=True;SSLMode=None;
     command:
       - /bin/sh
       - -c
@@ -61,14 +61,16 @@ services:
     container_name: api
     image: leoof/compra-programada-api:v1
     environment:
-      - ApplicationConfig__MotorCompraConfig__DiasDeCompra__0=5
-      - ApplicationConfig__MotorCompraConfig__DiasDeCompra__1=15
-      - ApplicationConfig__MotorCompraConfig__DiasDeCompra__2=25
-      - ApplicationConfig__MotorCompraConfig__TempoEmHoraAhCadaExecucao=10
-      - ApplicationConfig__MotorCompraConfig__NomePastaArquivosB3=cotacoes
-      - Service__DataBase__ConnectionString=Server=compra-programada-db;Port=3306;Database=compraprogramada;User=root;Password=rootpassword;AllowPublicKeyRetrieval=True;SSLMode=None;
+      - MotorCompraConfig__DiasDeCompra__0=5
+      - MotorCompraConfig__DiasDeCompra__1=15
+      - MotorCompraConfig__DiasDeCompra__2=25
+      - MotorCompraConfig__TempoEmHoraAhCadaExecucao=10
+      - MotorCompraConfig__NomePastaArquivosB3=cotacoes
+      - ConnectionStrings__DefaultDb=Server=compra-programada-db;Port=3306;Database=compraprogramada;User=root;Password=rootpassword;AllowPublicKeyRetrieval=True;SSLMode=None;
       - Service__Kafka__Server=kafka
       - Service__Kafka__SendMaxRetries=5
+      - Service__Kafka__ImpostoRendaTopic=topic.imposto-renda-publisher
+      - Service__Kafka__Aliquota=0.00005
     depends_on:
       compra-programada-db:
         condition: service_healthy

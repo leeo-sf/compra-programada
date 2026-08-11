@@ -177,7 +177,7 @@ public class ClienteHandlerTests
         // Arrange
         var request = new CarteiraCustodiaRequest(1);
         var cliente = FakerRequest.ClienteAtivo().Generate();
-        ContaGrafica conta = new(1, "", DateTime.MinValue, cliente, new() { }, new() { new(1, 1, "PETR4", 28.59m, 150), new(1, 1, "VALE3", 72.10m, 80), new(1, 1, "ITUB4", 26.40m, 300), new(1, 1, "WEGE3", 38.15m, 120), new(1, 1, "MGLU3", 5.20m, 1000) }, new() { });
+        ContaGrafica conta = new(1, "", DateTime.MinValue, cliente, new() { }, new() { new(1, "PETR4", 28.59m, 150), new(1, "VALE3", 72.10m, 80), new(1, "ITUB4", 26.40m, 300), new(1, "WEGE3", 38.15m, 120), new(1, "MGLU3", 5.20m, 1000) }, new() { });
         cliente.AdicionarConta(conta);
         CestaRecomendada cestaAtiva = CestaRecomendada.CriarCesta("Cesta", new()
         {
@@ -214,7 +214,7 @@ public class ClienteHandlerTests
             .Returns(cestaAtiva);
 
         _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
-            .Returns(new Cotacao(1, DateOnly.MinValue, DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
+            .Returns(new Cotacao(DateOnly.MinValue, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
 
         // Act
         var result = await _sut.Handle(request, CancellationToken.None);
@@ -277,7 +277,7 @@ public class ClienteHandlerTests
         var request = new RentabilidadeRequest(1);
         var cliente = FakerRequest.ClienteAtivo().Generate();
         ContaGrafica conta = new(1, "", DateTime.MinValue, cliente, new() { },
-            new() { new(1, 1, "PETR4", 28.59m, 150), new(1, 1, "VALE3", 72.10m, 80), new(1, 1, "ITUB4", 26.40m, 300), new(1, 1, "WEGE3", 38.15m, 120), new(1, 1, "MGLU3", 5.20m, 1000) },
+            new() { new(1, "PETR4", 28.59m, 150), new(1, "VALE3", 72.10m, 80), new(1, "ITUB4", 26.40m, 300), new(1, "WEGE3", 38.15m, 120), new(1, "MGLU3", 5.20m, 1000) },
             new() { new(1, 1, "PETR4", 150, 36, 1, 1, DateOnly.FromDateTime(new DateTime(2026, 03, 05))) });
         cliente.AdicionarConta(conta);
         CestaRecomendada cestaAtiva = CestaRecomendada.CriarCesta("Cesta", new()
@@ -306,7 +306,7 @@ public class ClienteHandlerTests
             .Returns(cestaAtiva);
 
         _cotacaoService.ObterCotacoesDaCestaRecomendadaAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())!
-            .Returns(new Cotacao(1, DateOnly.MinValue, DateTime.Now, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
+            .Returns(new Cotacao(DateOnly.MinValue, new() { ComposicaoCotacao.CriarItem("PETR4", 36.50m), ComposicaoCotacao.CriarItem("VALE3", 68.20m), ComposicaoCotacao.CriarItem("ITUB4", 33.15m), ComposicaoCotacao.CriarItem("WEGE3", 42.05m), ComposicaoCotacao.CriarItem("MGLU3", 1.95m) }));
 
         // Act
         var result = await _sut.Handle(request, CancellationToken.None);

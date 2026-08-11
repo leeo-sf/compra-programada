@@ -1,13 +1,11 @@
-﻿using CompraProgramada.Shared.Exceptions;
+﻿using CompraProgramada.Domain.Entity.BaseEntity;
+using CompraProgramada.Shared.Exceptions;
 
 namespace CompraProgramada.Domain.Entity;
 
-public class CestaRecomendada
+public class CestaRecomendada : EntidadeBase
 {
-    public int Id { get; private set; }
     public string Nome { get; private set; } = default!;
-    public DateTime DataCriacao { get; private set; }
-    public DateTime? DataDesativacao { get; private set; }
     public bool Ativa { get; private set; }
     public List<ComposicaoCesta> ComposicaoCesta { get; private set; } = default!;
     private const int QUANTIDADE_EXATA_ITENS_CESTA = 5;
@@ -15,12 +13,10 @@ public class CestaRecomendada
 
     private CestaRecomendada() { }
 
-    internal CestaRecomendada(int id, string nome, DateTime dataCriacao, DateTime? dataDesativacao, bool ativa, List<ComposicaoCesta> itens)
+    internal CestaRecomendada(string nome, bool ativa, List<ComposicaoCesta> itens)
+        : base(0)
     {
-        Id = id;
         Nome = nome;
-        DataCriacao = dataCriacao;
-        DataDesativacao = dataDesativacao;
         Ativa = ativa;
         ComposicaoCesta = itens;
     }
@@ -34,7 +30,7 @@ public class CestaRecomendada
         if (somaPercentuaisAtivos != SOMA_PERCENTUAIS_EXATA)
             throw new PercentualCestaException(somaPercentuaisAtivos);
 
-        return new CestaRecomendada(0, nome.ToUpper(), DateTime.Now, null, true, itens);
+        return new(nome.ToUpper(), true, itens);
     }
 
     public void DesativarCesta()
@@ -43,6 +39,6 @@ public class CestaRecomendada
             throw new ApplicationException("A cesta já se encontra desativada.");
 
         Ativa = false;
-        DataDesativacao = DateTime.Now;
+        DataAtualizacao = DateTime.UtcNow;
     }
 }
