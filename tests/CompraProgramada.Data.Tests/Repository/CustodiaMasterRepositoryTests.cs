@@ -18,7 +18,7 @@ public class CustodiaMasterRepositoryTests : SqliteTestBase
         ContaMaster conta = new(1, "MST-000001", DateTime.MinValue, new() { });
         List<CustodiaMaster> custodias = new()
         {
-            new CustodiaMaster(1, 1, "PETR4", 3, conta)
+            new CustodiaMaster(1, DateTime.MinValue, DateTime.MinValue, 1, "PETR4", 3, conta)
         };
 
         // Act
@@ -48,7 +48,7 @@ public class CustodiaMasterRepositoryTests : SqliteTestBase
         ContaMaster conta = new(1, "MST-000001", DateTime.MinValue, new() { });
         List<CustodiaMaster> custodias = new()
         {
-            new CustodiaMaster(1, 1, "PETR4", 3, conta)
+            new CustodiaMaster(1, DateTime.MinValue, DateTime.MinValue, 1, "PETR4", 3, conta)
         };
 
         _context.CustodiaMaster.AddRange(custodias);
@@ -69,7 +69,7 @@ public class CustodiaMasterRepositoryTests : SqliteTestBase
         ContaMaster conta = new(1, "MST-000001", DateTime.MinValue, new() { });
         List<CustodiaMaster> custodias = new()
         {
-            new CustodiaMaster(1, 1, "PETR4", 3, conta)
+            new CustodiaMaster(1, DateTime.MinValue, DateTime.MinValue, 1, "PETR4", 3, conta)
         };
 
         _context.CustodiaMaster.AddRange(custodias);

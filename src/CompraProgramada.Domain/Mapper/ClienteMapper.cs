@@ -14,11 +14,13 @@ public partial class ClienteMapper
 
 
     [MapProperty(nameof(Cliente.Id), nameof(ClienteDto.ClienteId))]
+    [MapProperty(nameof(Cliente.DataCriacao), nameof(AdesaoResponse.DataAdesao))]
     public partial ClienteDto ToResponse(Cliente cliente);
     public partial List<ClienteDto> ToResponse(List<Cliente> cliente);
 
 
     [MapProperty(nameof(Cliente.Id), nameof(AdesaoResponse.ClienteId))]
+    [MapProperty(nameof(Cliente.DataCriacao), nameof(AdesaoResponse.DataAdesao))]
     public partial AdesaoResponse ToAdesaoResponse(Cliente cliente);
 
 

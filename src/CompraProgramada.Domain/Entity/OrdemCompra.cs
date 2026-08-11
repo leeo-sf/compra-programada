@@ -6,12 +6,12 @@ namespace CompraProgramada.Domain.Entity;
 
 public class OrdemCompra
 {
-    public int Id { get; init; }
-    public string Ticker { get; init; } = string.Empty;
-    public int QuantidadeTotal { get; init; }
-    public decimal PrecoUnitario { get; init; }
-    public decimal ValorTotal { get; init; }
-    public DateTime Data { get; init; }
+    public int Id { get; }
+    public string Ticker { get; }
+    public int QuantidadeTotal { get; }
+    public decimal PrecoUnitario { get; }
+    public decimal ValorTotal { get; }
+    public DateTime Data { get; }
     public List<Distribuicao> Distribuicoes { get; private set; } = new List<Distribuicao>();
     public List<OrdemCompraDetalhe> Detalhes { get; private set; } = new List<OrdemCompraDetalhe>();
 
@@ -42,6 +42,8 @@ public class OrdemCompra
         if (multiplosPresente > 0)
             detalhes.Add(OrdemCompraDetalhe.GerarDetalhe(OrdemCompraTipo.Padrao, ticker, multiplosPresente * 100));
 
-        return new(0, ticker, quantidadeTotal, precoUnitario, quantidadeTotal * precoUnitario, DateTime.Now, detalhes);
+        var valorOrdemCompra = quantidadeTotal * precoUnitario;
+
+        return new(0, ticker.ToUpper(), quantidadeTotal, precoUnitario, valorOrdemCompra, DateTime.UtcNow, detalhes);
     }
 }

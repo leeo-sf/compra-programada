@@ -20,12 +20,12 @@ public class DomainExceptionHandler : IExceptionHandler
             var response = new
             {
                 Mensagem = ex.Message,
-                Codigo = ex.Codigo
+                ex.Codigo
             };
 
             httpContext.Response.StatusCode = (int)ex.StatusCode;
 
-            await httpContext.Response.WriteAsJsonAsync(response);
+            await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
 
             return true;
         }

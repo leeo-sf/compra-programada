@@ -67,7 +67,7 @@ public static class AppConfiguration
 
     internal static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion)
     {
-        var connectionString = configuration.GetSection("Service:DataBase:ConnectionString").Get<string>();
+        var connectionString = configuration.GetConnectionString("DefaultDb");
 
         serverVersion ??= new MySqlServerVersion(new Version(8, 4, 0));
 
@@ -111,7 +111,7 @@ public static class AppConfiguration
     }
 
     internal static void ConfigurarRegrasDaAplicacao(this IServiceCollection services, IConfiguration configuration)
-        => services.AddSingleton(opt => configuration.GetSection("ApplicationConfig").Get<AppConfig>()!);
+        => services.AddSingleton(configuration.Get<AppConfig>() ?? throw new ArgumentNullException("Configs is not defined"));
 
     internal static void ConfigurarKafka(this IServiceCollection services, IConfiguration configuration)
     {

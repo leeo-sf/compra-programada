@@ -50,7 +50,7 @@ public class ContaGraficaTests
     public async Task CalcularResumoDeRentabilidade_DeveRetornarApplicationException_Quando_CotacaoVazia()
     {
         ContaGrafica conta = new(1, "", DateTime.MinValue, Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150)), new() { }, new() { }, new() { });
-        Cotacao cotacao = new(1, DateOnly.MinValue, DateTime.MinValue, new() { });
+        Cotacao cotacao = new(DateOnly.MinValue, new() { });
 
         var act = () => conta.CalcularResumoDeRentabilidade(cotacao) ;
         var exception = act.Should().Throw<ApplicationException>().Which;
@@ -62,8 +62,8 @@ public class ContaGraficaTests
     public async Task CalcularResumoDeRentabilidade_DeveRetornarResumo_Quando_DadosValidos()
     {
         Cliente cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150));
-        ContaGrafica conta = new(1, "", DateTime.MinValue, cliente, new() { }, new() { new(1, 1, "PETR4", 49.89m, 9), new(1, 1, "VALE3", 67.90m, 22) }, new() { });
-        Cotacao cotacao = new(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "PETR4", 35), new(1, 1, "VALE3", 65) });
+        ContaGrafica conta = new(1, "", DateTime.MinValue, cliente, [], new() { new(1, "PETR4", 49.89m, 9), new(1, "VALE3", 67.90m, 22) }, new() { });
+        Cotacao cotacao = new(DateOnly.MinValue, new() { new(1, 1, "PETR4", 35), new(1, 1, "VALE3", 65) });
         ResumoCarteiraDto resultadoEsperado = new ResumoCarteiraDto { ValorTotalInvestido = 1942.81m, ValorAtualCarteira = 1745, PlTotal = -197.81m, RentabilidadePercentual = -10.18m };
 
         var result = conta.CalcularResumoDeRentabilidade(cotacao);
@@ -98,7 +98,7 @@ public class ContaGraficaTests
     public async Task CalcularEvolucaoCarteira_DeveRetornarApplicationException_Quando_CotacaoVazia()
     {
         ContaGrafica conta = new(1, "", DateTime.MinValue, Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150)), new() { }, new() { }, new() { });
-        Cotacao cotacao = new(1, DateOnly.MinValue, DateTime.MinValue, new() { });
+        Cotacao cotacao = new(DateOnly.MinValue, new() { });
 
         var act = () => conta.CalcularEvolucaoCarteira(cotacao);
         var exception = act.Should().Throw<ApplicationException>().Which;
@@ -110,7 +110,7 @@ public class ContaGraficaTests
     public async Task CalcularEvolucaoCarteira_DeveRetornarApplicationException_Quando_HistoricoCompraVazia()
     {
         ContaGrafica conta = new(1, "", DateTime.MinValue, Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150)), new() { }, new() { }, new() { });
-        Cotacao cotacao = new(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "PETR4", 35) });
+        Cotacao cotacao = new(DateOnly.MinValue, new() { new(1, 1, "PETR4", 35) });
 
         var act = () => conta.CalcularEvolucaoCarteira(cotacao);
         var exception = act.Should().Throw<ApplicationException>().Which;
@@ -134,7 +134,7 @@ public class ContaGraficaTests
     public async Task CalcularDetalhesCarteira_DeveRetornarApplicationException_Quando_CotacaoVazia()
     {
         ContaGrafica conta = new(1, "", DateTime.MinValue, Cliente.Criar(new("Name", "11111111111", "email@teste.com", 150)), new() { }, new() { }, new() { });
-        Cotacao cotacao = new(1, DateOnly.MinValue, DateTime.MinValue, new() { });
+        Cotacao cotacao = new(DateOnly.MinValue, new() { });
 
         var act = () => conta.CalcularDetalhesCarteira(cotacao, 1000);
         var exception = act.Should().Throw<ApplicationException>().Which;
@@ -147,7 +147,7 @@ public class ContaGraficaTests
     public async Task CalcularDetalhesCarteira_DeveRetornarDetalhes_Quando_DadosValidos(decimal valorAtualCarteira, Cotacao cotacao, List<DetalheCarteiraDto> resultadoEsperado)
     {
         Cliente cliente = Cliente.Criar(new("Name", "11111111111", "email@teste.com", 3000));
-        ContaGrafica conta = new(1, "", DateTime.MinValue, cliente, new() { }, new() { new(1, 1, "PETR4", 35.50m, 24), new(1, 1, "VALE3", 60, 12), new(1, 1, "ITUB4", 29, 18), new(1, 1, "BBDC4", 14.50m, 30), new(1, 1, "WEGE3", 38, 6) }, new() { });
+        ContaGrafica conta = new(1, "", DateTime.MinValue, cliente, new() { }, new() { new(1, "PETR4", 35.50m, 24), new(1, "VALE3", 60, 12), new(1, "ITUB4", 29, 18), new(1, "BBDC4", 14.50m, 30), new(1, "WEGE3", 38, 6) }, new() { });
 
         var result = conta.CalcularDetalhesCarteira(cotacao, valorAtualCarteira);
 
@@ -215,7 +215,7 @@ public class ContaGraficaTests
         return new()
         {
             {
-                new Cotacao(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "AAPL4", 28) }),
+                new Cotacao(DateOnly.MinValue, new() { new(1, 1, "AAPL4", 28) }),
                 new List<HistoricoCompra>
                 {
                     new(1, 1, "PETR4", 5, 35, 35, 5000, DateOnly.FromDateTime(new DateTime(2026, 03, 05)))
@@ -226,7 +226,7 @@ public class ContaGraficaTests
                 }
             },
             {
-                new Cotacao(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "PETR4", 28), new(1, 1, "VALE3", 57) }),
+                new Cotacao(DateOnly.MinValue, new() { new(1, 1, "PETR4", 28), new(1, 1, "VALE3", 57) }),
                 new List<HistoricoCompra>
                 {
                     new(1, 1, "PETR4", 5, 35, 35, 5000, DateOnly.FromDateTime(new DateTime(2026, 03, 05))),
@@ -238,7 +238,7 @@ public class ContaGraficaTests
                 }
             },
             {
-                new Cotacao(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "PETR4", 39), new(1, 1, "VALE3", 62), new(1, 1, "ITUB4", 31), new(1, 1, "BBDC4", 16), new(1, 1, "WEGE3", 41.50m) }),
+                new Cotacao(DateOnly.MinValue, new() { new(1, 1, "PETR4", 39), new(1, 1, "VALE3", 62), new(1, 1, "ITUB4", 31), new(1, 1, "BBDC4", 16), new(1, 1, "WEGE3", 41.50m) }),
                 new List<HistoricoCompra>
                 {
                     new(1, 1, "PETR4", 12, 35, 35, 1000, DateOnly.FromDateTime(new DateTime(2026, 03, 05))),
@@ -260,7 +260,7 @@ public class ContaGraficaTests
                 }
             },
             {
-                new Cotacao(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "PETR4", 39), new(1, 1, "VALE3", 62), new(1, 1, "ITUB4", 31), new(1, 1, "BBDC4", 16), new(1, 1, "WEGE3", 41.50m) }),
+                new Cotacao(DateOnly.MinValue, new() { new(1, 1, "PETR4", 39), new(1, 1, "VALE3", 62), new(1, 1, "ITUB4", 31), new(1, 1, "BBDC4", 16), new(1, 1, "WEGE3", 41.50m) }),
                 new List<HistoricoCompra>
                 {
                     new(1, 1, "PETR4", 12, 35, 35, 1000, DateOnly.FromDateTime(new DateTime(2026, 03, 05))),
@@ -296,7 +296,7 @@ public class ContaGraficaTests
         {
             {
                 6450,
-                new(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "PETR4", 37), new(1, 1, "VALE3", 65), new(1, 1, "ITUB4", 31), new(1, 1, "BBDC4", 15.50m), new(1, 1, "WEGE3", 42) }),
+                new(DateOnly.MinValue, new() { new(1, 1, "PETR4", 37), new(1, 1, "VALE3", 65), new(1, 1, "ITUB4", 31), new(1, 1, "BBDC4", 15.50m), new(1, 1, "WEGE3", 42) }),
                 new()
                 {
                     new() { Ticker = "PETR4", Quantidade = 24, PrecoMedio = 35.50m, CotacaoAtual = 37, ValorAtual = 888, Pl = 36, PlPercentual = 4.23m, ComposicaoCarteira = 13.77m },
@@ -308,7 +308,7 @@ public class ContaGraficaTests
             },
             {
                 1000,
-                new(1, DateOnly.MinValue, DateTime.MinValue, new() { new(1, 1, "AAPL4", 37) }),
+                new(DateOnly.MinValue, new() { new(1, 1, "AAPL4", 37) }),
                 new()
                 {
                     new() { Ticker = "PETR4", Quantidade = 24, PrecoMedio = 35.50m, CotacaoAtual = 0, ValorAtual = 0, Pl = -852, PlPercentual = 0, ComposicaoCarteira = 0 },

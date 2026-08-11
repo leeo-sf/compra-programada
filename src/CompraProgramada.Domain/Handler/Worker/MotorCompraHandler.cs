@@ -124,7 +124,10 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
 
         foreach (var ativo in ordensCompra)
         {
-            int residuoCustodiaMaster = residuosNaoDistribuidos?.FirstOrDefault(r => r.Ticker == ativo.Ticker)?.QuantidadeResiduo ?? 0;
+            int residuoCustodiaMaster = residuosNaoDistribuidos?
+                .Where(r => r.Ticker == ativo.Ticker)
+                .Select(x => x.QuantidadeResiduo)
+                .FirstOrDefault() ?? 0;
             var qtdTotalAtivoParaDistribuicao = ativo.QuantidadeTotal + residuoCustodiaMaster;
 
             foreach (var cliente in clientesAtivos.OrderByDescending(x => x.Id))
@@ -133,8 +136,8 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
                 var custodiaCliente = contaCliente.CustodiaFilhotes.FirstOrDefault(x => x.Ticker == ativo.Ticker && x.ContaGraficaId == contaCliente.Id);
                 if (custodiaCliente is null)
                 {
-                    _logger.LogWarning("Ativo {Ticker} não encontrado para a conta {NumeroConta}. A distribuição deste ativo não será realizada para esta conta.", ativo.Ticker, contaCliente.NumeroConta);
-                    continue;
+                    custodiaCliente = CustodiaFilhote.GerarCustodia(contaCliente.Id, ativo.Ticker);
+                    contaCliente.CustodiaFilhotes.Add(custodiaCliente);
                 }
 
                 var novaQuantidadeDeAtivos = (int)Math.Truncate(qtdTotalAtivoParaDistribuicao * (cliente.ValorAporte / valorTotalAportes));
@@ -142,6 +145,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
                 var valorPrecoMedio = custodiaCliente.CalcularPrecoMedio(ativo.PrecoUnitario, novaQuantidadeDeAtivos);
 
                 custodiaCliente.AdicionarNovaQuantidade(novaQuantidadeDeAtivos);
+                custodiaCliente.CalcularPrecoMedio(ativo.PrecoUnitario, novaQuantidadeDeAtivos);
 
                 contaCliente.AdicionarCompra(HistoricoCompra.RegistrarHistorico(
                     contaCliente.Id,
@@ -182,7 +186,8 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
             var qtdUtilizada = distribuicoes.Where(x => x.Ticker == ativo.Ticker)
                 .Sum(x => x.QuantidadeAlocada);
 
-            custodia?.AtualizarResiduo(ativo.QuantidadeTotal, qtdUtilizada);
+            var quantidadeResiduos = custodia?.AtualizarResiduo(ativo.QuantidadeTotal, qtdUtilizada) ?? 0;
+            custodia?.CalcularPrecoMedio(ativo.PrecoUnitario, quantidadeResiduos);
         }
 
         await _custodiaMasterRepository.AtualizarResiduosAysnc(custodias!, cancellationToken);

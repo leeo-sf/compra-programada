@@ -12,7 +12,7 @@ public class AppConfigHelper
         {
             MotorCompraConfig = new MotorCompraConfig
             {
-                DiasDeCompra = new[] { 5, 15, 25 },
+                DiasDeCompra = [5, 15, 25],
                 TempoEmHoraAhCadaExecucao = 10,
                 NomePastaArquivosB3 = "cotacoes"
             }

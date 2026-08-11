@@ -2,24 +2,28 @@
 using CompraProgramada.Domain.Entity;
 using OperationResult;
 using CompraProgramada.Domain.Contract.Service;
+using CompraProgramada.Shared.Config;
 
 namespace CompraProgramada.Domain.Service;
 
 public class ImpostoRendaService : IImpostoRendaService
 {
     private readonly IKafkaProducer _kafkaProducer;
-    private const string TOPIC_IR_DEDO_DURO = "topic.irdedo-duro";
-    private const decimal ALIQUOTA = 0.00005m;
+    private readonly KafkaConfig _kafkaConfig;
 
-    public ImpostoRendaService(IKafkaProducer kafkaProducer) => _kafkaProducer = kafkaProducer;
+    public ImpostoRendaService(
+        IKafkaProducer kafkaProducer,
+        AppConfig appConfig)
+    {
+        _kafkaProducer = kafkaProducer;
+        _kafkaConfig = appConfig.Service.Kafka;
+    }
 
     public async Task<Result<int>> PublicarIR(List<Distribuicao> distribuicoes, CancellationToken cancellationToken)
     {
         var detalhesIr = distribuicoes
             .Where(x => CalcularImpostoDeRenda(x.ValorOperacao) > 0)
-            .Select(dist =>
-        {
-            return new IRDedoDuroDto
+            .Select(dist => new IRDedoDuroDto
             {
                 ClienteId = dist.ContaGrafica.Cliente.Id,
                 Cpf = dist.ContaGrafica.Cliente.Cpf,
@@ -27,17 +31,16 @@ public class ImpostoRendaService : IImpostoRendaService
                 ValorOperacao = dist.ValorOperacao,
                 ValorIR = CalcularImpostoDeRenda(dist.ValorOperacao),
                 Data = dist.OrdemCompra.Data
-            };
-        }).ToList();
+            }).ToList();
 
-        await _kafkaProducer.PublishProducerAsync(TOPIC_IR_DEDO_DURO, detalhesIr);
+        await _kafkaProducer.PublishProducerAsync(_kafkaConfig.ImpostoRendaTopic, detalhesIr);
 
         return detalhesIr.Count;
     }
 
     internal decimal CalcularImpostoDeRenda(decimal valorOperacao)
     {
-        var irBruto = valorOperacao * ALIQUOTA;
+        var irBruto = valorOperacao * _kafkaConfig.Aliquota;
         return Math.Truncate(irBruto * 100) / 100;
     }
 }

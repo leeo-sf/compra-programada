@@ -6,7 +6,7 @@ namespace CompraProgramada.Domain.Service;
 
 public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 {
-    private readonly MotorCompraConfig _config;
+    private readonly MotorCompraConfig _motorConfig;
     private readonly IDateTimeProvaider _dateTimeProvaider;
     private DateTime _dataAtual => _dateTimeProvaider.Now;
     private readonly IHistoricoExecucaoMotorRepository _historicoExecucaoMotorRepository;
@@ -16,7 +16,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
         IDateTimeProvaider dateTimeProvaider,
         IHistoricoExecucaoMotorRepository historicoExecucaoMotorRepository)
     {
-        _config = config.MotorCompraConfig;
+        _motorConfig = config.MotorCompraConfig;
         _dateTimeProvaider = dateTimeProvaider;
         _historicoExecucaoMotorRepository = historicoExecucaoMotorRepository;
     }
@@ -25,7 +25,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
     {
         var ehDiaUtil = EhDiaUtil(_dataAtual);
 
-        if (_config.DiasDeCompra.Contains(_dataAtual.Day) && ehDiaUtil)
+        if (_motorConfig.DiasDeCompra.Contains(_dataAtual.Day) && ehDiaUtil)
         {
             var jaFoiExecutado = await _historicoExecucaoMotorRepository.ObterHistoricoExecucaoAsync(_dataAtual, cancellationToken) is not null;
 
@@ -39,7 +39,7 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
     public DateTime ObterProximaDataCompra()
     {
         DateTime? proximaDataCompra;
-        var diasOrdenadosDeExecucao = _config.DiasDeCompra.OrderBy(d => d).ToList();
+        var diasOrdenadosDeExecucao = _motorConfig.DiasDeCompra.OrderBy(d => d).ToList();
 
         foreach (var dia in diasOrdenadosDeExecucao)
         {
@@ -66,10 +66,10 @@ public class CalendarioMotorCompraService : ICalendarioMotorCompraService
 
     public DateTime ObterDataReferenciaExecucao(DateTime dataExecutada)
     {
-        if (_config.DiasDeCompra.Contains(dataExecutada.Day))
+        if (_motorConfig.DiasDeCompra.Contains(dataExecutada.Day))
             return dataExecutada;
 
-        var diasOrdenadosDeExecucao = _config.DiasDeCompra.OrderBy(d => d).ToList();
+        var diasOrdenadosDeExecucao = _motorConfig.DiasDeCompra.OrderBy(d => d).ToList();
 
         foreach (var dia in diasOrdenadosDeExecucao)
         {
