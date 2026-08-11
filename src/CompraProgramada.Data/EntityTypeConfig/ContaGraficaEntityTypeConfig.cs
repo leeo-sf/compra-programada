@@ -4,15 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CompraProgramada.Data.EntityTypeConfig;
 
-internal class ContaGraficaEntityTypeConfig : IEntityTypeConfiguration<ContaGrafica>
+internal class ContaGraficaEntityTypeConfig : EntityBaseContaConfiguration<ContaGrafica>
 {
-    public void Configure(EntityTypeBuilder<ContaGrafica> builder)
+    public override void Configure(EntityTypeBuilder<ContaGrafica> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable("conta_grafica");
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasColumnName("id").HasComment("identificador");
-        builder.Property(x => x.NumeroConta).HasColumnName("numero_conta").HasComment("número conta");
-        builder.Property(x => x.DataCriacao).HasColumnName("data_criacao");
+        builder.Property(x => x.ClienteId).HasColumnName("cliente_id").HasComment("identificador cliente");
         builder.Property(x => x.Tipo).HasColumnName("tipo").HasComment("tipo conta");
         builder.HasMany(x => x.CustodiaFilhotes).WithOne(x => x.ContaGrafica).HasForeignKey(x => x.ContaGraficaId);
         builder.HasMany(x => x.HistoricoCompra).WithOne(x => x.ContaGrafica).HasForeignKey(x => x.ContaGraficaId);

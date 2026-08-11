@@ -39,13 +39,15 @@ namespace CompraProgramada.Data.Migrations
                         .HasColumnName("ativa")
                         .HasComment("cesta ativa");
 
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("data_criacao");
-
-                    b.Property<DateTime?>("DataDesativacao")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("data_desativacao");
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -82,9 +84,15 @@ namespace CompraProgramada.Data.Migrations
                         .HasColumnName("cpf")
                         .HasComment("cpf do usuário");
 
-                    b.Property<DateTime>("DataAdesao")
+                    b.Property<DateTime>("DataAtualizacao")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("data_adesao");
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -193,7 +201,9 @@ namespace CompraProgramada.Data.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClienteId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("cliente_id")
+                        .HasComment("identificador cliente");
 
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime(6)")
@@ -203,7 +213,7 @@ namespace CompraProgramada.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("numero_conta")
-                        .HasComment("número conta");
+                        .HasComment("número da conta");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
@@ -237,13 +247,13 @@ namespace CompraProgramada.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("numero_conta")
-                        .HasComment("número conta");
+                        .HasComment("número da conta");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("tipo")
-                        .HasComment("tipo conta");
+                        .HasComment("tipo da conta");
 
                     b.HasKey("Id");
 
@@ -259,6 +269,11 @@ namespace CompraProgramada.Data.Migrations
                         .HasComment("identificador");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
 
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime(6)")
@@ -289,6 +304,16 @@ namespace CompraProgramada.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("conta_grafica_id")
                         .HasComment("identificador conta");
+
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
 
                     b.Property<decimal>("PrecoMedio")
                         .ValueGeneratedOnAdd()
@@ -331,6 +356,21 @@ namespace CompraProgramada.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("conta_master_id")
                         .HasComment("identificador conta");
+
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
+
+                    b.Property<decimal>("PrecoMedio")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("preco_medio")
+                        .HasComment("preço médio dos ativos");
 
                     b.Property<int>("QuantidadeResiduo")
                         .ValueGeneratedOnAdd()
