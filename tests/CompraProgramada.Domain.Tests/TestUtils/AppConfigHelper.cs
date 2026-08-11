@@ -15,6 +15,14 @@ public class AppConfigHelper
                 DiasDeCompra = [5, 15, 25],
                 TempoEmHoraAhCadaExecucao = 10,
                 NomePastaArquivosB3 = "cotacoes"
+            },
+            Service = new ServiceConfig
+            {
+                Kafka = new KafkaConfig
+                {
+                     ImpostoRendaTopic = "imposto-renda",
+                     Aliquota = 0.00005m
+                }
             }
         };
 

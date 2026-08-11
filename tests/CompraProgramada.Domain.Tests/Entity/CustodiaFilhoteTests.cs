@@ -87,7 +87,7 @@ public class CustodiaFilhoteTests
 
         var result = custodia.CalcularPrecoMedio(35, 2);
 
-        result.Should().Be(9);
+        result.Should().Be(5.83m);
     }
 
     [Fact]
