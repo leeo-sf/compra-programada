@@ -14,15 +14,18 @@ public class CriarCestaHandler : IRequestHandler<CriarCestaRecomendadaRequest, R
     private readonly ILogger<CriarCestaHandler> _logger;
     private readonly ICestaRecomendadaRepository _cestaRecomendadaRepository;
     private readonly IClienteRepository _clienteRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CriarCestaHandler(
         ILogger<CriarCestaHandler> logger,
         ICestaRecomendadaRepository cestaRecomendadaRepository,
-        IClienteRepository clienteRepository)
+        IClienteRepository clienteRepository,
+        IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _cestaRecomendadaRepository = cestaRecomendadaRepository;
         _clienteRepository = clienteRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<CriarCestaRecomendadaResponse>> Handle(CriarCestaRecomendadaRequest request, CancellationToken cancellationToken)
@@ -36,22 +39,23 @@ public class CriarCestaHandler : IRequestHandler<CriarCestaRecomendadaRequest, R
         var cestaAnterior = cestaAnteriorResult.Value;
 
         var itensCesta = request.Itens.Select(i => ComposicaoCesta.CriaItemNaCesta(i.Ticker, i.Percentual)).ToList();
+        var cesta = CestaRecomendada.CriarCesta(request.Nome, itensCesta);
 
-        var cestaCriada = await _cestaRecomendadaRepository.CriarAsync(CestaRecomendada.CriarCesta(request.Nome, itensCesta), cancellationToken);
+        _cestaRecomendadaRepository.Criar(cesta);
 
-        _logger.LogInformation("Cesta registrada na base de dados {Cesta}", cestaCriada);
+        await _unitOfWork.Salvar(cancellationToken);
 
-        var cestaAtualizada = cestaAnterior is not null;
+        _logger.LogInformation("Cesta registrada na base de dados {Cesta}", cesta);
 
-        if (!cestaAtualizada)
-            return ResponseCriarAlterarCesta(cestaCriada, false, default, default, default);
+        if (cestaAnterior is null)
+            return ResponseCriarAlterarCesta(cesta, false, default, default, default);
 
         var quantidadeUsuariosAtivos = await _clienteRepository.QuantidadeAtivosAsync(cancellationToken);
 
-        var (ativosRemovidos, ativosAdicionados) = ObterMudancasDeAtivos([.. cestaAnterior!.ComposicaoCesta.Select(c => c.Ticker)], [.. cestaCriada.ComposicaoCesta.Select(c => c.Ticker)]);
+        var (ativosRemovidos, ativosAdicionados) = ObterMudancasDeAtivos([.. cestaAnterior!.ComposicaoCesta.Select(c => c.Ticker)], [.. cesta.ComposicaoCesta.Select(c => c.Ticker)]);
 
         var msgOperacaoComAtualizacao = $"Cesta atualizada. Rebalanceamento disparado para {quantidadeUsuariosAtivos} clientes ativos.";
-        return ResponseCriarAlterarCesta(cestaCriada, true, cestaAnterior, ativosRemovidos, ativosAdicionados) with { Mensagem = msgOperacaoComAtualizacao };
+        return ResponseCriarAlterarCesta(cesta, true, cestaAnterior, ativosRemovidos, ativosAdicionados) with { Mensagem = msgOperacaoComAtualizacao };
     }
 
     private static CriarCestaRecomendadaResponse ResponseCriarAlterarCesta(CestaRecomendada cesta, bool atualizouCesta, CestaRecomendada? cestaAnterior, List<string>? ativosRemovidos, List<string>? ativosAdicionados)
@@ -72,11 +76,11 @@ public class CriarCestaHandler : IRequestHandler<CriarCestaRecomendadaRequest, R
         var cesta = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
 
         if (cesta is null)
-            return Result.Success<CestaRecomendada>(default!)!;
+            return cesta;
 
         cesta.DesativarCesta();
 
-        await _cestaRecomendadaRepository.AtualizarAsync(cesta, cancellationToken);
+        _cestaRecomendadaRepository.Atualizar(cesta);
 
         _logger.LogInformation("Cesta atual desativada {Cesta}", cesta);
 

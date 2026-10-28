@@ -4,7 +4,7 @@ namespace CompraProgramada.Domain.Contract.Repository;
 
 public interface ICustodiaMasterRepository
 {
-    Task<List<CustodiaMaster>> CriarAsync(List<CustodiaMaster> custodias, CancellationToken cancellationToken);
+    void Criar(List<CustodiaMaster> custodias);
     Task<List<CustodiaMaster>?> ObterResiduosAsync(CancellationToken cancellationToken);
     Task AtualizarResiduosAysnc(List<CustodiaMaster> custodias, CancellationToken cancellationToken);
 }

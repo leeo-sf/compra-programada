@@ -22,12 +22,12 @@ public class CustodiaMasterRepositoryTests : SqliteTestBase
         };
 
         // Act
-        var result = await _repo.CriarAsync(custodias, CancellationToken.None);
+        _repo.Criar(custodias);
+
+        await _context.SaveChangesAsync();
 
         // Assert
         _context.CustodiaMaster.Should().HaveCount(1);
-        result.Should().NotBeNull();
-        result.First().QuantidadeResiduo.Should().Be(3);
     }
 
     [Fact]

@@ -93,6 +93,7 @@ public static class AppConfiguration
         services.AddScoped<ICustodiaMasterRepository, CustodiaMasterRepository>();
         services.AddScoped<IHistoricoExecucaoMotorRepository, HistoricoExecucaoMotorRepository>();
         services.AddScoped<IOrdemCompraRepository, OrdemCompraRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<ICotacaoService, CotacaoService>();
         services.AddScoped<IOrdemCompraService, OrdemCompraService>();

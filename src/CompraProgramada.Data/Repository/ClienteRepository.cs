@@ -12,7 +12,6 @@ public class ClienteRepository : IClienteRepository
 
     public async Task<List<Cliente>> ObterClientesAtivosAsync(CancellationToken cancellationToken)
         => await _context.Cliente
-            .AsNoTracking()
             .Include(x => x.ContaGrafica)
             .ThenInclude(x => x.CustodiaFilhotes)
             .Where(c => c.Ativo)
@@ -55,10 +54,6 @@ public class ClienteRepository : IClienteRepository
         return conta;
     }
 
-    public async Task<List<ContaGrafica>> AtualizarContasAsync(List<ContaGrafica> contas, CancellationToken cancellationToken)
-    {
-        _context.ContaGrafica.UpdateRange(contas);
-        await _context.SaveChangesAsync(cancellationToken);
-        return contas;
-    }
+    public void AtualizarConta(ContaGrafica conta)
+        => _context.Entry(conta).CurrentValues.SetValues(conta);
 }

@@ -178,10 +178,9 @@ public class ClienteRepositoryTests : SqliteTestBase
         conta.AdicionarDistribuicao(Distribuicao.CriarDistribuicao(10, conta, OrdemCompra.GerarOrdemCompra("PETR4", 100, 42)));
 
         // Act
-        var result = await _repo.AtualizarContasAsync([conta], CancellationToken.None);
+        _repo.AtualizarConta(conta);
 
         // Assert
         _context.ContaGrafica.Should().HaveCount(1);
-        result.Should().HaveCount(1);
     }
 }

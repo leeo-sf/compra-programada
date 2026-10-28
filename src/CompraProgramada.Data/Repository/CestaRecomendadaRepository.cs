@@ -10,19 +10,11 @@ public class CestaRecomendadaRepository : ICestaRecomendadaRepository
 
     public CestaRecomendadaRepository(AppDbContext context) => _context = context;
 
-    public async Task<CestaRecomendada> CriarAsync(CestaRecomendada cesta, CancellationToken cancellationToken)
-    {
-        _context.CestaRecomendada.Add(cesta);
-        await _context.SaveChangesAsync(cancellationToken);
-        return cesta;
-    }
+    public void Criar(CestaRecomendada cesta)
+        => _context.CestaRecomendada.Add(cesta);
 
-    public async Task<CestaRecomendada> AtualizarAsync(CestaRecomendada cesta, CancellationToken cancellationToken)
-    {
-        _context.Entry(cesta).CurrentValues.SetValues(cesta);
-        await _context.SaveChangesAsync(cancellationToken);
-        return cesta;
-    }
+    public void Atualizar(CestaRecomendada cesta)
+        => _context.Entry(cesta).CurrentValues.SetValues(cesta);
 
     public async Task<CestaRecomendada?> ObterCestaAtualAsync(CancellationToken cancellationToken)
         => await _context.CestaRecomendada

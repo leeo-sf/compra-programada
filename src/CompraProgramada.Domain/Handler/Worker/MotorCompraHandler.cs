@@ -25,6 +25,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
     private readonly OrdemCompraMapper _mapperOrdemCompra;
     private readonly DistribuicaoMapper _distribuicaoMapper;
     private readonly IDateTimeProvaider _dateTimeProvaider;
+    private readonly IUnitOfWork _unitOfWork;
 
     public MotorCompraHandler(
         ILogger<MotorCompraHandler> logger,
@@ -36,7 +37,8 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
         ICustodiaMasterRepository custodiaMasterRepository,
         OrdemCompraMapper mapperOrdemCompra,
         DistribuicaoMapper distribuicaoMapper,
-        IDateTimeProvaider dateTimeProvaider)
+        IDateTimeProvaider dateTimeProvaider,
+        IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _historicoExecucaoMotorRepository = historicoExecucaoMotorRepository;
@@ -48,6 +50,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
         _mapperOrdemCompra = mapperOrdemCompra;
         _distribuicaoMapper = distribuicaoMapper;
         _dateTimeProvaider = dateTimeProvaider;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<ExecutarMotorCompraResponse>> Handle(ExecutarMotorCompraRequest request, CancellationToken cancellationToken)
@@ -158,15 +161,18 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
 
                 contaCliente.AdicionarDistribuicao(
                     Distribuicao.CriarDistribuicao(novaQuantidadeDeAtivos, contaCliente, ativo));
+
+                _clienteRepository.AtualizarConta(contaCliente);
             }
         }
 
-        var contas = clientesAtivos.Select(x => x.ContaGrafica).ToList();
-        var contasAtualizadas = await _clienteRepository.AtualizarContasAsync(contas, cancellationToken);
+        await _unitOfWork.Salvar(cancellationToken);
 
         _logger.LogInformation("Atualização realizada das nas contas que tiveram a distribuição na base de dados.");
 
-        return contasAtualizadas.SelectMany(x => x.Distribuicoes).ToList();
+        return clientesAtivos.Select(x => x.ContaGrafica)
+            .SelectMany(x => x.Distribuicoes)
+            .ToList();
     }
 
     internal async Task<Result<List<CustodiaMaster>>> AtualizaAtivosNaoDistribuidosAsync(List<Distribuicao> distribuicoes, List<OrdemCompra> ordensCompra, CancellationToken cancellationToken)

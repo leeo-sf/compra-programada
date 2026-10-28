@@ -14,6 +14,7 @@ public class CriarCestaHandlerTests
     private readonly ILogger<CriarCestaHandler> _logger;
     private readonly ICestaRecomendadaRepository _cestaRecomendadaRepository;
     private readonly IClienteRepository _clienteRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly CriarCestaHandler _sut;
 
     public CriarCestaHandlerTests()
@@ -21,7 +22,8 @@ public class CriarCestaHandlerTests
         _logger = Substitute.For<ILogger<CriarCestaHandler>>();
         _cestaRecomendadaRepository = Substitute.For<ICestaRecomendadaRepository>();
         _clienteRepository = Substitute.For<IClienteRepository>();
-        _sut = new(_logger, _cestaRecomendadaRepository, _clienteRepository);
+        _unitOfWork = Substitute.For<IUnitOfWork>();
+        _sut = new(_logger, _cestaRecomendadaRepository, _clienteRepository, _unitOfWork);
     }
 
     [Fact]
@@ -34,8 +36,7 @@ public class CriarCestaHandlerTests
             .Returns((CestaRecomendada)null!);
 
         _cestaRecomendadaRepository
-            .CriarAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
-            .Returns(new CestaRecomendada("Cesta", true, []));
+            .Criar(Arg.Any<CestaRecomendada>());
 
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -60,8 +61,7 @@ public class CriarCestaHandlerTests
             .Returns(cestaAnterior);
 
         _cestaRecomendadaRepository
-            .CriarAsync(Arg.Any<CestaRecomendada>(), Arg.Any<CancellationToken>())
-            .Returns(new CestaRecomendada("Cesta", true, []));
+            .Criar(Arg.Any<CestaRecomendada>());
 
         _clienteRepository.QuantidadeAtivosAsync(Arg.Any<CancellationToken>())
             .Returns(1);

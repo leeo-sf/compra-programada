@@ -11,5 +11,5 @@ public interface IClienteRepository
     Task<Cliente> CriarAsync(Cliente cliente, CancellationToken cancellationToken);
     Task<Cliente> AtualizarAsync(Cliente cliente, CancellationToken cancellationToken);
     Task<ContaGrafica> CriarContaAsync(ContaGrafica conta, CancellationToken cancellationToken);
-    Task<List<ContaGrafica>> AtualizarContasAsync(List<ContaGrafica> contas, CancellationToken cancellationToken);
+    void AtualizarConta(ContaGrafica conta);
 }

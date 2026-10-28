@@ -24,6 +24,7 @@ public class MotorCompraHandlerTests
     private readonly OrdemCompraMapper _mapperOrdemCompra;
     private readonly DistribuicaoMapper _distribuicaoMapper;
     private readonly IDateTimeProvaider _dateTimeProvaider;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly MotorCompraHandler _sut;
 
     public MotorCompraHandlerTests()
@@ -38,7 +39,8 @@ public class MotorCompraHandlerTests
         _mapperOrdemCompra = Substitute.For<OrdemCompraMapper>();
         _distribuicaoMapper = Substitute.For<DistribuicaoMapper>();
         _dateTimeProvaider = Substitute.For<IDateTimeProvaider>();
-        _sut = new MotorCompraHandler(_logger, _historicoExecucaoMotorRepository, _clienteRepository, _calendarioMotorCompraService, _impostoRendaService, _ordemCompraService, _custodiaMasterRepository, _mapperOrdemCompra, _distribuicaoMapper, _dateTimeProvaider);
+        _unitOfWork = Substitute.For<IUnitOfWork>();
+        _sut = new MotorCompraHandler(_logger, _historicoExecucaoMotorRepository, _clienteRepository, _calendarioMotorCompraService, _impostoRendaService, _ordemCompraService, _custodiaMasterRepository, _mapperOrdemCompra, _distribuicaoMapper, _dateTimeProvaider, _unitOfWork);
     }
 
     [Fact]
@@ -60,8 +62,7 @@ public class MotorCompraHandlerTests
         _custodiaMasterRepository.ObterResiduosAsync(Arg.Any<CancellationToken>())
             .Returns([]);
 
-        _clienteRepository.AtualizarContasAsync(Arg.Any<List<ContaGrafica>>(), Arg.Any<CancellationToken>())
-            .Returns([]);
+        _clienteRepository.AtualizarConta(Arg.Any<ContaGrafica>());
 
         _custodiaMasterRepository.AtualizarResiduosAysnc(Arg.Any<List<CustodiaMaster>>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);

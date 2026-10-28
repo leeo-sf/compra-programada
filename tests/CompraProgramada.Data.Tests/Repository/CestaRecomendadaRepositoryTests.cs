@@ -17,7 +17,9 @@ public class CestaRecomendadaRepositoryTests : SqliteTestBase
         var cesta = CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) });
 
         // Act
-        var result = await _repo.CriarAsync(cesta, CancellationToken.None);
+        _repo.Criar(cesta);
+
+        await _context.SaveChangesAsync();
 
         // Assert
         _context.CestaRecomendada.Should().HaveCount(1);
@@ -28,17 +30,18 @@ public class CestaRecomendadaRepositoryTests : SqliteTestBase
     {
         // Arrange
         var cesta = CestaRecomendada.CriarCesta("Name", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) });
-        var cestaAtualizada = CestaRecomendada.CriarCesta("Name Updated", new() { ComposicaoCesta.CriaItemNaCesta("PETR4", 30), ComposicaoCesta.CriaItemNaCesta("VALE3", 25), ComposicaoCesta.CriaItemNaCesta("ITUB4", 20), ComposicaoCesta.CriaItemNaCesta("BBDC4", 15), ComposicaoCesta.CriaItemNaCesta("WEGE3", 10) });
 
         _context.CestaRecomendada.Add(cesta);
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repo.AtualizarAsync(cestaAtualizada, CancellationToken.None);
+        cesta.DesativarCesta();
+        _repo.Atualizar(cesta);
+        await _context.SaveChangesAsync();
 
         // Assert
         _context.CestaRecomendada.Should().HaveCount(1);
-        result.Nome.Should().Be("NAME UPDATED");
+        cesta.Ativa.Should().BeFalse();
     }
 
     [Fact]

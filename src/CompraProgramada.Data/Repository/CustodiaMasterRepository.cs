@@ -10,12 +10,8 @@ public class CustodiaMasterRepository : ICustodiaMasterRepository
 
     public CustodiaMasterRepository(AppDbContext context) => _context = context;
 
-    public async Task<List<CustodiaMaster>> CriarAsync(List<CustodiaMaster> custodias, CancellationToken cancellationToken)
-    {
-        _context.CustodiaMaster.AddRange(custodias);
-        await _context.SaveChangesAsync(cancellationToken);
-        return custodias;
-    }
+    public void Criar(List<CustodiaMaster> custodias)
+        => _context.CustodiaMaster.AddRange(custodias);
 
     public async Task<List<CustodiaMaster>?> ObterResiduosAsync(CancellationToken cancellationToken)
         => await _context.CustodiaMaster

@@ -56,13 +56,13 @@ public class ClienteHandle
 
         var cliente = Cliente.Criar(request);
 
-        var clienteSalvo = await _clienteRepository.CriarAsync(cliente, cancellationToken);
+        await _clienteRepository.CriarAsync(cliente, cancellationToken);
 
-        var conta = ContaGrafica.Gerar(clienteSalvo);
+        var conta = ContaGrafica.Gerar(cliente);
 
-        var contaSalva = await _clienteRepository.CriarContaAsync(conta, cancellationToken);
+        await _clienteRepository.CriarContaAsync(conta, cancellationToken);
 
-        cliente.AdicionarConta(contaSalva);
+        cliente.AdicionarConta(conta);
 
         _logger.LogInformation("Adesão realizada com sucesso para o cliente {Nome} com Id {Id}.", cliente.Nome, cliente.Id);
 
@@ -87,11 +87,11 @@ public class ClienteHandle
 
         cliente.Desativar();
 
-        var clienteAtualizado = await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
+        await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
 
         _logger.LogInformation("Solicitação de saída do produto realizada com sucesso.");
 
-        return _mapper.ToSaidaProdutoResponse(clienteAtualizado);
+        return _mapper.ToSaidaProdutoResponse(cliente);
     }
 
     public async Task<Result<AtualizarValorMensalResponse>> Handle(AtualizarValorMensalRequest request, CancellationToken cancellationToken)
@@ -109,9 +109,9 @@ public class ClienteHandle
 
         cliente.AtualizarValorMensal(request);
 
-        var clienteAtualizado = await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
+        await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
 
-        _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", clienteAtualizado.Id, clienteAtualizado.ValorMensal);
+        _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", cliente.Id, cliente.ValorMensal);
 
         return _mapper.ToAtualizarValorMensalResponse(cliente);
     }
