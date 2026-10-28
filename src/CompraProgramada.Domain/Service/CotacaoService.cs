@@ -5,6 +5,7 @@ using OperationResult;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Handler.Api;
+using CompraProgramada.Shared.Extensions;
 
 namespace CompraProgramada.Domain.Service;
 
@@ -47,7 +48,7 @@ public class CotacaoService : ICotacaoService
             DateOnly.FromDateTime(cotacoesCesta.Select(x => x.DataPregao).First()),
             [.. cotacoesCesta.Select(x => ComposicaoCotacao.CriarItem(x.Ticker, x.PrecoFechamento))]);
 
-        _logger.LogInformation("Cotações de fachamento B3 da cesta Top Five com base na data pregão {DataPregao}. Cotações: {CotacoesFechamento}", cotacaoAhRegistrar.DataPregao, cotacaoAhRegistrar.ComposicaoCotacao);
+        _logger.LogCotacoesFachamentoB3(cotacaoAhRegistrar.DataPregao);
 
         var cotacaoSalva = await _cotacaoRepository.SalvarCotacaoAsync(cotacaoAhRegistrar, cancellationToken);
 

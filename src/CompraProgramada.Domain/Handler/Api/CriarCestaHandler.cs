@@ -1,6 +1,7 @@
 ﻿using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Extensions;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using MediatR;
@@ -30,7 +31,7 @@ public class CriarCestaHandler : IRequestHandler<CriarCestaRecomendadaRequest, R
 
     public async Task<Result<CriarCestaRecomendadaResponse>> Handle(CriarCestaRecomendadaRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando processo de criação/atualização de cesta: {Request}", request);
+        _logger.LogInicioCriacaoOuAtualizacaoCesta(request);
 
         var cestaAnteriorResult = await ObtemEDesativaCestaAtual(cancellationToken);
         if (!cestaAnteriorResult.IsSuccess)
@@ -45,7 +46,7 @@ public class CriarCestaHandler : IRequestHandler<CriarCestaRecomendadaRequest, R
 
         await _unitOfWork.Salvar(cancellationToken);
 
-        _logger.LogInformation("Cesta registrada na base de dados {Cesta}", cesta);
+        _logger.LogCestaRegistrada(cesta.Nome, cesta.ComposicaoCesta);
 
         if (cestaAnterior is null)
             return ResponseCriarAlterarCesta(cesta, false, default, default, default);
@@ -82,7 +83,7 @@ public class CriarCestaHandler : IRequestHandler<CriarCestaRecomendadaRequest, R
 
         _cestaRecomendadaRepository.Atualizar(cesta);
 
-        _logger.LogInformation("Cesta atual desativada {Cesta}", cesta);
+        _logger.LogCestaDesativada(cesta.Nome, cesta.ComposicaoCesta);
 
         return cesta;
     }

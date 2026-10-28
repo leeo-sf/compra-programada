@@ -4,6 +4,7 @@ using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Mapper;
 using CompraProgramada.Shared.Exceptions;
+using CompraProgramada.Shared.Extensions;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using MediatR;
@@ -41,7 +42,7 @@ public class ClienteHandle
 
     public async Task<Result<AdesaoResponse>> Handle(AdesaoRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando processo de adesão para o cliente {Nome}", request.Nome);
+        _logger.LogInicioProcessoAdesao(request.Nome);
 
         var clienteExistente = await _clienteRepository.CpfExistenteAsync(request.Cpf, cancellationToken);
         if (clienteExistente)
@@ -50,7 +51,7 @@ public class ClienteHandle
         var temCestaRecomendada = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken) is not null;
         if (!temCestaRecomendada)
         {
-            _logger.LogWarning("Adesão não pode ser realizada, pois não há cesta recomendada ativa");
+            _logger.LogFalhaAdesaoCestaNaoAtiva();
             return new AppException("Adesão não pode ser realizada", "CESTA_NAO_ENCONTRADA");
         }
 
@@ -64,7 +65,7 @@ public class ClienteHandle
 
         cliente.AdicionarConta(conta);
 
-        _logger.LogInformation("Adesão realizada com sucesso para o cliente {Nome} com Id {Id}.", cliente.Nome, cliente.Id);
+        _logger.LogAdesaoRealizadaComSucesso(cliente.Nome, cliente.Id);
 
         return _mapper.ToAdesaoResponse(cliente);
     }
@@ -77,11 +78,11 @@ public class ClienteHandle
 
         var cliente = clienteResult.Value;
 
-        _logger.LogInformation("Iniciando processo de saida do produto para o cliente {ClienteId}.", request.ClienteId);
+        _logger.LogInicioProcessoSaidaProduto(request.ClienteId);
 
         if (cliente is { Ativo: false })
         {
-            _logger.LogWarning("Cliente {ClienteId} já está inativo.", request.ClienteId);
+            _logger.LogClienteInativo(request.ClienteId);
             return new AppException("Cliente já está inativo", "CLIENTE_INATIVO");
         }
 
@@ -89,7 +90,7 @@ public class ClienteHandle
 
         await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
 
-        _logger.LogInformation("Solicitação de saída do produto realizada com sucesso.");
+        _logger.LogSaidaProdutoRealizadaComSucesso();
 
         return _mapper.ToSaidaProdutoResponse(cliente);
     }
@@ -100,7 +101,7 @@ public class ClienteHandle
         if (!clienteResult.IsSuccess)
             return clienteResult.Exception;
 
-        _logger.LogInformation("Solicitação do ClienteId: {ClienteId} para alteração do valor mensal, novo valor mensal: {NovoValorMensal}", request.ClienteId, request.NovoValorMensal);
+        _logger.LogInicioAtualizacaoValorMensal(request.ClienteId, request.NovoValorMensal);
 
         var cliente = clienteResult.Value;
 
@@ -111,7 +112,7 @@ public class ClienteHandle
 
         await _clienteRepository.AtualizarAsync(cliente, cancellationToken);
 
-        _logger.LogInformation("Valor mensal do ClienteId {ClientId} atualizado para: {NovoValor}", cliente.Id, cliente.ValorMensal);
+        _logger.LogValorMensalAtualizado(cliente.Id, cliente.ValorMensal);
 
         return _mapper.ToAtualizarValorMensalResponse(cliente);
     }
@@ -127,7 +128,7 @@ public class ClienteHandle
         if (cliente.ContaGrafica is { CarteiraAtiva: false })
             return new AppException("Cliente não tem uma carteira ativa", "CARTEIRA_INATIVA");
 
-        _logger.LogInformation("Cliente solicitando consulta da carteira: {ClienteId}", request);
+        _logger.LogConsultaCarteira(request.ClienteId);
 
         var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)
@@ -154,7 +155,7 @@ public class ClienteHandle
         if (cliente.ContaGrafica is { CarteiraAtiva: false })
             return new AppException("Cliente não tem uma carteira ativa", "CARTEIRA_INATIVA");
 
-        _logger.LogInformation("Cliente solicitando consulta da rentabilidade da carteira: {ClienteId}", request);
+        _logger.LogConsultaRentabilidade(request.ClienteId);
 
         var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)

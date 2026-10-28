@@ -5,6 +5,7 @@ using CompraProgramada.Domain.Entity;
 using CompraProgramada.Domain.Mapper;
 using CompraProgramada.Shared.Dto;
 using CompraProgramada.Shared.Exceptions;
+using CompraProgramada.Shared.Extensions;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using MediatR;
@@ -61,7 +62,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
             if (!deveExecutarCompraHoje)
             {
                 var dataProximaExecucao = _calendarioMotorCompraService.ObterProximaDataCompra();
-                _logger.LogInformation("MotorCompra não será executado hoje. Próxima data de compra prevista para {DataProximaExecucao}. Encerrando processo.", dataProximaExecucao);
+                _logger.LogAvisoExecucaoMotorCompra(dataProximaExecucao);
                 return Result.Success<ExecutarMotorCompraResponse>(null!)!;
             }
         }
@@ -74,11 +75,11 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
 
         var qtdClientesAtivos = clientes.Count;
 
-        _logger.LogInformation("{QuantidadeClientes} clientes ativos para processamento.", qtdClientesAtivos);
+        _logger.LogQuantidadeClientesAtivosParaDistribuicao(qtdClientesAtivos);
 
         var valorTotalConsolidado = clientes.Sum(cliente => cliente.ValorAporte);
 
-        _logger.LogInformation("Total Consolidado a ser comprado: {TotalConsolidado}", valorTotalConsolidado);
+        _logger.LogTotalConsolidadoParaCompra(valorTotalConsolidado);
 
         var ordensCompraResult = await _ordemCompraService.EmitirOrdensDeCompraAsync(valorTotalConsolidado, cancellationToken);
         if (!ordensCompraResult.IsSuccess)
@@ -88,7 +89,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
         if (!distribuicoesResult.IsSuccess)
             return distribuicoesResult.Exception;
 
-        _logger.LogInformation("Distribuições para as custodias realizadas.");
+        _logger.LogDistribuicoesRealizadas();
 
         var distribuicoes = distribuicoesResult.Value;
 
@@ -100,12 +101,12 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
         if (!qtdIrPublicadoResult.IsSuccess)
             return qtdIrPublicadoResult.Exception;
 
-        _logger.LogInformation("Ir Dedo Duro calculado e publicado para {QtdClientes} clientes.", qtdIrPublicadoResult.Value);
+        _logger.LogIrPublicado(qtdIrPublicadoResult.Value);
 
         var dataReferencia = _calendarioMotorCompraService.ObterDataReferenciaExecucao(dataExecucao);
         await _historicoExecucaoMotorRepository.SalvarHistoricoExecucaoAsync(HistoricoExecucaoMotor.CriarRegistroHistorico(dataReferencia, dataExecucao), cancellationToken);
 
-        _logger.LogInformation("Registrado histórico da execução do motor de compra na base de dados.");
+        _logger.LogRegitroHistoricoExecucaoMotorCompra();
 
         return new ExecutarMotorCompraResponse(
             dataExecucao,
@@ -123,7 +124,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
         var valorTotalAportes = clientesAtivos.Sum(cliente => cliente.ValorMensal / 3);
         var residuosNaoDistribuidos = await _custodiaMasterRepository.ObterResiduosAsync(cancellationToken);
 
-        _logger.LogInformation("Resíduos não distribuídos obtidos para reaproveitamento na distribuição: {Residuos}", residuosNaoDistribuidos);
+        _logger.LogResiduosParaDistribuicao();
 
         foreach (var ativo in ordensCompra)
         {
@@ -168,7 +169,7 @@ public class MotorCompraHandler : IRequestHandler<ExecutarMotorCompraRequest, Re
 
         await _unitOfWork.Salvar(cancellationToken);
 
-        _logger.LogInformation("Atualização realizada das nas contas que tiveram a distribuição na base de dados.");
+        _logger.LogAtualizacaoContasDistribuicao();
 
         return clientesAtivos.Select(x => x.ContaGrafica)
             .SelectMany(x => x.Distribuicoes)

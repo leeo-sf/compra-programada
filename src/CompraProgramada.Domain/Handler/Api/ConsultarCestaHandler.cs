@@ -3,6 +3,7 @@ using CompraProgramada.Domain.Contract.Repository;
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Mapper;
 using CompraProgramada.Shared.Dto;
+using CompraProgramada.Shared.Extensions;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using MediatR;
@@ -34,7 +35,7 @@ public class ConsultarCestaHandler
 
     public async Task<Result<CestaRecomendadaDto>> Handle(CestaAtualRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando consulta da cesta atual.");
+        _logger.LogConsultaCestaAtual();
 
         var cesta = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
 
@@ -64,7 +65,7 @@ public class ConsultarCestaHandler
 
     public async Task<Result<HistoricoCestasResponse>> Handle(CestaHistoricoRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando processo de consulta de histórico de cestas.");
+        _logger.LogConsultaCestaHistorico();
 
         var cestas = await _cestaRecomendadaRepository.ObterCestasAsync(cancellationToken);
 

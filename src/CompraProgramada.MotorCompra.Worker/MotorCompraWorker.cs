@@ -1,4 +1,5 @@
 ﻿using CompraProgramada.Shared.Config;
+using CompraProgramada.Shared.Extensions;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using MediatR;
@@ -33,17 +34,17 @@ public class MotorCompraWorker : BackgroundService
 
             if (!result.IsSuccess)
             {
-                _logger.LogError("Erro ao executar o motor de compra. {Exception}", result.Exception);
+                _logger.LogErroExecucaoMotorCompra(result.Exception);
                 continue;
             }
 
-            _logger.LogInformation("Motor de compra executado com sucesso {Result}.", result.Value);
+            _logger.LogSucessoExecucaoMotorCompra(result.Value);
         }
     }
 
     internal async Task<Result<ExecutarMotorCompraResponse>> ExecutarMotorDeCompra(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando o motor de compra...");
+        _logger.LogIniciandoMotorCompra();
 
         using var scope = _serviceScopeFactory.CreateScope();
 

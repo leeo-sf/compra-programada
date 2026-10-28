@@ -2,6 +2,7 @@
 using CompraProgramada.Domain.Contract.Service;
 using CompraProgramada.Domain.Entity;
 using CompraProgramada.Shared.Exceptions;
+using CompraProgramada.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using OperationResult;
 
@@ -31,7 +32,7 @@ public class OrdemCompraService : IOrdemCompraService
 
     public async Task<Result<List<OrdemCompra>>> EmitirOrdensDeCompraAsync(decimal valorTotalConsolidado, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Iniciando emissão de ordens de compra...");
+        _logger.LogIniciandoEmissaoOrdensCompra();
 
         var cestaVigente = await _cestaRecomendadaRepository.ObterCestaAtualAsync(cancellationToken);
         if (cestaVigente is null)
@@ -43,7 +44,7 @@ public class OrdemCompraService : IOrdemCompraService
 
         var fechamentos = fechamentosResult.Value;
 
-        _logger.LogInformation("Fechamento dos ativos correspondentes a cesta atual obtidos: {Fechamentos}", fechamentos);
+        _logger.LogFechamentosObtidos(fechamentos);
 
         var residuos = await _custodiaMasterRepository.ObterResiduosAsync(cancellationToken);
 
@@ -57,7 +58,7 @@ public class OrdemCompraService : IOrdemCompraService
 
             if (ativoCesta is null)
             {
-                _logger.LogWarning("Ativo {Ticker} não encontrado na composição da cesta vigente", ticker);
+                _logger.LogAtivoNaoEncontrado(ticker);
                 continue;
             }
 
@@ -70,7 +71,7 @@ public class OrdemCompraService : IOrdemCompraService
 
         var ordensCompraEmitidas = await _ordemCompraRepository.SalvarOrdensCompraAsync(ordensCompra, cancellationToken);
 
-        _logger.LogInformation("Ordens de compra emitidas e registradas. {OrdemCompra}", ordensCompraEmitidas);
+        _logger.LogOrdensCompraEmitidas(ordensCompraEmitidas);
 
         return ordensCompraEmitidas;
     }
