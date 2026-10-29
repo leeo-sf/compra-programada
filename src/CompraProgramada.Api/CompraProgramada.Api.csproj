@@ -28,4 +28,8 @@
     <ProjectReference Include="..\CompraProgramada.Infra\CompraProgramada.Infra.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Docker\" />
+  </ItemGroup>
+
 </Project>

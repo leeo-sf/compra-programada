@@ -26,6 +26,7 @@
     <File Path="prometheus.yml" />
     <File Path="README.md" />
     <File Path="Version.targets" />
+    <File Path="docker-compose.yml" />
   </Folder>
   <Folder Name="/Soluction Items/.github/workflows/">
     <File Path=".github/workflows/tests-and-coverage.yaml" />
