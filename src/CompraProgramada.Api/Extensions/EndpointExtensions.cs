@@ -2,7 +2,7 @@
 using MediatR;
 using OperationResult;
 
-namespace CompraProgramada.Api.Endpoints;
+namespace CompraProgramada.Api.Extensions;
 
 internal static class EndpointExtensions
 {
@@ -26,7 +26,7 @@ internal static class EndpointExtensions
         => error switch
         {
             DomainException e => Results.Json(new { Mensagem = e.Message, e.Codigo }, statusCode: (int)e.StatusCode),
-            ApplicationException appEx => Results.BadRequest(appEx.Message),
+            ApplicationException appEx => Results.BadRequest(new { appEx.Message }),
             _ => Results.StatusCode(500)
         };
 }

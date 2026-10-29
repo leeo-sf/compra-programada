@@ -82,6 +82,12 @@ public static class AppConfiguration
                         maxRetryDelay: TimeSpan.FromSeconds(30),
                         errorNumbersToAdd: null);
                 }));
+
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            dbContext.Database.Migrate();
+        }
     }
 
     internal static void AdicionaServicosERepositorios(this IServiceCollection services)

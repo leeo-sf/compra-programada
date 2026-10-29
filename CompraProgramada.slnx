@@ -1,24 +1,28 @@
 <Solution>
+  <Folder Name="/Aspire/">
+    <Project Path="src/CompraProgramada.AppHost/CompraProgramada.AppHost.csproj" />
+    <Project Path="src/CompraProgramada.ServiceDefaults/CompraProgramada.ServiceDefaults.csproj" />
+  </Folder>
   <Folder Name="/Presentation/">
-    <Project Path="./src/CompraProgramada.Api/CompraProgramada.Api.csproj" />
-    <Project Path="./src/CompraProgramada.MotorCompra.Worker/CompraProgramada.MotorCompra.Worker.csproj" />
+    <Project Path="src/CompraProgramada.Api/CompraProgramada.Api.csproj" />
+    <Project Path="src/CompraProgramada.MotorCompra.Worker/CompraProgramada.MotorCompra.Worker.csproj" />
   </Folder>
   <Folder Name="/Infra/">
-    <Project Path="./src/CompraProgramada.Data/CompraProgramada.Data.csproj" />
-    <Project Path="./src/CompraProgramada.Infra/CompraProgramada.Infra.csproj" />
+    <Project Path="src/CompraProgramada.Data/CompraProgramada.Data.csproj" />
   </Folder>
   <Folder Name="/Domain/">
-    <Project Path="./src/CompraProgramada.Domain/CompraProgramada.Domain.csproj" />
+    <Project Path="src/CompraProgramada.Domain/CompraProgramada.Domain.csproj" />
   </Folder>
   <Folder Name="/Cross-Cutting/">
-    <Project Path="./src/CompraProgramada.Shared/CompraProgramada.Shared.csproj" />
+    <Project Path="src/CompraProgramada.Shared/CompraProgramada.Shared.csproj" />
+    <Project Path="src/CompraProgramada.Infra/CompraProgramada.Infra.csproj" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="./tests/CompraProgramada.Api.Tests/CompraProgramada.Api.Tests.csproj" />
-    <Project Path="./tests/CompraProgramada.Data.Tests/CompraProgramada.Data.Tests.csproj" />
-    <Project Path="./tests/CompraProgramada.Domain.Tests/CompraProgramada.Domain.Tests.csproj" />
-    <Project Path="./tests/CompraProgramada.Infra.Tests/CompraProgramada.Infra.Tests.csproj" />
-    <Project Path="./tests/CompraProgramada.MotorCompra.Worker.Tests/CompraProgramada.MotorCompra.Worker.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.Api.Tests/CompraProgramada.Api.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.Data.Tests/CompraProgramada.Data.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.Domain.Tests/CompraProgramada.Domain.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.Infra.Tests/CompraProgramada.Infra.Tests.csproj" />
+    <Project Path="tests/CompraProgramada.MotorCompra.Worker.Tests/CompraProgramada.MotorCompra.Worker.Tests.csproj" />
   </Folder>
   <Folder Name="/Soluction Items/">
     <File Path=".runsettings" />
@@ -28,6 +32,7 @@
     <File Path="Version.targets" />
     <File Path="docker-compose.yml" />
   </Folder>
+  <Folder Name="/Soluction Items/.github/" />
   <Folder Name="/Soluction Items/.github/workflows/">
     <File Path=".github/workflows/tests-and-coverage.yaml" />
     <File Path=".github/workflows/deploy.yaml" />

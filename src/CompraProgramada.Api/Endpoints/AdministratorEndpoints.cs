@@ -1,4 +1,5 @@
-﻿using CompraProgramada.Shared.Dto;
+﻿using CompraProgramada.Api.Extensions;
+using CompraProgramada.Shared.Dto;
 using CompraProgramada.Shared.Request;
 using CompraProgramada.Shared.Response;
 using MediatR;
