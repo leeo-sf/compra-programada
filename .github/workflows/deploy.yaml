@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  DOCKER_IMAGE_NAME: compra-programada-api
+  IMAGE_NAME_API: compra-programada-api
 
 jobs:
   run-build-docker-image:
@@ -57,15 +57,15 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Docker - API
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./docker/Dockerfile
+          file: ./src/CompraProgramada.Api/Docker/Dockerfile
           push: true
           tags: |
-            ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.versioning.outputs.deploy_version }}
-            ${{ vars.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            ${{ vars.DOCKER_USERNAME }}/${{ env.IMAGE_NAME_API }}:${{ steps.versioning.outputs.deploy_version }}
+            ${{ vars.DOCKER_USERNAME }}/${{ env.IMAGE_NAME_API }}:latest
 
   run-update-bundle-version:
     runs-on: ubuntu-latest
