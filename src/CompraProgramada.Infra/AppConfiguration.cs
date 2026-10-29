@@ -32,7 +32,7 @@ public static class AppConfiguration
         typeof(IWorkerMotorCompraRequestHandler)
     ];
 
-    public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion = null)
+    public static void ConfigurarServicosApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMediatR(x =>
             x.RegisterServicesFromAssembly(typeof(DomainExceptionHandler).Assembly))
@@ -45,49 +45,48 @@ public static class AppConfiguration
         services.ConfigureHttpOptions();
         services.ConfigurarExceptionHandler();
         services.ConfigurarFluentValidation();
-        services.ConfigurarBancoDeDados(configuration, serverVersion);
+        services.ConfigurarBancoDeDados(configuration);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
         services.ConfigurarKafka(configuration);
         services.ConfigurarMappers();
     }
 
-    public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion = null)
+    public static void ConfigurarServicosWorker(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMediatR(x =>
             x.RegisterServicesFromAssembly(typeof(DomainExceptionHandler).Assembly))
             .ConfigurarHandlers<IWorkerMotorCompraRequestHandler>();
 
-        services.ConfigurarBancoDeDados(configuration, serverVersion);
+        services.ConfigurarBancoDeDados(configuration);
         services.AdicionaServicosERepositorios();
         services.ConfigurarRegrasDaAplicacao(configuration);
         services.ConfigurarKafka(configuration);
         services.ConfigurarMappers();
     }
 
-    internal static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration, ServerVersion? serverVersion)
+    internal static void ConfigurarBancoDeDados(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultDb");
 
-        serverVersion ??= new MySqlServerVersion(new Version(8, 4, 0));
-
         services.AddDbContextPool<AppDbContext>(options =>
-            options.UseMySql(connectionString,
-            serverVersion,
+            options.UseNpgsql(connectionString,
                 opt =>
                 {
                     opt.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
                     opt.EnableRetryOnFailure(
                         maxRetryCount: 3,
                         maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorNumbersToAdd: null);
+                        errorCodesToAdd: null);
                 }));
 
+#if DBUG
         using (var scope = services.BuildServiceProvider().CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             dbContext.Database.Migrate();
         }
+#endif
     }
 
     internal static void AdicionaServicosERepositorios(this IServiceCollection services)

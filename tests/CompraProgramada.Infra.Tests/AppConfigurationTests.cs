@@ -46,9 +46,7 @@ public class AppConfigurationTests
 
         _services.AddLogging();
 
-        MySqlServerVersion fakerVersion = new(new Version(8, 0, 0));
-
-        _services.ConfigurarServicosApi(configuration, fakerVersion);
+        _services.ConfigurarServicosApi(configuration);
 
         var provider = _services.BuildServiceProvider();
 
@@ -75,9 +73,7 @@ public class AppConfigurationTests
 
         _services.AddLogging();
 
-        MySqlServerVersion fakerVersion = new(new Version(8, 0, 0));
-
-        _services.ConfigurarServicosWorker(configuration, fakerVersion);
+        _services.ConfigurarServicosWorker(configuration);
 
         var provider = _services.BuildServiceProvider();
 
@@ -107,9 +103,7 @@ public class AppConfigurationTests
 
         _services.AddLogging();
 
-        MySqlServerVersion fakerVersion = new(new Version(8, 0, 0));
-
-        _services.ConfigurarBancoDeDados(configuration, fakerVersion);
+        _services.ConfigurarBancoDeDados(configuration);
 
         var provider = _services.BuildServiceProvider();
 

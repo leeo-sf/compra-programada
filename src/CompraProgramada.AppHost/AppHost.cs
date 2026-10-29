@@ -1,24 +1,25 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var mysql = builder.AddMySql("DefaultDb")
+var postgres = builder.AddPostgres("DefaultDb")
+    .WithPgAdmin()
     .WithLifetime(ContainerLifetime.Persistent)
-    .WithEndpoint(port: 3306, name: "tcp")
+    .WithEndpoint(port: 5432, name: "tcp")
     .WithDataVolume()
-    .AddDatabase("mysql", databaseName: "compra-programada-db");
+    .AddDatabase("postgres", databaseName: "compra-programada-db");
 
 var kafka = builder.AddKafka("kafka");
 
 builder.AddProject<Projects.CompraProgramada_Api>("api")
-    .WithReference(mysql, "DefaultDb")
+    .WithReference(postgres, "DefaultDb")
     .WithReference(kafka)
-    .WaitFor(mysql)
+    .WaitFor(postgres)
     .WaitFor(kafka)
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
 
 builder.AddProject<Projects.CompraProgramada_MotorCompra_Worker>("motor-compra")
-    .WithReference(mysql, "DefaultDb")
+    .WithReference(postgres, "DefaultDb")
     .WithReference(kafka)
-    .WaitFor(mysql)
+    .WaitFor(postgres)
     .WaitFor(kafka)
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
 

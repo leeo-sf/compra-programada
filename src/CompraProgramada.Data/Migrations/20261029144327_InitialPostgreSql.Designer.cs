@@ -3,56 +3,58 @@ using System;
 using CompraProgramada.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace CompraProgramada.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260324021258_AtualizaTipoOrdemCompraColumn")]
-    partial class AtualizaTipoOrdemCompraColumn
+    [Migration("20261029144327_InitialPostgreSql")]
+    partial class InitialPostgreSql
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("ProductVersion", "10.0.14")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("CompraProgramada.Domain.Entity.CestaRecomendada", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativa")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("ativa")
                         .HasComment("cesta ativa");
 
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("data_criacao");
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
 
-                    b.Property<DateTime?>("DataDesativacao")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("data_desativacao");
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("nome")
                         .HasComment("nome cesta");
 
@@ -65,15 +67,15 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativo")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("ativo")
                         .HasComment("usuário ativo");
@@ -81,33 +83,39 @@ namespace CompraProgramada.Data.Migrations
                     b.Property<string>("Cpf")
                         .IsRequired()
                         .HasMaxLength(11)
-                        .HasColumnType("varchar(11)")
+                        .HasColumnType("character varying(11)")
                         .HasColumnName("cpf")
                         .HasComment("cpf do usuário");
 
-                    b.Property<DateTime>("DataAdesao")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("data_adesao");
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("email")
                         .HasComment("email usuário");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("nome")
                         .HasComment("nome usuário");
 
                     b.Property<decimal>("ValorAnterior")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("valor_anterior")
                         .HasComment("valor anterior de compra");
 
                     b.Property<decimal>("ValorMensal")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("valor_mensal")
                         .HasComment("valor mensal de compra");
 
@@ -123,25 +131,25 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CestaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("cesta_id")
                         .HasComment("identificador cesta");
 
                     b.Property<decimal>("Percentual")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("percentual")
                         .HasComment("percentual ocupante na cesta");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("ativo");
 
@@ -156,25 +164,25 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CotacaoId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("cotacao_id")
                         .HasComment("identificador composição de cotação");
 
                     b.Property<decimal>("PrecoFechamento")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("preco_fechamento")
                         .HasComment("preço do fechamento do ativo");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("identificação ativo");
 
@@ -189,28 +197,30 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClienteId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer")
+                        .HasColumnName("cliente_id")
+                        .HasComment("identificador cliente");
 
                     b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_criacao");
 
                     b.Property<string>("NumeroConta")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("numero_conta")
-                        .HasComment("número conta");
+                        .HasComment("número da conta");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("tipo")
                         .HasComment("tipo conta");
 
@@ -226,27 +236,27 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_criacao");
 
                     b.Property<string>("NumeroConta")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("numero_conta")
-                        .HasComment("número conta");
+                        .HasComment("número da conta");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("tipo")
-                        .HasComment("tipo conta");
+                        .HasComment("tipo da conta");
 
                     b.HasKey("Id");
 
@@ -257,14 +267,24 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DataPregao")
-                        .HasColumnType("datetime(6)")
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
+
+                    b.Property<DateOnly>("DataPregao")
+                        .HasColumnType("date")
                         .HasColumnName("data_pregao")
                         .HasComment("data do pregão");
 
@@ -277,34 +297,44 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContaGraficaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("conta_grafica_id")
                         .HasComment("identificador conta");
 
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
+
                     b.Property<decimal>("PrecoMedio")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasDefaultValue(0m)
                         .HasColumnName("preco_medio")
                         .HasComment("custo médio ponderado de compra");
 
                     b.Property<int>("Quantidade")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("quantidade")
                         .HasComment("quantidade comprado");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("ativo");
 
@@ -319,27 +349,42 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContaMasterId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("conta_master_id")
                         .HasComment("identificador conta");
 
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_atualizacao")
+                        .HasComment("data de atualização");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_criacao")
+                        .HasComment("data de criação");
+
+                    b.Property<decimal>("PrecoMedio")
+                        .HasColumnType("numeric")
+                        .HasColumnName("preco_medio")
+                        .HasComment("preço médio dos ativos");
+
                     b.Property<int>("QuantidadeResiduo")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("quantidade_residuo")
                         .HasComment("quantidade de ativos que sobraram");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("ativo");
 
@@ -354,35 +399,35 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContaGraficaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("conta_grafica_id")
                         .HasComment("identificador conta cliente");
 
                     b.Property<int>("OrdemCompraId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ordem_compra_id")
                         .HasComment("identificador ordem de compra");
 
                     b.Property<int>("QuantidadeAlocada")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("quantidade_alocada")
                         .HasComment("quantidade alocada na custodia");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("ativo comprado");
 
                     b.Property<decimal>("ValorOperacao")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("valor_operacao")
                         .HasComment("resultado financeiro da fatia");
 
@@ -399,14 +444,14 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContaGraficaId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("conta_grafica_id")
                         .HasComment("identificador conta");
 
@@ -414,28 +459,28 @@ namespace CompraProgramada.Data.Migrations
                         .HasColumnType("date");
 
                     b.Property<decimal>("PrecoExecutado")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("preco_executado")
                         .HasComment("preco de fechamento do ativo");
 
                     b.Property<decimal>("PrecoMedio")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("preco_medio")
                         .HasComment("preco medio");
 
                     b.Property<int>("Quantidade")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("quantidade")
                         .HasComment("quantidade comprado");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("ativo comprado");
 
                     b.Property<decimal>("ValorAporte")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("valor_aporte")
                         .HasComment("valor aporte");
 
@@ -450,25 +495,25 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataExecucao")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_execucao")
                         .HasComment("data que foi executado");
 
                     b.Property<DateTime>("DataReferencia")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data_referencia")
                         .HasComment("data que deveria ser executada");
 
                     b.Property<bool>("Executado")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("executado")
                         .HasComment("compra feita");
@@ -482,37 +527,37 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Data")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("data")
                         .HasComment("data da compra");
 
                     b.Property<decimal>("PrecoUnitario")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("preco_unitatio")
                         .HasComment("preço de fechamento de cada ativo");
 
                     b.Property<int>("QuantidadeTotal")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("quantidade_total")
                         .HasComment("quantos total de ativos");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("ativo comprado");
 
                     b.Property<decimal>("ValorTotal")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("valor_total")
                         .HasComment("valor total da ordem de compra");
 
@@ -525,34 +570,32 @@ namespace CompraProgramada.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasComment("identificador");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("OrdemCompraId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ordem_compra_id")
                         .HasComment("identificador ordem compra");
 
                     b.Property<int>("Quantidade")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("quantidade")
                         .HasComment("quantidade do lote");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("ticker")
                         .HasComment("ativo comprado");
 
                     b.Property<int>("Tipo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1)
+                        .HasColumnType("integer")
                         .HasColumnName("tipo")
                         .HasComment("tipo do lote");
 
